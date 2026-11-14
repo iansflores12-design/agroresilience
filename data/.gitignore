@@ -4,3 +4,5 @@ processed/
 .env
 __pycache__/
 .venv/
+entrada/
+salida/

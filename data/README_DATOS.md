@@ -119,6 +119,39 @@ Hecha el 2026-11-13 con `scripts/10_procesar.py`, solo a partir de `raw/` (359 M
 - **SMAP:** `smap_honduras.nc` y `smap_series.csv`, 4,160 días (se dejó fuera el archivo más viejo de las 7 fechas duplicadas). Cada punto tiene dato en unos 1,500 a 1,950 días por pasada; el resto son vacíos reales del satélite. No se filtró por bandera de calidad.
 - **Meteomatics:** `meteomatics_diario_largo.csv` (184,283 filas), `meteomatics_pronostico.csv` y `meteomatics_estaticos.csv`. La columna `dia_local` es la marca de tiempo menos un día, por eso empieza en 1980-12-31.
 
+## Procesar archivos nuevos (sin IA)
+
+`scripts/procesar_nuevo.py` aplica a archivos nuevos las mismas reglas que generaron `processed/`. No usa modelos, APIs de IA ni red. Las reglas están en `PROCESAMIENTO.md`.
+
+**Cómo ejecutarlo** (desde esta carpeta):
+
+```
+.venv/bin/python -I scripts/procesar_nuevo.py                      # procesa lo nuevo que haya en entrada/
+.venv/bin/python -I scripts/procesar_nuevo.py ruta/al/archivo.json # procesa archivos concretos
+.venv/bin/python -I scripts/procesar_nuevo.py --entrada OTRA --salida OTRA
+```
+
+Las carpetas también se pueden fijar con las variables `AGRO_ENTRADA` y `AGRO_SALIDA`. El script se niega a escribir en `raw/` o `processed/`.
+
+**Cómo añadir datos nuevos:**
+
+1. Copia el archivo crudo en `entrada/` con el mismo nombre que usa su fuente en `raw/` (el tipo se detecta por nombre y contenido): `power/<punto>.json`, `oni*.txt`, `ibtracs*.csv`, `<punto>.json` o `<punto>_cercano.json` de SoilGrids, `hist_*.json` / `pronostico_*.json` / `estaticos.json` de Meteomatics, `*3IMERG*_HND.nc4`, `SMAP_L3_SM_P_E_*_HND.nc4`, `GRCTellus*.nc`.
+2. El punto debe existir en `config/zonas.json`. Para un punto nuevo, agrégalo ahí primero.
+3. Corre el script sin argumentos. Solo procesa archivos cuyo sha256 no esté en `salida/.procesados.csv`.
+4. Revisa `salida/`: las tablas tienen el mismo formato que `processed/`. Los registros inválidos están en `salida/errores.csv` (columnas: fecha_hora, archivo, tipo, registro, motivo) y los reemplazos de filas repetidas en `salida/avisos.csv`. Un registro inválido no detiene la corrida.
+
+`salida/` no se mezcla sola con `processed/`; ese paso es manual.
+
+**Pruebas** (27, tardan unos 3 minutos):
+
+```
+.venv/bin/python -I -m unittest discover -s tests -v
+```
+
+Cubren (a) los datos originales, verificando que la salida coincide con `processed/` (POWER, ONI, IBTrACS, SoilGrids, GRACE y Meteomatics completos; IMERG y SMAP con una muestra de 30 archivos cada uno), y (b) archivos sintéticos con registros nuevos e inválidos.
+
+SMAP usa la malla guardada en `config/smap_malla.json`; se regenera con `.venv/bin/python -I scripts/generar_malla_smap.py`.
+
 ## Pendientes
 
 - HLS: **solo consultado, no bajado**. ECOSTRESS se bajó después con `scripts/12_ecostress.py` (ver tabla de estado); no tiene versión procesada. Consulta original de ambos (`scripts/11_consulta_ecostress_hls.py`, 2025-11-14 a 2026-11-14). En espera de decisión.
