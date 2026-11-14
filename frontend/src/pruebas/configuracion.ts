@@ -14,3 +14,8 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
+
+// jsdom no implementa createSVGRect; Leaflet lo consulta al cargar para decidir si dibuja en SVG.
+if (!('createSVGRect' in SVGSVGElement.prototype)) {
+  Object.defineProperty(SVGSVGElement.prototype, 'createSVGRect', { value: () => ({}) })
+}

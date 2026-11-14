@@ -26,26 +26,27 @@ scripts/            generar_tema.mjs (colores M3), generar_datos_zonas.py (datos
 src/
   tema/             colores.css (generado), tokens.css, base.css, sileo.css
   componentes/      componentes base (Boton, Chip, Fab, Tarjeta...), Estructura y navegación
-    mapa/           ContenedorMapa.tsx: espacio reservado del mapa (lo construye otro agente)
+    mapa/           ContenedorMapa y MapaHonduras (Leaflet, por departamento), leyenda y puntajes
     fenomeno/       EspacioFenomeno.tsx: espacio reservado del fenómeno (lo construye otro agente)
   estado/           EstadoApp (cultivo, zona, edad, sonido) y Conversacion (chat)
   lib/              avisos.ts (Sileo), sonido.ts (WebAudio), chat/ (cliente del asistente)
-  datos/            cultivos, rotaciones, zonas (+ zonas.generado.json)
+  datos/            cultivos, rotaciones, zonas (+ zonas.generado.json), aptitud (+ departamentos.geo.json)
   pantallas/        Cultivos, Mapa, Zona, Chat (una carpeta por ruta)
   pruebas/          configuración de Vitest y ayudantes
 ```
 
 ## Espacios reservados
 
-- **Mapa:** `src/componentes/mapa/ContenedorMapa.tsx`, con `data-placeholder="mapa"` y el
-  contrato `PropsMapa` (DISENO.md, sección 8).
 - **Fenómeno:** `src/componentes/fenomeno/EspacioFenomeno.tsx`, con
   `data-placeholder="fenomeno"` y el contrato `PropsFenomeno`.
 
-Las carpetas `mapa/` y `fenomeno/` y las pantallas reales las crean los siguientes pasos; en
-esta base las pantallas son provisionales.
+El mapa ya está integrado (`src/componentes/mapa/`); queda reservado el espacio del fenómeno.
 
 ## Datos
+
+Los puntajes de `aptitud.ts` (qué tan bien se da un cultivo en cada departamento y qué sembrar
+después) son ilustrativos y están pendientes de validación. `departamentos.geo.json` son los
+límites reales de geoBoundaries y OpenStreetMap (ODbL), simplificados.
 
 El contenido de `cultivos.ts` y `rotaciones.ts` es ilustrativo y está pendiente de validación
 agronómica. `zonas.generado.json` lo produce `scripts/generar_datos_zonas.py` a partir de

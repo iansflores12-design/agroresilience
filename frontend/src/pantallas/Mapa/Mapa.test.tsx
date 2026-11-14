@@ -1,5 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { aptitud, rotacionesPara } from '../../datos/aptitud'
 import { humedadPorcentaje, zonas } from '../../datos/zonas'
 import { avisar } from '../../lib/avisos'
 import { renderizarApp } from '../../pruebas/renderizar'
@@ -15,11 +16,14 @@ describe('Mapa', () => {
     vi.clearAllMocks()
   })
 
-  it('muestra el espacio reservado, un boton por zona y la invitacion a elegir', () => {
-    const { container } = renderizarApp('/mapa')
-    expect(container.querySelector('[data-placeholder="mapa"]')).toBeInTheDocument()
+  it('muestra el mapa, un boton por zona y la invitacion a elegir', () => {
+    renderizarApp('/mapa')
+    expect(screen.getByRole('region', { name: 'Mapa' })).toBeInTheDocument()
     for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toBeInTheDocument()
     expect(screen.getByText('Toque un punto del mapa o un lugar de la lista.')).toBeInTheDocument()
+    // Sin cultivo no hay puntajes: se invita a elegirlo.
+    expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
   })
 
   it('elegir un punto cambia la zona del estado, avisa y muestra la tarjeta', async () => {
@@ -47,11 +51,86 @@ describe('Mapa', () => {
     expect(await screen.findByRole('heading', { level: 1, name: /^¿Cómo está la tierra/ })).toBeInTheDocument()
   })
 
-  it('los controles que dependen del mapa real avisan', async () => {
+  it('tiene controles para acercar y alejar, y avisa si no puede saber la ubicacion', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/mapa')
-    await usuario.click(screen.getByRole('button', { name: 'Capas' }))
-    await usuario.click(screen.getByRole('button', { name: 'Mi ubicación' }))
-    expect(avisar.info).toHaveBeenCalledTimes(2)
+    const controles = screen.getByRole('group', { name: 'Controles del mapa' })
+    await usuario.click(within(controles).getByRole('button', { name: 'Acercar' }))
+    await usuario.click(within(controles).getByRole('button', { name: 'Alejar' }))
+    // jsdom no tiene geolocalizacion.
+    await usuario.click(within(controles).getByRole('button', { name: 'Mi ubicación' }))
+    expect(avisar.alerta).toHaveBeenCalledWith(expect.objectContaining({ titulo: 'No se pudo saber dónde está' }))
+  })
+
+  describe('con cultivo elegido', () => {
+    beforeEach(() => {
+      window.localStorage.setItem(
+        'agroresilience.estado.v1',
+        JSON.stringify({ cultivoId: 'maiz', zonaId: 'choluteca', edadSemanas: 4, sonido: false }),
+      )
+    })
+
+    it('pinta cada departamento con su puntaje y muestra el del lugar elegido', () => {
+      renderizarApp('/mapa')
+      const esperado = aptitud('HN-CH', 'maiz', 'normal')!
+      const choluteca = screen.getByRole('button', {
+        name: new RegExp(`^Departamento de Choluteca: .* para maíz, ${esperado.total} de 100$`),
+      })
+      expect(choluteca).toHaveAttribute('aria-pressed', 'true')
+      expect(choluteca).toHaveAttribute('data-nivel', esperado.nivel)
+      const seccion = screen.getByRole('region', { name: '¿Se da bien el maíz en Choluteca?' })
+      expect(
+        within(seccion).getByText(`${esperado.total} de 100. Puesto ${esperado.puesto} de 18 departamentos.`),
+      ).toBeInTheDocument()
+    })
+
+    it('elegir otro departamento con el teclado cambia el puntaje y las opciones de siembra', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      const olancho = screen.getByRole('button', { name: /^Departamento de Olancho:/ })
+      olancho.focus()
+      await usuario.keyboard('{Enter}')
+      expect(olancho).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el maíz en Olancho?' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: 'Qué sembrar después en Olancho' })).toBeInTheDocument()
+    })
+
+    it('cambiar el tipo de año cambia el puntaje', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      const seco = aptitud('HN-CH', 'maiz', 'seco')!
+      expect(seco.total).not.toBe(aptitud('HN-CH', 'maiz', 'normal')!.total)
+      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
+      expect(screen.getByRole('button', { name: 'Año seco' })).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByText(`${seco.total} de 100. Puesto ${seco.puesto} de 18 departamentos.`)).toBeInTheDocument()
+    })
+
+    it('lista que sembrar despues y abre y cierra el detalle de una opcion', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      const opciones = rotacionesPara('HN-CH', 'maiz', 'normal')
+      const seccion = screen.getByRole('region', { name: 'Qué sembrar después en Choluteca' })
+      // El nombre accesible es "tipo, nombre, nivel, puntaje": se ancla en el nivel para no confundir
+      // "frijol" con "frijol terciopelo".
+      const tarjetaDe = (nombre: string) =>
+        within(seccion).getByRole('button', {
+          name: new RegExp(`${nombre.replace(/[()]/g, '\\$&')} ?(Buena|Regular|Difícil) ?[0-9]+ de 100$`),
+        })
+      for (const r of opciones) expect(tarjetaDe(r.nombre)).toBeInTheDocument()
+      expect(within(seccion).getByText('Toque una opción para ver más.')).toBeInTheDocument()
+
+      const mejor = opciones.find((r) => r.mejor)!
+      const tarjeta = tarjetaDe(mejor.nombre)
+      await usuario.click(tarjeta)
+      expect(tarjeta).toHaveAttribute('aria-expanded', 'true')
+      const detalle = within(seccion).getByRole('article', { name: mejor.nombre })
+      expect(within(detalle).getByText(mejor.ventajas[0])).toBeInTheDocument()
+      expect(within(detalle).getByText(mejor.riesgos[0])).toBeInTheDocument()
+      expect(within(detalle).getByText('Septiembre a diciembre.', { exact: false })).toBeInTheDocument()
+
+      await usuario.click(tarjeta)
+      expect(tarjeta).toHaveAttribute('aria-expanded', 'false')
+      expect(within(seccion).queryByRole('article')).not.toBeInTheDocument()
+    })
   })
 })

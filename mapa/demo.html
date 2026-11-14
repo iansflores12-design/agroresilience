@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AgroMapa · demo de integración</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="agro-mapa.css"/>
+<style>
+  /* Estilos solo de esta demo: hacen de "sitio anfitrión". */
+  body { margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 15px; margin: 24px 0 4px; }
+  p.nota { font-size: 12px; color: #64748b; margin: 0 0 10px; }
+  .caja { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+  .controles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+  .controles select { padding: 5px 8px; border-radius: 8px; border: 1px solid #cbd5e1; font: inherit; }
+  #mapa-inicio { height: 280px; border-radius: 8px; border: 1px solid #e2e8f0; }
+  #leyenda-inicio { margin-top: 8px; }
+  #salida { margin-top: 8px; font-size: 12px; }
+  .pantalla { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #f8fafc; }
+  #mapa-detalle { height: 320px; }
+  #rotaciones, #panel-detalle { padding: 10px; }
+  @media (min-width: 900px) {
+    .pantalla { display: flex; height: 720px; }
+    .columna-mapa { flex: 1; min-width: 0; overflow-y: auto; }
+    #mapa-detalle { height: 400px; }
+    #panel-detalle { flex: none; width: 400px; overflow-y: auto; border-left: 1px solid #e2e8f0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>1 · Mapa para la pantalla de inicio</h1>
+  <p class="nota">Solo el mapa. Los selectores de arriba son del sitio anfitrión y lo manejan con <code>mapa.set()</code>; el texto de abajo se actualiza con <code>onCambio</code>.</p>
+  <div class="caja">
+    <div class="controles">
+      <select id="sel-cultivo" aria-label="Cultivo">
+        <option value="maiz">Maíz</option><option value="frijol">Frijol rojo</option><option value="sorgo">Sorgo/Maicillo</option>
+        <option value="cafe">Café</option><option value="arroz">Arroz</option>
+      </select>
+      <select id="sel-escenario" aria-label="Escenario">
+        <option value="normal">Normal</option><option value="seco" selected>Seco</option><option value="humedo">Húmedo</option>
+      </select>
+    </div>
+    <div id="mapa-inicio"></div>
+    <div id="leyenda-inicio"></div>
+    <div id="salida"></div>
+  </div>
+
+  <h1>2 · Pantalla de mapa completa</h1>
+  <p class="nota">Mapa con selector de capas, las cards de rotaciones debajo y el panel de detalle; los tres conectados.</p>
+  <div class="pantalla">
+    <div class="columna-mapa">
+      <div id="mapa-detalle"></div>
+      <div id="rotaciones"></div>
+    </div>
+    <div id="panel-detalle"></div>
+  </div>
+</main>
+
+<script type="module">
+  import { crearMapaAgro } from './agro-mapa.js';
+  import { crearPanelAgro } from './agro-panel.js';
+  import { crearRotacionesAgro } from './agro-rotaciones.js';
+
+  // 1 · Inicio: mapa compacto, leyenda fuera del mapa, controles propios.
+  const salida = document.getElementById('salida');
+  const mostrar = (estado, d) => {
+    salida.innerHTML = `<b>${d.nombre}</b>: ${d.total}/100 para ${estado.cultivo} (aptitud ${d.etiqueta.toLowerCase()}, puesto ${d.puesto} de ${d.totalDeptos})`;
+  };
+  const inicio = crearMapaAgro('#mapa-inicio', {
+    cultivo: 'maiz', escenario: 'seco', depto: 'HN-CH',
+    leyenda: document.getElementById('leyenda-inicio'),
+    onCambio: mostrar
+  });
+  mostrar(inicio.estado(), inicio.detalle());
+  document.getElementById('sel-cultivo').onchange = e => inicio.set({ cultivo: e.target.value });
+  document.getElementById('sel-escenario').onchange = e => inicio.set({ escenario: e.target.value });
+
+  // 2 · Pantalla de mapa: capas + rotaciones + panel.
+  const detalle = crearMapaAgro('#mapa-detalle', { selectorCapas: true });
+  crearRotacionesAgro('#rotaciones', detalle);
+  crearPanelAgro('#panel-detalle', detalle);
+</script>
+</body>
+</html>

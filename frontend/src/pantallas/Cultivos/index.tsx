@@ -12,6 +12,7 @@ import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
 import { confirmar } from '../../lib/sonido'
 import estilos from './Cultivos.module.css'
+import { DondeSeDa } from './DondeSeDa'
 
 const NOMBRES_MESES = [
   'enero',
@@ -191,6 +192,8 @@ export default function Cultivos() {
             <TiraEtapas cultivo={cultivo} semana={semana} />
           </section>
         )}
+
+        {cultivo && <DondeSeDa key={cultivo.id} cultivo={cultivo} />}
 
         <section className={estilos.seccion} aria-labelledby="titulo-rotaciones">
           <h2 id="titulo-rotaciones" className="tipo-titulo">

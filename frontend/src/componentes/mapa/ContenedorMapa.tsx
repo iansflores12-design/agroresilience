@@ -1,6 +1,8 @@
+import type { Ref } from 'react'
+import type { Escenario } from '../../datos/aptitud'
 import type { DatosZonas, Zona } from '../../datos/zonas'
 import estilos from './ContenedorMapa.module.css'
-import { MapaProvisional } from './MapaProvisional'
+import { MapaHonduras, type ControlMapa } from './MapaHonduras'
 
 export interface PropsMapa {
   zonas: Zona[]
@@ -8,18 +10,24 @@ export interface PropsMapa {
   zonaSeleccionadaId: string | null
   cultivoId: string | null
   alSeleccionarZona(id: string): void
+  /** Departamento marcado (codigo ISO, por ejemplo HN-CH). */
+  departamentoId?: string | null
+  /** Si se da, los departamentos se pueden tocar y elegir con el teclado. */
+  alSeleccionarDepartamento?(id: string): void
+  /** Tipo de ano con el que se calcula el puntaje. Por defecto, normal. */
+  escenario?: Escenario
+  /** Para acercar, alejar o centrar el mapa desde los botones de la pantalla. */
+  ref?: Ref<ControlMapa>
 }
 
 /**
- * PLACEHOLDER(mapa): para integrar el mapa real, sustituir `MapaProvisional` por el componente
- * definitivo, que recibe exactamente las mismas `PropsMapa`. Este contenedor ya da el tamano, la
- * forma (--forma-xl-mas), el recorte y el fondo: el mapa real solo tiene que llenar el 100 % del
- * contenedor y llamar a `alSeleccionarZona` al elegir una zona.
+ * Da al mapa su tamano, su forma (--forma-xl-mas), el recorte y el fondo. El mapa llena el
+ * 100 % del contenedor: el alto lo decide quien lo usa.
  */
 export function ContenedorMapa(props: PropsMapa) {
   return (
-    <section data-placeholder="mapa" aria-label="Mapa" className={estilos.contenedor}>
-      <MapaProvisional {...props} />
+    <section aria-label="Mapa" className={estilos.contenedor}>
+      <MapaHonduras {...props} />
     </section>
   )
 }

@@ -30,6 +30,13 @@
   height: 100%;
 }
 
+.columnaMapa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  min-width: 0;
+}
+
 .controles {
   position: absolute;
   inset-block-start: var(--esp-3);
@@ -100,14 +107,40 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
   gap: var(--esp-2);
   min-width: 0;
+}
+
+.detalle {
+  width: 100%;
 }
 
 .detalle summary {
   cursor: pointer;
   font: var(--tipo-nota);
   color: var(--md-sys-color-primary);
+}
+
+.detalle[open] > summary {
+  margin-block-end: var(--esp-3);
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.escenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.puntos {
+  font: var(--tipo-cuerpo-fuerte);
+  font-variant-numeric: tabular-nums;
 }
 
 .vacio {
@@ -127,9 +160,12 @@
     align-items: stretch;
   }
 
+  .columnaMapa {
+    flex: 1;
+  }
+
   .mapa {
     flex: 1;
-    min-width: 0;
     height: auto;
     max-height: none;
     min-height: 32rem;

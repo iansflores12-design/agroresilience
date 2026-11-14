@@ -131,6 +131,31 @@
   background-color: var(--md-sys-color-on-surface);
 }
 
+/* Donde se da mejor: el mapa lleva su propio alto. */
+.mapaInicio {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  max-height: 32rem;
+}
+
+.mapaInicio > section {
+  height: 100%;
+  min-height: 0;
+}
+
+.resultado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2) var(--esp-3);
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.accion {
+  align-self: flex-start;
+}
+
 /* Rotaciones */
 .rotaciones {
   display: grid;

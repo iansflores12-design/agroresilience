@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html class="h-full" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>AgroResilience Honduras · Maqueta de mapa</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { agro: {
+      900: '#133527', 800: '#1b4332', 700: '#2d6a4f', 600: '#40916c', 500: '#52b788',
+      400: '#74c69d', 200: '#b7e4c7', 100: '#d8f3dc', 50: '#f0fdf4'
+    } } } }
+  }
+</script>
+<style>
+  html, body { height: 100%; height: 100dvh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  .hidden { display: none !important; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  .leaflet-container { background: #e8f1f5; font: inherit; }
+  .score-label { background: transparent; border: 0; box-shadow: none; padding: 0;
+    font-weight: 800; font-size: 11px; color: #0f172a;
+    text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #fff; }
+  .score-label::before { display: none; }
+  .map-lg .score-label { font-size: 13px; }
+  .leaflet-control-attribution { font-size: 9px; }
+  .leaflet-interactive:focus { outline: none; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex flex-col h-[100dvh] w-full max-w-md lg:max-w-6xl mx-auto antialiased border-x border-slate-200">
+
+<!-- Aviso de maqueta -->
+<aside class="bg-amber-100 border-b border-amber-300 text-amber-950 text-[10px] font-semibold py-1 px-3 text-center flex-none">
+  Maqueta: los límites departamentales son reales; los datos y puntajes son de ejemplo.
+</aside>
+
+<!-- Encabezado -->
+<header class="bg-white border-b border-slate-200 px-3.5 py-2.5 flex-none">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 rounded-lg bg-agro-800 flex items-center justify-center flex-none">
+        <svg class="w-5 h-5 text-agro-200" fill="currentColor" viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A9.49 9.49 0 0 0 12 21c7 0 11-8 11-14a5.2 5.2 0 0 0-.25-1.5z"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1.5">
+          <h1 class="font-bold text-sm tracking-tight text-agro-900 leading-none">AgroResilience HN</h1>
+          <span class="text-[9px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.5 rounded border border-emerald-300">NASA 2026</span>
+        </div>
+        <p class="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">Aptitud por departamento · Modelo FAO-56</p>
+      </div>
+    </div>
+    <span class="text-[9px] text-slate-400 font-mono" id="estado-datos">Cargando mapa…</span>
+  </div>
+</header>
+
+<main class="flex-1 relative overflow-hidden bg-slate-50">
+
+  <!-- ============ PESTAÑA 1: INICIO ============ -->
+  <section id="tab-inicio" class="h-full overflow-y-auto no-scrollbar p-2.5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 lg:h-full">
+
+      <!-- Columna mapa -->
+      <div class="lg:col-span-7 flex flex-col gap-2.5 min-h-0">
+        <!-- Selectores -->
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200 flex-none">
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Departamento</span>
+              <select class="sel-depto mt-0.5 block w-full rounded-lg border-slate-300 text-xs font-medium py-1.5 focus:border-agro-600 focus:ring-agro-600"></select>
+            </label>
+            <label class="block">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Tu cultivo</span>
+              <select class="sel-cultivo mt-0.5 block w-full rounded-lg border-slate-300 text-xs font-medium py-1.5 focus:border-agro-600 focus:ring-agro-600"></select>
+            </label>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-2 grupo-escenario"></div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="bg-white rounded-xl border border-slate-200 p-2 flex flex-col flex-none lg:flex-1 min-h-0">
+          <div class="flex items-center justify-between px-1 pb-1.5">
+            <span class="text-[11px] font-bold text-slate-700">Aptitud para <span class="txt-cultivo text-agro-700"></span> por departamento</span>
+            <span class="text-[10px] text-slate-400">Toca un departamento</span>
+          </div>
+          <div id="mapa-inicio" class="isolate w-full h-[250px] lg:h-auto lg:flex-1 rounded-lg overflow-hidden border border-slate-200"></div>
+          <div class="leyenda flex flex-wrap items-center gap-x-2.5 gap-y-1 px-1 pt-1.5 text-[10px] text-slate-600"></div>
+        </div>
+      </div>
+
+      <!-- Columna resumen -->
+      <div class="lg:col-span-5 flex flex-col gap-2.5 lg:overflow-y-auto no-scrollbar">
+        <div id="resumen-inicio" class="bg-white rounded-xl p-3 border border-slate-200"></div>
+        <div class="bg-white rounded-xl p-3 border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Mejores zonas para <span class="txt-cultivo"></span></span>
+            <button class="text-[10px] text-agro-700 font-semibold hover:underline" onclick="cambiarPestana('mapa')">Ver las 18 →</button>
+          </div>
+          <div id="top-inicio" class="space-y-1.5"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PESTAÑA 2: MAPA DETALLADO ============ -->
+  <section id="tab-mapa" class="h-full hidden flex flex-col lg:flex-row">
+    <!-- Mapa grande -->
+    <div class="relative flex-none h-[46%] lg:h-full lg:flex-1 border-b lg:border-b-0 lg:border-r border-slate-200">
+      <div id="mapa-detalle" class="map-lg isolate w-full h-full"></div>
+
+      <!-- Capas -->
+      <div id="capas" class="absolute top-2 left-12 right-2 z-[500] flex gap-1 overflow-x-auto no-scrollbar text-[10px]"></div>
+
+      <!-- Leyenda flotante -->
+      <div class="absolute bottom-2 left-2 z-[500] bg-white/95 rounded-lg border border-slate-200 px-2 py-1.5 shadow-sm">
+        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wide mb-1" id="leyenda-titulo"></div>
+        <div class="leyenda-detalle flex flex-col gap-0.5 text-[10px] text-slate-700"></div>
+      </div>
+    </div>
+
+    <!-- Panel de detalle -->
+    <div class="flex-1 lg:flex-none lg:w-[400px] overflow-y-auto no-scrollbar p-2.5 space-y-2.5 bg-slate-50">
+      <div class="bg-white rounded-xl p-2.5 border border-slate-200">
+        <div class="grid grid-cols-2 gap-2">
+          <select class="sel-depto block w-full rounded-lg border-slate-300 text-xs font-medium py-1.5 focus:border-agro-600 focus:ring-agro-600"></select>
+          <select class="sel-cultivo block w-full rounded-lg border-slate-300 text-xs font-medium py-1.5 focus:border-agro-600 focus:ring-agro-600"></select>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 pt-2 grupo-escenario"></div>
+      </div>
+      <div id="panel-detalle" class="space-y-2.5"></div>
+    </div>
+  </section>
+
+  <!-- Pestañas no incluidas en esta maqueta -->
+  <section id="tab-otro" class="h-full hidden flex items-center justify-center p-6 text-center">
+    <div>
+      <p class="text-sm font-bold text-slate-700" id="otro-titulo"></p>
+      <p class="text-xs text-slate-500 mt-1">Esta pantalla no forma parte de esta maqueta; queda igual que en el diseño original.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-slate-50 border-t border-slate-200 px-3 py-1 text-center flex-none">
+  <p class="text-[9px] text-slate-500 font-medium">Herramienta de apoyo · No reemplaza el criterio agronómico · Límites: geoBoundaries / OpenStreetMap</p>
+</footer>
+
+<!-- Navegación inferior -->
+<nav class="bg-white border-t border-slate-200 flex-none pb-[env(safe-area-inset-bottom)]">
+  <div class="grid grid-cols-4 h-14">
+    <button class="tab-btn flex flex-col items-center justify-center space-y-0.5 transition" data-tab="inicio" onclick="cambiarPestana('inicio')">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span class="text-[10px] tracking-tight">Inicio</span>
+    </button>
+    <button class="tab-btn flex flex-col items-center justify-center space-y-0.5 transition" data-tab="mapa" onclick="cambiarPestana('mapa')">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" x2="8" y1="2" y2="18"/><line x1="16" x2="16" y1="6" y2="22"/></svg>
+      <span class="text-[10px] tracking-tight">Mapa</span>
+    </button>
+    <button class="tab-btn flex flex-col items-center justify-center space-y-0.5 transition" data-tab="comparador" onclick="cambiarPestana('comparador')">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+      <span class="text-[10px] tracking-tight">Comparador</span>
+    </button>
+    <button class="tab-btn flex flex-col items-center justify-center space-y-0.5 transition" data-tab="evidencia" onclick="cambiarPestana('evidencia')">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="text-[10px] tracking-tight">Evidencia &amp; IA</span>
+    </button>
+  </div>
+</nav>
+
+<script>
+/* ============================================================
+   DATOS DE EJEMPLO (no reales). Clave = código ISO del departamento.
+   lluvia mm/año · temp °C · alt msnm · hum % humedad de suelo
+   ndvi 0-1 · canicula días secos seguidos · ph · seco = Corredor Seco
+   ============================================================ */
+const DEPTOS = {
+  'HN-AT': { nombre: 'Atlántida',          lluvia: 2800, temp: 26.5, alt: 150,  hum: 38, ndvi: 0.78, canicula: 5,  ph: 5.6, seco: false },
+  'HN-CH': { nombre: 'Choluteca',          lluvia: 1650, temp: 28.5, alt: 120,  hum: 19, ndvi: 0.46, canicula: 32, ph: 6.4, seco: true  },
+  'HN-CL': { nombre: 'Colón',              lluvia: 2500, temp: 26.5, alt: 180,  hum: 36, ndvi: 0.76, canicula: 6,  ph: 5.7, seco: false },
+  'HN-CM': { nombre: 'Comayagua',          lluvia: 1200, temp: 23.5, alt: 750,  hum: 24, ndvi: 0.58, canicula: 22, ph: 6.3, seco: true  },
+  'HN-CP': { nombre: 'Copán',              lluvia: 1600, temp: 21.5, alt: 950,  hum: 30, ndvi: 0.70, canicula: 12, ph: 5.8, seco: false },
+  'HN-CR': { nombre: 'Cortés',             lluvia: 1900, temp: 26.0, alt: 250,  hum: 33, ndvi: 0.68, canicula: 9,  ph: 6.2, seco: false },
+  'HN-EP': { nombre: 'El Paraíso',         lluvia: 1150, temp: 22.5, alt: 850,  hum: 23, ndvi: 0.57, canicula: 26, ph: 6.2, seco: true  },
+  'HN-FM': { nombre: 'Francisco Morazán',  lluvia: 1050, temp: 22.0, alt: 1050, hum: 22, ndvi: 0.54, canicula: 27, ph: 6.1, seco: true  },
+  'HN-GD': { nombre: 'Gracias a Dios',     lluvia: 3000, temp: 27.0, alt: 60,   hum: 41, ndvi: 0.80, canicula: 4,  ph: 5.2, seco: false },
+  'HN-IN': { nombre: 'Intibucá',           lluvia: 1500, temp: 18.5, alt: 1600, hum: 29, ndvi: 0.66, canicula: 16, ph: 5.6, seco: true  },
+  'HN-IB': { nombre: 'Islas de la Bahía',  lluvia: 2400, temp: 27.5, alt: 30,   hum: 34, ndvi: 0.70, canicula: 5,  ph: 6.5, seco: false },
+  'HN-LP': { nombre: 'La Paz',             lluvia: 1250, temp: 21.0, alt: 1200, hum: 23, ndvi: 0.56, canicula: 28, ph: 6.0, seco: true  },
+  'HN-LE': { nombre: 'Lempira',            lluvia: 1550, temp: 20.5, alt: 1300, hum: 28, ndvi: 0.65, canicula: 17, ph: 5.7, seco: true  },
+  'HN-OC': { nombre: 'Ocotepeque',         lluvia: 1450, temp: 20.0, alt: 1350, hum: 27, ndvi: 0.64, canicula: 15, ph: 5.9, seco: false },
+  'HN-OL': { nombre: 'Olancho',            lluvia: 1400, temp: 24.0, alt: 600,  hum: 29, ndvi: 0.67, canicula: 14, ph: 6.3, seco: false },
+  'HN-SB': { nombre: 'Santa Bárbara',      lluvia: 1800, temp: 23.5, alt: 650,  hum: 32, ndvi: 0.72, canicula: 10, ph: 6.0, seco: false },
+  'HN-VA': { nombre: 'Valle',              lluvia: 1500, temp: 29.0, alt: 80,   hum: 18, ndvi: 0.43, canicula: 35, ph: 6.5, seco: true  },
+  'HN-YO': { nombre: 'Yoro',               lluvia: 1300, temp: 24.5, alt: 550,  hum: 26, ndvi: 0.61, canicula: 18, ph: 6.2, seco: false }
+};
+
+/* Rangos por cultivo: [mínimo, óptimo desde, óptimo hasta, máximo]. sens = sensibilidad a la canícula. */
+const CULTIVOS = {
+  maiz:   { nombre: 'Maíz',          lluvia: [500, 800, 1600, 2500],   temp: [14, 20, 28, 34], alt: [0, 0, 1500, 2400],     ph: [5.0, 5.8, 7.0, 7.8], sens: 0.80 },
+  frijol: { nombre: 'Frijol rojo',   lluvia: [400, 700, 1500, 2200],   temp: [12, 17, 25, 30], alt: [200, 500, 1700, 2300], ph: [5.2, 6.0, 7.0, 7.5], sens: 0.60 },
+  sorgo:  { nombre: 'Sorgo/Maicillo',lluvia: [350, 500, 1200, 2000],   temp: [18, 25, 32, 38], alt: [0, 0, 900, 1600],      ph: [5.2, 5.8, 7.5, 8.3], sens: 0.25 },
+  cafe:   { nombre: 'Café',          lluvia: [1100, 1500, 2200, 3200], temp: [14, 18, 23, 26], alt: [600, 1000, 1700, 2100],ph: [4.5, 5.0, 6.0, 6.6], sens: 0.70 },
+  arroz:  { nombre: 'Arroz',         lluvia: [1200, 1800, 3000, 4000], temp: [20, 24, 30, 35], alt: [0, 0, 500, 1000],      ph: [4.8, 5.5, 6.8, 7.5], sens: 0.90 }
+};
+
+const ESCENARIOS = {
+  normal: { nombre: 'Normal', lluvia: 1.00, hum: 1.00, canicula: 1.0 },
+  seco:   { nombre: 'Seco',   lluvia: 0.72, hum: 0.80, canicula: 1.4 },
+  humedo: { nombre: 'Húmedo', lluvia: 1.25, hum: 1.15, canicula: 0.6 }
+};
+
+const FACTORES = [
+  { clave: 'agua',    nombre: 'Agua (lluvia)',          peso: 0.20, limite: 'la lluvia disponible queda fuera del rango que pide el cultivo' },
+  { clave: 'clima',   nombre: 'Temperatura',            peso: 0.20, limite: 'la temperatura media se aleja del rango óptimo del cultivo' },
+  { clave: 'altitud', nombre: 'Altitud',                peso: 0.10, limite: 'la altitud de la zona no es la ideal para este cultivo' },
+  { clave: 'suelo',   nombre: 'Suelo (pH y humedad)',   peso: 0.15, limite: 'el suelo retiene poca humedad o su pH no favorece al cultivo' },
+  { clave: 'sequia',  nombre: 'Aguante a la canícula',  peso: 0.35, limite: 'la canícula es larga y este cultivo la resiste mal' }
+];
+
+/* Capas del mapa detallado */
+const CAPAS = {
+  aptitud: { nombre: 'Aptitud',      titulo: 'Puntaje de aptitud', cortes: [40, 55, 70, 82],
+             colores: ['#9e2a2b', '#e07a3f', '#e9c46a', '#74c69d', '#2d6a4f'], fmt: v => Math.round(v),
+             etiquetas: ['Muy baja', 'Baja', 'Media', 'Buena', 'Muy buena'] },
+  lluvia:  { nombre: 'Lluvia',       titulo: 'Lluvia anual (mm)', cortes: [900, 1300, 1700, 2200],
+             colores: ['#f1eef6', '#bdc9e1', '#74a9cf', '#2b8cbe', '#045a8d'], fmt: v => Math.round(v / 10) * 10 },
+  humedad: { nombre: 'Humedad SMAP', titulo: 'Humedad de suelo (%)', cortes: [18, 23, 28, 34],
+             colores: ['#d8b365', '#f6e8c3', '#c7eae5', '#5ab4ac', '#01665e'], fmt: v => Math.round(v) },
+  ndvi:    { nombre: 'NDVI',         titulo: 'Vigor vegetal (NDVI)', cortes: [0.5, 0.58, 0.66, 0.74],
+             colores: ['#ffffcc', '#c2e699', '#78c679', '#31a354', '#006837'], fmt: v => v.toFixed(2) },
+  sequia:  { nombre: 'Canícula',     titulo: 'Canícula (días secos)', cortes: [8, 15, 22, 30],
+             colores: ['#ffffb2', '#fecc5c', '#fd8d3c', '#f03b20', '#bd0026'], fmt: v => Math.round(v) }
+};
+
+/* ============================================================
+   ESTADO Y CÁLCULO
+   ============================================================ */
+const estado = { depto: 'HN-CH', cultivo: 'maiz', escenario: 'seco', capa: 'aptitud', pestana: 'inicio' };
+
+const limitar = (v, a, b) => Math.max(a, Math.min(b, v));
+const trapecio = (v, [a, b, c, d]) => v < a || v > d ? 0 : v < b ? (v - a) / (b - a) : v <= c ? 1 : (d - v) / (d - c);
+
+function condiciones(iso) {
+  const d = DEPTOS[iso], e = ESCENARIOS[estado.escenario];
+  return { ...d, lluvia: d.lluvia * e.lluvia, hum: d.hum * e.hum, canicula: d.canicula * e.canicula };
+}
+
+function puntaje(iso, cultivoId = estado.cultivo) {
+  const c = condiciones(iso), k = CULTIVOS[cultivoId];
+  const sub = {
+    agua:    100 * trapecio(c.lluvia, k.lluvia),
+    clima:   100 * trapecio(c.temp, k.temp),
+    altitud: 100 * trapecio(c.alt, k.alt),
+    suelo:   60 * trapecio(c.ph, k.ph) + 40 * limitar((c.hum - 10) / 25, 0, 1),
+    sequia:  100 - limitar(c.canicula * k.sens * 2.2, 0, 100)
+  };
+  const total = FACTORES.reduce((s, f) => s + f.peso * sub[f.clave], 0);
+  return { total: Math.round(total), sub };
+}
+
+function valorCapa(iso, capa) {
+  const c = condiciones(iso);
+  return { aptitud: () => puntaje(iso).total, lluvia: () => c.lluvia, humedad: () => c.hum,
+           ndvi: () => c.ndvi, sequia: () => c.canicula }[capa]();
+}
+
+function clase(valor, capa) {
+  const cortes = CAPAS[capa].cortes;
+  let i = 0; while (i < cortes.length && valor >= cortes[i]) i++;
+  return i;
+}
+const color = (valor, capa) => CAPAS[capa].colores[clase(valor, capa)];
+const ranking = (cultivoId = estado.cultivo) =>
+  Object.keys(DEPTOS).map(iso => ({ iso, total: puntaje(iso, cultivoId).total })).sort((a, b) => b.total - a.total);
+
+/* ============================================================
+   MAPAS LEAFLET
+   ============================================================ */
+const LIMITES_HN = [[12.95, -89.4], [16.55, -83.1]];
+const URL_GEOJSON = 'https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/9469f09592ced973a3448cf66b6100b741b64c0d/releaseData/gbOpen/HND/ADM1/geoBoundaries-HND-ADM1_simplified.geojson';
+const mapas = {};
+
+function crearMapa(id, capaFija) {
+  const mapa = L.map(id, { zoomControl: true, attributionControl: true, zoomSnap: 0.25, minZoom: 6, maxZoom: 11,
+                           maxBounds: [[11.5, -91.5], [18, -81]] });
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Fondo: Esri · Límites: geoBoundaries/OSM'
+  }).addTo(mapa);
+  mapa.fitBounds(LIMITES_HN);
+  mapas[id] = { mapa, geo: null, capaFija };
+}
+
+function estiloDepto(iso, capa) {
+  const sel = iso === estado.depto;
+  return { fillColor: color(valorCapa(iso, capa), capa), fillOpacity: 0.85,
+           color: sel ? '#0f172a' : '#ffffff', weight: sel ? 3 : 1.2 };
+}
+
+function agregarDepartamentos(geojson) {
+  Object.values(mapas).forEach(m => {
+    m.geo = L.geoJSON(geojson, {
+      filter: f => DEPTOS[f.properties.shapeISO],
+      onEachFeature: (f, capa) => {
+        const iso = f.properties.shapeISO;
+        capa.bindTooltip('', { permanent: true, direction: 'center', className: 'score-label', interactive: false });
+        capa.on('click', () => { estado.depto = iso; pintar(); });
+        capa.on('mouseover', () => { if (iso !== estado.depto) capa.setStyle({ weight: 2.5, color: '#334155' }); });
+        capa.on('mouseout', () => capa.setStyle(estiloDepto(iso, m.capaFija || estado.capa)));
+      }
+    }).addTo(m.mapa);
+  });
+}
+
+function pintarMapas() {
+  Object.values(mapas).forEach(m => {
+    if (!m.geo) return;
+    const capa = m.capaFija || estado.capa;
+    m.geo.eachLayer(l => {
+      const iso = l.feature.properties.shapeISO;
+      l.setStyle(estiloDepto(iso, capa));
+      l.setTooltipContent(String(CAPAS[capa].fmt(valorCapa(iso, capa))));
+      if (iso === estado.depto) l.bringToFront();
+    });
+  });
+}
+
+/* ============================================================
+   INTERFAZ
+   ============================================================ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const etiquetaAptitud = v => CAPAS.aptitud.etiquetas[clase(v, 'aptitud')];
+
+function barra(valor, colorBarra) {
+  return `<div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${limitar(valor, 0, 100)}%;background:${colorBarra}"></div></div>`;
+}
+
+function filaRanking(r, pos) {
+  const sel = r.iso === estado.depto;
+  return `<button onclick="estado.depto='${r.iso}';pintar()" class="w-full flex items-center gap-2 text-left rounded-lg px-1.5 py-1 ${sel ? 'bg-agro-50 ring-1 ring-agro-400' : 'hover:bg-slate-50'}">
+    <span class="w-4 text-[10px] font-bold text-slate-400 text-right">${pos}</span>
+    <span class="w-28 text-[11px] ${sel ? 'font-bold text-agro-900' : 'text-slate-700'} truncate">${DEPTOS[r.iso].nombre}</span>
+    <span class="flex-1">${barra(r.total, color(r.total, 'aptitud'))}</span>
+    <span class="w-6 text-[11px] font-bold text-slate-800 text-right">${r.total}</span>
+  </button>`;
+}
+
+function pintarControles() {
+  $$('.sel-depto').forEach(s => s.value = estado.depto);
+  $$('.sel-cultivo').forEach(s => s.value = estado.cultivo);
+  $$('.grupo-escenario').forEach(g => g.innerHTML = Object.entries(ESCENARIOS).map(([id, e]) =>
+    `<button onclick="estado.escenario='${id}';pintar()" class="text-xs py-1 rounded text-center ${id === estado.escenario
+      ? 'font-semibold bg-agro-800 text-white' : 'font-medium border border-slate-200 text-slate-600 hover:bg-slate-50'}">${e.nombre}</button>`).join(''));
+  $$('.txt-cultivo').forEach(e => e.textContent = CULTIVOS[estado.cultivo].nombre.toLowerCase());
+  $('#capas').innerHTML = Object.entries(CAPAS).map(([id, c]) =>
+    `<button onclick="estado.capa='${id}';pintar()" class="px-2 py-1 rounded-md whitespace-nowrap border shadow-sm ${id === estado.capa
+      ? 'bg-agro-800 text-white border-agro-800 font-semibold' : 'bg-white/95 text-slate-600 border-slate-200'}">${c.nombre}</button>`).join('');
+}
+
+function pintarLeyendas() {
+  const a = CAPAS.aptitud;
+  $('.leyenda').innerHTML = a.colores.map((c, i) =>
+    `<span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm inline-block" style="background:${c}"></span>${a.etiquetas[i]}</span>`).join('');
+  const k = CAPAS[estado.capa];
+  $('#leyenda-titulo').textContent = k.titulo;
+  $('.leyenda-detalle').innerHTML = k.colores.map((c, i) => {
+    const rango = i === 0 ? `< ${k.cortes[0]}` : i === k.colores.length - 1 ? `≥ ${k.cortes[i - 1]}` : `${k.cortes[i - 1]} – ${k.cortes[i]}`;
+    return `<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm inline-block border border-slate-300/60" style="background:${c}"></span>${rango}${k.etiquetas ? ' · ' + k.etiquetas[i] : ''}</span>`;
+  }).reverse().join('');
+}
+
+function pintarInicio() {
+  const d = DEPTOS[estado.depto], c = condiciones(estado.depto), p = puntaje(estado.depto);
+  const rk = ranking(), pos = rk.findIndex(r => r.iso === estado.depto) + 1;
+  $('#resumen-inicio').innerHTML = `
+    <div class="flex justify-between items-start">
+      <div>
+        <span class="text-[10px] font-bold text-agro-700 uppercase tracking-wider">Zona seleccionada</span>
+        <h2 class="text-lg font-extrabold text-slate-900 leading-tight">${d.nombre}</h2>
+        <div class="flex flex-wrap gap-1 mt-1">
+          <span class="text-[9px] font-semibold px-2 py-0.5 rounded border" style="background:${color(p.total, 'aptitud')}22;border-color:${color(p.total, 'aptitud')}">Aptitud ${etiquetaAptitud(p.total).toLowerCase()}</span>
+          ${d.seco ? '<span class="text-[9px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Corredor Seco</span>' : ''}
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-4xl font-black leading-none" style="color:${p.total >= 55 ? '#1b4332' : '#9e2a2b'}">${p.total}</span>
+        <span class="text-[10px] text-slate-400 block">/ 100 · puesto ${pos} de 18</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-1.5 mt-3 text-center">
+      <div class="bg-slate-50 rounded-lg py-1.5 border border-slate-100"><div class="text-sm font-bold text-slate-800">${Math.round(c.lluvia / 10) * 10}</div><div class="text-[9px] text-slate-500">mm lluvia/año</div></div>
+      <div class="bg-slate-50 rounded-lg py-1.5 border border-slate-100"><div class="text-sm font-bold text-slate-800">${Math.round(c.hum)}%</div><div class="text-[9px] text-slate-500">humedad suelo</div></div>
+      <div class="bg-slate-50 rounded-lg py-1.5 border border-slate-100"><div class="text-sm font-bold text-slate-800">${Math.round(c.canicula)} d</div><div class="text-[9px] text-slate-500">canícula</div></div>
+    </div>
+    <button onclick="cambiarPestana('mapa')" class="mt-3 w-full bg-agro-800 hover:bg-agro-900 text-white text-xs font-semibold py-2 rounded-lg">Ver detalle de ${d.nombre} en el mapa →</button>`;
+  $('#top-inicio').innerHTML = rk.slice(0, 5).map((r, i) => filaRanking(r, i + 1)).join('');
+}
+
+function pintarDetalle() {
+  const d = DEPTOS[estado.depto], c = condiciones(estado.depto), p = puntaje(estado.depto), k = CULTIVOS[estado.cultivo];
+  const rk = ranking(), pos = rk.findIndex(r => r.iso === estado.depto) + 1;
+  const peor = FACTORES.reduce((m, f) => p.sub[f.clave] < p.sub[m.clave] ? f : m);
+  const porCultivo = Object.keys(CULTIVOS).map(id => ({ id, total: puntaje(estado.depto, id).total })).sort((a, b) => b.total - a.total);
+  const dato = (valor, etiqueta) => `<div class="bg-slate-50 rounded-lg px-2 py-1.5 border border-slate-100"><div class="text-[13px] font-bold text-slate-800">${valor}</div><div class="text-[9px] text-slate-500 leading-tight">${etiqueta}</div></div>`;
+
+  $('#panel-detalle').innerHTML = `
+    <div class="bg-white rounded-xl p-3 border border-slate-200">
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="text-[10px] font-bold text-agro-700 uppercase tracking-wider">${k.nombre} · escenario ${ESCENARIOS[estado.escenario].nombre.toLowerCase()}</span>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">${d.nombre}</h2>
+          <div class="flex flex-wrap gap-1 mt-1">
+            <span class="text-[9px] font-semibold px-2 py-0.5 rounded border" style="background:${color(p.total, 'aptitud')}22;border-color:${color(p.total, 'aptitud')}">Aptitud ${etiquetaAptitud(p.total).toLowerCase()}</span>
+            ${d.seco ? '<span class="text-[9px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Corredor Seco</span>' : ''}
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-4xl font-black leading-none" style="color:${p.total >= 55 ? '#1b4332' : '#9e2a2b'}">${p.total}</span>
+          <span class="text-[10px] text-slate-400 block">/ 100 · puesto ${pos} de 18</span>
+        </div>
+      </div>
+      <div class="mt-3 space-y-2">
+        ${FACTORES.map(f => `<div>
+          <div class="flex justify-between text-[11px] mb-0.5"><span class="text-slate-600">${f.nombre} <span class="text-slate-400">· peso ${Math.round(f.peso * 100)}%</span></span><span class="font-bold text-slate-800">${Math.round(p.sub[f.clave])}</span></div>
+          ${barra(p.sub[f.clave], color(p.sub[f.clave], 'aptitud'))}</div>`).join('')}
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 mt-3 text-[10.5px] text-amber-950 leading-snug">
+        <strong>Lo que más limita:</strong> ${peor.limite} (${Math.round(p.sub[peor.clave])}/100).
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-3 border border-slate-200">
+      <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-2">Datos de la zona</div>
+      <div class="grid grid-cols-3 gap-1.5">
+        ${dato(Math.round(c.lluvia / 10) * 10 + ' mm', 'Lluvia anual')}
+        ${dato(c.temp.toFixed(1) + ' °C', 'Temperatura media')}
+        ${dato(c.alt + ' m', 'Altitud media')}
+        ${dato(Math.round(c.hum) + ' %', 'Humedad suelo (SMAP)')}
+        ${dato(c.ndvi.toFixed(2), 'NDVI (vigor vegetal)')}
+        ${dato(Math.round(c.canicula) + ' días', 'Canícula esperada')}
+        ${dato(c.ph.toFixed(1), 'pH del suelo')}
+        ${dato(k.lluvia[1] + '–' + k.lluvia[2], 'mm que pide ' + k.nombre.toLowerCase())}
+        ${dato(k.temp[1] + '–' + k.temp[2] + ' °C', 'Temp. óptima cultivo')}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-3 border border-slate-200">
+      <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-2">Qué cultivo rinde mejor en ${d.nombre}</div>
+      <div class="space-y-1.5">
+        ${porCultivo.map(x => `<button onclick="estado.cultivo='${x.id}';pintar()" class="w-full flex items-center gap-2 text-left rounded-lg px-1.5 py-1 ${x.id === estado.cultivo ? 'bg-agro-50 ring-1 ring-agro-400' : 'hover:bg-slate-50'}">
+          <span class="w-28 text-[11px] ${x.id === estado.cultivo ? 'font-bold text-agro-900' : 'text-slate-700'}">${CULTIVOS[x.id].nombre}</span>
+          <span class="flex-1">${barra(x.total, color(x.total, 'aptitud'))}</span>
+          <span class="w-6 text-[11px] font-bold text-slate-800 text-right">${x.total}</span></button>`).join('')}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-3 border border-slate-200">
+      <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-2">Los 18 departamentos para ${k.nombre.toLowerCase()}</div>
+      <div class="space-y-1">${rk.map((r, i) => filaRanking(r, i + 1)).join('')}</div>
+    </div>`;
+}
+
+function pintar() {
+  pintarControles();
+  pintarLeyendas();
+  pintarMapas();
+  pintarInicio();
+  pintarDetalle();
+}
+
+function cambiarPestana(nombre) {
+  estado.pestana = nombre;
+  const real = nombre === 'inicio' || nombre === 'mapa';
+  $('#tab-inicio').classList.toggle('hidden', nombre !== 'inicio');
+  $('#tab-mapa').classList.toggle('hidden', nombre !== 'mapa');
+  $('#tab-otro').classList.toggle('hidden', real);
+  if (!real) $('#otro-titulo').textContent = nombre === 'comparador' ? 'Comparador de rotaciones' : 'Evidencia & IA';
+  $$('.tab-btn').forEach(b => {
+    const activo = b.dataset.tab === nombre;
+    b.classList.toggle('text-agro-800', activo);
+    b.classList.toggle('text-slate-400', !activo);
+    b.querySelector('span').classList.toggle('font-bold', activo);
+    b.querySelector('span').classList.toggle('font-medium', !activo);
+  });
+  // Leaflet necesita recalcular su tamaño cuando el contenedor deja de estar oculto
+  const m = mapas[nombre === 'inicio' ? 'mapa-inicio' : 'mapa-detalle'];
+  if (real && m) requestAnimationFrame(() => { m.mapa.invalidateSize(); m.mapa.fitBounds(LIMITES_HN); });
+}
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+$$('.sel-depto').forEach(s => {
+  s.innerHTML = Object.entries(DEPTOS).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre, 'es'))
+    .map(([iso, d]) => `<option value="${iso}">${d.nombre}</option>`).join('');
+  s.addEventListener('change', () => { estado.depto = s.value; pintar(); });
+});
+$$('.sel-cultivo').forEach(s => {
+  s.innerHTML = Object.entries(CULTIVOS).map(([id, c]) => `<option value="${id}">${c.nombre}</option>`).join('');
+  s.addEventListener('change', () => { estado.cultivo = s.value; pintar(); });
+});
+
+crearMapa('mapa-inicio', 'aptitud');   // el mapa de inicio siempre muestra aptitud
+crearMapa('mapa-detalle', null);       // el mapa detallado cambia de capa
+cambiarPestana('inicio');
+pintar();
+window.addEventListener('resize', () => Object.values(mapas).forEach(m => m.mapa.invalidateSize()));
+
+fetch(URL_GEOJSON)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(g => { agregarDepartamentos(g); pintar(); $('#estado-datos').textContent = '18 departamentos'; })
+  .catch(e => { $('#estado-datos').textContent = 'Sin conexión: no cargó el mapa'; console.error('GeoJSON', e); });
+</script>
+</body>
+</html>

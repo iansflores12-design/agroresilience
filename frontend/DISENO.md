@@ -208,6 +208,13 @@ export const rotaciones: Rotacion[]
   grano" (tomate en verano, maíz de primera, frijol de postrera). Temporadas de Honduras:
   primera de mayo a agosto, postrera de septiembre a diciembre, verano de enero a abril.
 
+- `src/datos/aptitud.ts`: puntaje **ilustrativo** de qué tan bien se da cada cultivo en cada
+  departamento y de qué sembrar de postrera. Pendiente de validar; no sale de
+  `data/processed/`. Expone `departamentos`, `buscarDepartamento`, `departamentoDeZona`,
+  `tieneAptitud`, `escenarios`, `factores`, `nivelDePuntaje`, `palabraNivel`, `ranking`,
+  `aptitud` y `rotacionesPara`. `src/datos/departamentos.geo.json` son los límites **reales**
+  de los 18 departamentos (geoBoundaries y OpenStreetMap, licencia ODbL), simplificados.
+
 - `src/datos/zonas.generado.json`: datos **reales** resumidos de `data/processed/` por
   `scripts/generar_datos_zonas.py` (SMAP, IMERG, POWER, SoilGrids). Forma:
 
@@ -289,23 +296,46 @@ cuatro pantallas (sección 1, regla 2).
 2. **¿Hace cuánto sembró?** Solo con cultivo elegido: el número de semanas en
    `--tipo-heroe`, "semanas desde la siembra" debajo, la etapa en palabras ("Está
    floreciendo") y el selector deslizable. Sin cultivo, esta sección no se muestra.
-3. **Qué sembrar después (rotaciones).** Una tarjeta por rotación con su nombre, su
+3. **¿Dónde se da mejor el <cultivo>?** Solo con cultivo elegido: el mismo mapa por
+   departamento de la pantalla Mapa, sin los puntos de lugares, con su leyenda, una frase
+   ("Se da mejor en ..." o el puntaje del departamento tocado) y el botón "Ver el mapa
+   completo".
+4. **Qué sembrar después (rotaciones).** Una tarjeta por rotación con su nombre, su
    beneficio en una frase y sus pasos como lista vertical: icono de temporada, nombre
    completo del cultivo (botón que lo elige) y meses en palabras ("Mayo a agosto"). La
    regla de 12 iniciales de la versión 1 se quita: las iniciales sueltas no se leen y
    obligaban a cortar nombres. Nota: "Calendario de referencia. Consulte a su técnico".
 
 ### Mapa (`/mapa`): "¿Dónde está su parcela?"
-- Igual que en la versión 1: el mapa ocupa el alto disponible y
-  `componentes/mapa/ContenedorMapa.tsx` es el espacio reservado (`data-placeholder="mapa"`,
-  comentario `PLACEHOLDER(mapa)`, contrato `PropsMapa`).
-- Los controles flotantes del mapa llevan icono y texto ("Capas", "Mi ubicación").
+- El mapa ocupa el alto disponible. `componentes/mapa/ContenedorMapa.tsx` le da tamaño, forma
+  y recorte (contrato `PropsMapa`) y dentro va `MapaHonduras.tsx`: Honduras por departamento
+  con Leaflet, **sin teselas de fondo** (solo los límites, que viajan con la app en
+  `datos/departamentos.geo.json`), para que cargue igual con conexión lenta.
+- Con cultivo elegido, cada departamento se pinta según qué tan bien se da ese cultivo. El
+  puntaje (0 a 100) solo aparece, en una pastilla, sobre el departamento que se toca. Tres niveles, siempre con icono y
+  palabra en la leyenda (`NivelAptitud`): `buena` usa `primary-container` con `check_circle`
+  y "Buena"; `regular` usa `surface-container-highest` con `remove` y "Regular"; `dificil` usa
+  la familia `tierra` con `warning` y "Difícil". Los departamentos se tocan, por eso pueden
+  llevar el color de señal. Sin cultivo van en `surface-container-high` y sin puntaje.
+- Los departamentos son botones (ratón, dedo y teclado, con `aria-pressed`). Cada lugar con
+  datos reales es un punto tocable con zona táctil de 48 px; el elegido muestra su nombre.
+- Controles flotantes: "Acercar", "Alejar" y "Mi ubicación" (elige el lugar más cercano; si
+  no se puede saber la ubicación, avisa y remite a la lista). En teléfono, arrastrar solo
+  mueve el mapa cuando está acercado; si no, desplaza la página.
 - Lista de lugares debajo del mapa en compacta, al lado en expandida: botones grandes con
   el nombre completo del lugar y su estado en palabras con el medidor ("Seca", "Normal",
-  "Húmeda"). Es la forma de elegir para quien no lee mapas, y la que queda cuando el mapa
-  real tarde en cargar.
+  "Húmeda"). Es la forma de elegir para quien no lee mapas.
 - Tarjeta del lugar elegido con su estado y el botón "Ver cómo está la tierra" (`/zona`).
   Las coordenadas pasan al desplegable de detalles.
+- **"¿Se da bien el <cultivo> en <departamento>?"** (solo con cultivo): chips "Año seco",
+  "Año normal" y "Año lluvioso", el nivel en grande, "74 de 100. Puesto 16 de 18
+  departamentos.", lo que más le cuesta en una frase y el desplegable "Ver el puntaje por
+  partes". El departamento es el que se tocó o, si no, el del lugar elegido.
+- **"Qué sembrar después en <departamento>"**: una tarjeta por opción de postrera (repetir el
+  cultivo primero, luego las demás de mejor a peor) con nombre en palabras ("Maíz y después
+  frijol"), nivel y puntaje. Tocar una abre su detalle debajo (`aria-expanded`): cuándo se
+  siembra, puntaje por partes, a favor, cuidados y qué falta saber. Tocarla otra vez lo cierra.
+- Los puntajes son **ilustrativos** (`datos/aptitud.ts`) y se dice en la pantalla.
 
 ### Tierra (`/zona`): "¿Cómo está la tierra en <zona>?"
 - Selector de lugar arriba (chips con nombre completo; el elegido siempre visible).
@@ -390,6 +420,11 @@ Notas de forma: los controles descansan en radio igual a la mitad de su alto (eq
 `completa`, pero se puede animar sin el salto de `9999px`), pasan a `md` al presionar y a `lg`
 al seleccionarse; el chip, de 32 px de alto, pasa a `md` al seleccionarse porque `lg` no se
 distinguiría del reposo.
+
+Mapa (`src/componentes/mapa/`): `ContenedorMapa(PropsMapa)`, `MapaHonduras` (Leaflet; expone
+`ControlMapa` por `ref`: `acercar`, `alejar`, `verTodo`, `irA`), `NivelAptitud({ nivel,
+grande? })`, `LeyendaAptitud`, `Partes({ partes, etiqueta })` y `useEscenario()` (tipo de año,
+compartido entre pantallas en `sessionStorage`).
 
 ### Iconos registrados (`componentes/iconos.ts`)
 

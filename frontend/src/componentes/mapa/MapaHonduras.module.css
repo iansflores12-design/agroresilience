@@ -1,0 +1,121 @@
+/* El selector doble gana a los estilos propios de Leaflet sin usar !important. */
+.raiz.raiz {
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-surface-container-low);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface);
+}
+
+.raiz.raiz:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-primary);
+  outline-offset: calc(-1 * var(--anillo-foco));
+}
+
+/* Departamentos. Leaflet escribe el color como atributo; aqui lo deciden los tokens. */
+.raiz path {
+  fill: var(--md-sys-color-surface-container-high);
+  fill-opacity: 1;
+  stroke: var(--md-sys-color-surface-container-low);
+  stroke-opacity: 1;
+  stroke-width: 1px;
+  outline: none;
+  transition: opacity var(--mov-efecto) var(--curva-efecto);
+}
+
+.raiz path[data-nivel='buena'] {
+  fill: var(--md-sys-color-primary-container);
+}
+
+.raiz path[data-nivel='regular'] {
+  fill: var(--md-sys-color-surface-container-highest);
+}
+
+.raiz path[data-nivel='dificil'] {
+  fill: var(--agro-color-tierra-container);
+}
+
+@media (hover: hover) {
+  .raiz path[role='button']:hover {
+    opacity: calc(1 - var(--estado-hover) * 2);
+  }
+}
+
+.raiz path[aria-pressed='true'] {
+  stroke: var(--md-sys-color-on-surface);
+  stroke-width: 1.5px;
+}
+
+.raiz path:focus-visible {
+  stroke: var(--md-sys-color-on-surface);
+  stroke-width: 2.5px;
+  stroke-dasharray: 6 4;
+}
+
+/* Puntaje del departamento elegido: pastilla clara para que se lea sobre cualquier color. */
+.puntaje.puntaje {
+  padding: 0 var(--esp-1);
+  border: 0;
+  border-radius: var(--forma-sm);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  box-shadow: none;
+  font: var(--tipo-nota);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface);
+  pointer-events: none;
+}
+
+.puntaje.puntaje::before {
+  display: none;
+}
+
+.puntaje.puntaje[hidden] {
+  display: none;
+}
+
+/* Lugares con datos: punto pequeno dentro de una zona tactil de 48 px. */
+.lugar.lugar {
+  display: grid;
+  place-items: center;
+  border-radius: var(--forma-completa);
+  cursor: pointer;
+}
+
+.lugar > span {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--md-sys-color-surface-container-lowest);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-on-surface);
+  box-shadow: var(--elevacion-1);
+  transition: transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.lugar:active > span {
+  transform: scale(0.85);
+}
+
+.lugar[aria-pressed='true'] > span {
+  background-color: var(--md-sys-color-primary);
+  transform: scale(1.4);
+}
+
+.lugar:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-primary);
+  outline-offset: -6px;
+}
+
+.nombreLugar.nombreLugar {
+  padding: var(--esp-1) var(--esp-2);
+  border: 0;
+  border-radius: var(--forma-sm);
+  background-color: var(--md-sys-color-inverse-surface);
+  box-shadow: var(--elevacion-1);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-inverse-on-surface);
+}
+
+.nombreLugar.nombreLugar::before {
+  display: none;
+}
