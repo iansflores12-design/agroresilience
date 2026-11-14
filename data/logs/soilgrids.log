@@ -1,0 +1,78 @@
+2026-11-13 19:32:56,107 INFO ok: choluteca.json (4621 bytes)
+2026-11-13 19:34:35,898 INFO ok: nacaome.json (4622 bytes)
+2026-11-13 19:36:38,258 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=14.07&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:37:07,009 INFO ok: tegucigalpa.json (4622 bytes)
+2026-11-13 19:39:09,368 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.64&lat=14.45&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:41:19,730 ERROR intento 2/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.64&lat=14.45&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:43:30,095 ERROR intento 3/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.64&lat=14.45&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:45:32,475 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-86.58&lat=14.03&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:47:42,845 ERROR intento 2/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-86.58&lat=14.03&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:48:29,291 INFO ok: danli.json (4623 bytes)
+2026-11-13 19:48:57,846 INFO ok: juticalpa.json (4583 bytes)
+2026-11-13 19:51:00,205 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-85.88&lat=14.87&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:53:09,885 INFO ok: catacamas.json (4582 bytes)
+2026-11-13 19:55:12,264 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-88.78&lat=14.77&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:55:53,006 INFO ok: santa_rosa_copan.json (4621 bytes)
+2026-11-13 19:57:55,378 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-88.18&lat=14.3&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 19:59:36,129 INFO ok: la_esperanza.json (4582 bytes)
+2026-11-13 20:01:38,498 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.13&lat=15.13&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 20:03:08,747 INFO ok: yoro.json (4623 bytes)
+2026-11-13 20:03:25,611 INFO ok: san_pedro_sula.json (4622 bytes)
+2026-11-13 20:04:18,402 INFO omitido (ya en manifiesto): choluteca.json
+2026-11-13 20:04:18,402 INFO omitido (ya en manifiesto): nacaome.json
+2026-11-13 20:04:18,403 INFO omitido (ya en manifiesto): tegucigalpa.json
+2026-11-13 20:04:41,189 INFO ok: comayagua.json (4623 bytes)
+2026-11-13 20:04:43,197 INFO omitido (ya en manifiesto): danli.json
+2026-11-13 20:04:43,198 INFO omitido (ya en manifiesto): juticalpa.json
+2026-11-13 20:04:43,199 INFO omitido (ya en manifiesto): catacamas.json
+2026-11-13 20:04:43,199 INFO omitido (ya en manifiesto): santa_rosa_copan.json
+2026-11-13 20:04:43,200 INFO omitido (ya en manifiesto): la_esperanza.json
+2026-11-13 20:04:43,201 INFO omitido (ya en manifiesto): yoro.json
+2026-11-13 20:04:43,201 INFO omitido (ya en manifiesto): san_pedro_sula.json
+2026-11-13 21:17:16,437 ERROR sonda 13.35,-87.19 intento 1: TimeoutError('The read operation timed out')
+2026-11-13 21:19:26,814 ERROR sonda 13.35,-87.19 intento 2: TimeoutError('The read operation timed out')
+2026-11-13 21:19:50,035 INFO sonda choluteca N 0.05 grados -> 13.35,-87.19: True
+2026-11-13 21:22:52,400 ERROR intento 1/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=13.35&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 21:26:02,765 ERROR intento 2/3 error en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=13.35&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: TimeoutError('The read operation timed out')
+2026-11-13 21:26:44,803 INFO ok: choluteca_cercano.json (4581 bytes)
+2026-11-13 21:26:59,563 INFO sonda nacaome N 0.05 grados -> 13.58,-87.49: True
+2026-11-13 21:27:56,850 INFO ok: nacaome_cercano.json (4582 bytes)
+2026-11-13 21:27:59,793 INFO sonda tegucigalpa N 0.05 grados -> 14.12,-87.19: True
+2026-11-13 21:28:15,881 ERROR intento 1/3 HTTP 502 en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=14.12&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+2026-11-13 21:28:26,434 ERROR intento 2/3 HTTP 503 en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=14.12&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: <html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+2026-11-13 21:28:36,960 ERROR intento 3/3 HTTP 503 en https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-87.19&lat=14.12&property=clay&property=sand&property=silt&property=soc&property=phh2o&property=bdod&property=cec&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean: <html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
+
+2026-11-13 21:28:39,490 ERROR sonda 14.50,-87.64 intento 1: <HTTPError 503: 'Service Temporarily Unavailable'>
+2026-11-13 21:29:42,466 INFO sonda comayagua N 0.05 grados -> 14.50,-87.64: True
+2026-11-13 21:29:56,489 INFO ok: comayagua_cercano.json (4580 bytes)
+2026-11-13 21:31:01,226 INFO sonda danli N 0.05 grados -> 14.08,-86.58: True
+2026-11-13 21:31:31,179 INFO ok: danli_cercano.json (4582 bytes)
+2026-11-13 21:31:50,173 INFO sonda santa_rosa_copan N 0.05 grados -> 14.82,-88.78: True
+2026-11-13 21:32:10,236 INFO ok: santa_rosa_copan_cercano.json (4581 bytes)
+2026-11-13 21:32:22,183 INFO sonda yoro N 0.05 grados -> 15.18,-87.13: True
+2026-11-13 21:33:19,730 INFO ok: yoro_cercano.json (4582 bytes)
+2026-11-13 21:34:28,568 INFO sonda san_pedro_sula N 0.05 grados -> 15.55,-88.03: False
+2026-11-13 21:34:31,591 INFO sonda san_pedro_sula NE 0.05 grados -> 15.55,-87.98: True
+2026-11-13 21:35:07,770 INFO ok: san_pedro_sula_cercano.json (4582 bytes)
+2026-11-13 21:35:32,156 INFO sonda tegucigalpa N 0.05 grados -> 14.12,-87.19: True
+2026-11-13 21:36:08,757 INFO ok: tegucigalpa_cercano.json (4582 bytes)
