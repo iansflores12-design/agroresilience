@@ -1,0 +1,47 @@
+.interior {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  max-width: var(--ancho-lectura);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.insignia {
+  align-self: flex-start;
+  padding: var(--esp-1) var(--esp-3);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--tipo-nota);
+}
+
+.campoFila {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--esp-2);
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--zona-tactil);
+  max-height: calc(var(--esp-6) * 4 + var(--esp-6));
+  padding: var(--esp-3) var(--esp-4);
+  border: 0;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  font: var(--tipo-cuerpo);
+  resize: none;
+  overflow-y: auto;
+}
+
+.campo::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.campo:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}

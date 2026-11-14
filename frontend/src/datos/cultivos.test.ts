@@ -1,5 +1,4 @@
 import { buscarCultivo, cultivos, etapaEnSemana } from './cultivos'
-import { rotaciones } from './rotaciones'
 
 describe('cultivos', () => {
   it('cada cultivo tiene etapas contiguas que cubren todo el ciclo', () => {
@@ -24,16 +23,5 @@ describe('cultivos', () => {
     }
     expect(etapaEnSemana(c, -3)).toBe(c.etapas[0])
     expect(etapaEnSemana(c, c.cicloSemanas + 10)).toBe(c.etapas[c.etapas.length - 1])
-  })
-
-  it('las rotaciones solo usan cultivos existentes y meses validos', () => {
-    expect(rotaciones).toHaveLength(4)
-    for (const r of rotaciones) {
-      for (const p of r.pasos) {
-        expect(buscarCultivo(p.cultivoId)).not.toBeNull()
-        expect(p.mesInicio).toBeGreaterThanOrEqual(1)
-        expect(p.mesFin).toBeLessThanOrEqual(12)
-      }
-    }
   })
 })

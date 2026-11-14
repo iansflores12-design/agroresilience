@@ -37,6 +37,16 @@
   min-width: 0;
 }
 
+.anio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.pregunta2 {
+  font: var(--tipo-cuerpo-fuerte);
+}
+
 .controles {
   position: absolute;
   inset-block-start: var(--esp-3);
@@ -160,19 +170,22 @@
     align-items: stretch;
   }
 
+  /* El mapa se queda a la vista mientras se recorre la columna de la derecha. */
   .columnaMapa {
+    position: sticky;
+    inset-block-start: var(--esp-4);
     flex: 1;
+    align-self: flex-start;
   }
 
   .mapa {
-    flex: 1;
-    height: auto;
+    height: calc(100dvh - 15rem);
     max-height: none;
-    min-height: 32rem;
+    min-height: 28rem;
   }
 
   .lateral {
     flex: none;
-    width: 24rem;
+    width: 28rem;
   }
 }

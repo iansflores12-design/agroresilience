@@ -1,0 +1,106 @@
+.raiz {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.lienzo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container);
+}
+
+@media (min-width: 600px) {
+  .lienzo {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Colores de la escena: tinta sobre papel y el color de agua de la app como unica senal. */
+.escena {
+  --e-fondo: var(--md-sys-color-surface-container);
+  --e-suelo: var(--md-sys-color-surface-container-high);
+  --e-trazo: var(--md-sys-color-on-surface);
+  --e-suave: var(--md-sys-color-outline);
+  --e-agua: var(--agro-color-agua);
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Trazos de ancho fijo en pantalla; tallos y vainas escalan con la camara. */
+.escena :where(path, line, circle, rect) {
+  vector-effect: non-scaling-stroke;
+}
+
+.escena [data-escala] {
+  vector-effect: none;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.palabras {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.pregunta {
+  margin: 0;
+  font: var(--tipo-titulo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.palabra {
+  margin-inline-start: auto;
+  font: var(--tipo-pregunta);
+  color: var(--md-sys-color-on-surface);
+}
+
+.hoy {
+  padding: var(--esp-1) var(--esp-3);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font: var(--tipo-nota);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.linea-hoy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  font: var(--tipo-cuerpo-fuerte);
+  color: var(--md-sys-color-on-surface);
+}
+
+.zonas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.texto {
+  margin: 0;
+  font: var(--tipo-titulo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.pie {
+  margin: var(--esp-3) 0 0;
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}

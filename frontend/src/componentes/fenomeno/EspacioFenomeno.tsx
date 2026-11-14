@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { Zona } from '../../datos/zonas'
 import estilos from './EspacioFenomeno.module.css'
+import { Sequia } from './Sequia'
 
 export interface PropsFenomeno {
   zona: Zona | null
@@ -8,16 +9,14 @@ export interface PropsFenomeno {
 }
 
 /**
- * PLACEHOLDER(fenomeno): para integrar la explicacion grafica real, reemplazar el contenido de
- * `.lienzo` (el <div> con la proporcion reservada) por el componente definitivo, que recibe
- * `zona` y `cultivoId`. Conservar la <section data-placeholder="fenomeno"> y su titulo, y hacer
- * que el componente llene el 100 % del lienzo: la proporcion es 16:9 (4:3 en ventana compacta).
+ * Explicacion grafica del fenomeno (hoy, la sequia). Conserva el contrato `PropsFenomeno`, el
+ * titulo y la <section data-fenomeno="sequia">; la escena llena el lienzo (16:9, 4:3 en compacta).
  */
 export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
   const idTitulo = useId()
   return (
     <section
-      data-placeholder="fenomeno"
+      data-fenomeno="sequia"
       aria-labelledby={idTitulo}
       data-zona={zona?.id}
       data-cultivo={cultivoId ?? undefined}
@@ -26,9 +25,7 @@ export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
       <h2 id={idTitulo} className="tipo-titulo">
         ¿Por qué pasa esto?
       </h2>
-      <div className={estilos.lienzo}>
-        <p className="tipo-nota">Espacio reservado: aquí irá la explicación gráfica de un fenómeno</p>
-      </div>
+      <Sequia zona={zona} cultivoId={cultivoId} />
     </section>
   )
 }

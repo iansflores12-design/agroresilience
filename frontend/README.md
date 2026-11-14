@@ -27,7 +27,7 @@ src/
   tema/             colores.css (generado), tokens.css, base.css, sileo.css
   componentes/      componentes base (Boton, Chip, Fab, Tarjeta...), Estructura y navegación
     mapa/           ContenedorMapa y MapaHonduras (Leaflet, por departamento), leyenda y puntajes
-    fenomeno/       EspacioFenomeno.tsx: espacio reservado del fenómeno (lo construye otro agente)
+    fenomeno/       EspacioFenomeno.tsx, Sequia.tsx (explicación gráfica), escena.ts (dibujo SVG) y textos.ts
   estado/           EstadoApp (cultivo, zona, edad, sonido) y Conversacion (chat)
   lib/              avisos.ts (Sileo), sonido.ts (WebAudio), chat/ (cliente del asistente)
   datos/            cultivos, rotaciones, zonas (+ zonas.generado.json), aptitud (+ departamentos.geo.json)
@@ -35,12 +35,13 @@ src/
   pruebas/          configuración de Vitest y ayudantes
 ```
 
-## Espacios reservados
+## Explicación del fenómeno
 
 - **Fenómeno:** `src/componentes/fenomeno/EspacioFenomeno.tsx`, con
-  `data-placeholder="fenomeno"` y el contrato `PropsFenomeno`.
+  `data-fenomeno="sequia"` y el contrato `PropsFenomeno`. Dibuja la sequía (escena SVG,
+  deslizador de intensidad y una frase por zona y nivel).
 
-El mapa ya está integrado (`src/componentes/mapa/`); queda reservado el espacio del fenómeno.
+El mapa está integrado en `src/componentes/mapa/`.
 
 ## Datos
 

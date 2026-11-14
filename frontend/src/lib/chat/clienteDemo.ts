@@ -20,6 +20,12 @@ function resumir(c: ContextoChat): string {
   } else if (c.zona) {
     lineas.push('Humedad del suelo: sin lectura.')
   }
+  if (c.recomendacion) {
+    lineas.push(`Rotación recomendada: ${c.recomendacion.rotacion.nombre}.`)
+  }
+  if (c.perspectiva) {
+    lineas.push(c.perspectiva.usable ? `Perspectiva del año: ${c.perspectiva.temporada}.` : 'Perspectiva del año: sin señal clara.')
+  }
   return lineas.join('\n')
 }
 

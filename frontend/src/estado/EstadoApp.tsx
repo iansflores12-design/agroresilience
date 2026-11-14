@@ -1,6 +1,7 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { configurarSonido } from '../lib/sonido'
+import type { Enfoque } from '../lib/recomendacion/tipos'
 
 export interface EstadoApp {
   cultivoId: string | null
@@ -8,6 +9,8 @@ export interface EstadoApp {
   /** Semanas desde la siembra. */
   edadSemanas: number
   sonido: boolean
+  /** Lo que mas le importa al productor, maximo 2. */
+  enfoques: Enfoque[]
 }
 
 interface AccionesEstadoApp {
@@ -16,11 +19,16 @@ interface AccionesEstadoApp {
   elegirZona(id: string): void
   fijarEdad(semanas: number): void
   alternarSonido(): void
+  /** Quita el enfoque si estaba; si no, lo agrega y descarta el mas antiguo si pasan de 2. */
+  alternarEnfoque(id: Enfoque): void
 }
 
 export const CLAVE_ESTADO = 'agroresilience.estado.v1'
 
-const porDefecto: EstadoApp = { cultivoId: null, zonaId: null, edadSemanas: 0, sonido: true }
+const porDefecto: EstadoApp = { cultivoId: null, zonaId: null, edadSemanas: 0, sonido: true, enfoques: [] }
+
+const ENFOQUES_VALIDOS: readonly string[] = ['agua', 'seguro', 'tierra', 'venta']
+const MAX_ENFOQUES = 2
 
 const Contexto = createContext<(EstadoApp & AccionesEstadoApp) | null>(null)
 
@@ -40,6 +48,9 @@ function leerEstadoGuardado(): EstadoApp {
           ? d.edadSemanas
           : 0,
       sonido: typeof d.sonido === 'boolean' ? d.sonido : true,
+      enfoques: Array.isArray(d.enfoques)
+        ? [...new Set(d.enfoques.filter((x): x is Enfoque => typeof x === 'string' && ENFOQUES_VALIDOS.includes(x)))].slice(0, MAX_ENFOQUES)
+        : [],
     }
   } catch {
     return porDefecto
@@ -73,10 +84,16 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   const alternarSonido = useCallback(() => {
     setEstado((e) => ({ ...e, sonido: !e.sonido }))
   }, [])
+  const alternarEnfoque = useCallback((id: Enfoque) => {
+    setEstado((e) => ({
+      ...e,
+      enfoques: e.enfoques.includes(id) ? e.enfoques.filter((x) => x !== id) : [...e.enfoques, id].slice(-MAX_ENFOQUES),
+    }))
+  }, [])
 
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido }),
-    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido],
+    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, alternarEnfoque }),
+    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, alternarEnfoque],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }

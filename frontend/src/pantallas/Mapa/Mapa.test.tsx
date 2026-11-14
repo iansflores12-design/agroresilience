@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { aptitud, rotacionesPara } from '../../datos/aptitud'
+import { aptitud, condiciones, buscarDepartamento, palabraNivel, ranking, rotacionesPara } from '../../datos/aptitud'
+import { consejosPara } from '../../datos/consejos'
 import { humedadPorcentaje, zonas } from '../../datos/zonas'
 import { avisar } from '../../lib/avisos'
 import { renderizarApp } from '../../pruebas/renderizar'
@@ -24,6 +25,23 @@ describe('Mapa', () => {
     // Sin cultivo no hay puntajes: se invita a elegirlo.
     expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
+  })
+
+  it('sin cultivo no hay numeros ni top 3, y la lista de departamentos es alfabetica', async () => {
+    const usuario = userEvent.setup()
+    const { container } = renderizarApp('/mapa')
+    expect(container.querySelectorAll('[data-departamento]')).toHaveLength(0)
+    expect(screen.queryByRole('region', { name: /^Los 3 mejores/ })).not.toBeInTheDocument()
+    const lista = screen.getByRole('list', { name: 'Los 18 departamentos' })
+    const botones = within(lista).getAllByRole('button')
+    expect(botones).toHaveLength(18)
+    const nombres = botones.map((b) => b.getAttribute('aria-label')!.replace('Elegir ', ''))
+    expect(nombres).toEqual([...nombres].sort((a, b) => a.localeCompare(b, 'es')))
+    expect(lista).not.toHaveTextContent('de 100')
+    // Se puede elegir un departamento aunque todavia no haya cultivo.
+    await usuario.click(within(lista).getByRole('button', { name: 'Elegir Olancho' }))
+    expect(within(lista).getByRole('button', { name: 'Elegir Olancho' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('elegir un punto cambia la zona del estado, avisa y muestra la tarjeta', async () => {
@@ -117,20 +135,135 @@ describe('Mapa', () => {
           name: new RegExp(`${nombre.replace(/[()]/g, '\\$&')} ?(Buena|Regular|Difícil) ?[0-9]+ de 100$`),
         })
       for (const r of opciones) expect(tarjetaDe(r.nombre)).toBeInTheDocument()
-      expect(within(seccion).getByText('Toque una opción para ver más.')).toBeInTheDocument()
+      expect(within(seccion).getByText('Toque una opción para ver por qué.')).toBeInTheDocument()
+      expect(within(seccion).getByRole('heading', { level: 3, name: opciones.find((r) => r.mejor)!.nombre })).toBeInTheDocument()
 
       const mejor = opciones.find((r) => r.mejor)!
       const tarjeta = tarjetaDe(mejor.nombre)
       await usuario.click(tarjeta)
       expect(tarjeta).toHaveAttribute('aria-expanded', 'true')
-      const detalle = within(seccion).getByRole('article', { name: mejor.nombre })
+      const detalle = within(seccion).getByRole('region', { name: new RegExp(mejor.nombre.replace(/[()]/g, '\\$&')) })
       expect(within(detalle).getByText(mejor.ventajas[0])).toBeInTheDocument()
       expect(within(detalle).getByText(mejor.riesgos[0])).toBeInTheDocument()
       expect(within(detalle).getByText('Septiembre a diciembre.', { exact: false })).toBeInTheDocument()
 
       await usuario.click(tarjeta)
       expect(tarjeta).toHaveAttribute('aria-expanded', 'false')
-      expect(within(seccion).queryByRole('article')).not.toBeInTheDocument()
+      expect(within(seccion).queryByText('A favor')).not.toBeInTheDocument()
+    })
+
+    it('muestra los 3 mejores en orden, con su puntaje, y coinciden con el ranking', () => {
+      renderizarApp('/mapa')
+      const mejores = ranking('maiz', 'normal').slice(0, 3)
+      const tarjeta = screen.getByRole('region', { name: 'Los 3 mejores para maíz' })
+      expect(within(tarjeta).getByText('En un año normal, estos son los que mejor se dan.')).toBeInTheDocument()
+      const filas = within(tarjeta).getAllByRole('button')
+      expect(filas).toHaveLength(3)
+      mejores.forEach((p, i) => {
+        expect(filas[i]).toHaveAccessibleName(`Puesto ${i + 1}: ${p.nombre}, ${p.total} de 100, ${palabraNivel[p.nivel].toLowerCase()}`)
+        expect(filas[i]).toHaveTextContent(p.nombre)
+        expect(filas[i]).toHaveTextContent(`${p.total}de 100`)
+      })
+    })
+
+    it('el top cambia con el tipo de año y la tarjeta lo dice', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
+      const tarjeta = screen.getByRole('region', { name: 'Los 3 mejores para maíz' })
+      expect(within(tarjeta).getByText(/^En un año seco/)).toBeInTheDocument()
+      const filas = within(tarjeta).getAllByRole('button')
+      ranking('maiz', 'seco')
+        .slice(0, 3)
+        .forEach((p, i) => expect(filas[i]).toHaveAccessibleName(new RegExp(`^Puesto ${i + 1}: ${p.nombre}, ${p.total} de 100`)))
+    })
+
+    it('tocar una fila del top elige ese departamento: mapa, lista y detalle', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      const segundo = ranking('maiz', 'normal')[1]
+      const tarjeta = screen.getByRole('region', { name: 'Los 3 mejores para maíz' })
+      await usuario.click(within(tarjeta).getAllByRole('button')[1])
+      expect(within(tarjeta).getAllByRole('button')[1]).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('button', { name: new RegExp(`^Departamento de ${segundo.nombre}:`) })).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('heading', { level: 2, name: `¿Se da bien el maíz en ${segundo.nombre}?` })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: `Consejos para ${segundo.nombre}` })).toBeInTheDocument()
+      const lista = screen.getByRole('list', { name: 'Los 18 departamentos' })
+      const marcados = within(lista).getAllByRole('button', { pressed: true })
+      expect(marcados).toHaveLength(1)
+      expect(marcados[0]).toHaveAccessibleName(new RegExp(`^Elegir ${segundo.nombre}:`))
+    })
+
+    it('la lista tiene los 18 departamentos de mejor a peor con su puntaje y marca el elegido', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      const orden = ranking('maiz', 'normal')
+      const lista = screen.getByRole('list', { name: 'Los 18 departamentos' })
+      const botones = within(lista).getAllByRole('button')
+      expect(botones).toHaveLength(18)
+      orden.forEach((p, i) => {
+        expect(botones[i]).toHaveAccessibleName(
+          `Elegir ${p.nombre}: puesto ${i + 1}, ${p.total} de 100, ${palabraNivel[p.nivel].toLowerCase()}`,
+        )
+        expect(botones[i]).toHaveAttribute('aria-pressed', String(p.id === 'HN-CH'))
+      })
+      // Con el mismo puntaje, por orden alfabetico.
+      orden.slice(1).forEach((p, i) => {
+        if (p.total === orden[i].total) expect(orden[i].nombre.localeCompare(p.nombre, 'es')).toBeLessThan(0)
+      })
+      await usuario.click(botones[orden.findIndex((p) => p.id === 'HN-OL')])
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el maíz en Olancho?' })).toBeInTheDocument()
+      expect(within(lista).getAllByRole('button', { pressed: true })).toHaveLength(1)
+      expect(screen.getByRole('button', { name: /^Departamento de Olancho:/ })).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    it('cada departamento muestra su numero en el mapa y cambia con el tipo de año', async () => {
+      const usuario = userEvent.setup()
+      const { container } = renderizarApp('/mapa')
+      const numeros = () =>
+        Object.fromEntries(
+          [...container.querySelectorAll<HTMLElement>('[data-departamento]')].map((e) => [
+            e.dataset.departamento,
+            e.querySelector('[class*="numero"]')?.textContent,
+          ]),
+        )
+      const normal = numeros()
+      for (const p of ranking('maiz', 'normal')) expect(normal[p.id]).toBe(String(p.total))
+      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
+      const seco = numeros()
+      for (const p of ranking('maiz', 'seco')) expect(seco[p.id]).toBe(String(p.total))
+      expect(seco).not.toEqual(normal)
+    })
+
+    it('muestra las condiciones del lugar ajustadas al año, con unidades', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
+      const c = condiciones(buscarDepartamento('HN-CH')!, 'seco')
+      const detalle = screen.getByText('Ver las condiciones del lugar').closest('details')!
+      expect(within(detalle).getByText('Lluvia del año').nextSibling).toHaveTextContent(`${Math.round(c.lluvia)} mm`)
+      expect(within(detalle).getByText('Temperatura media').nextSibling).toHaveTextContent(`${c.temp.toFixed(1)} °C`)
+      expect(within(detalle).getByText('Altura del terreno').nextSibling).toHaveTextContent(`${Math.round(c.alt)} m`)
+      expect(within(detalle).getByText('Agua en la tierra').nextSibling).toHaveTextContent(`${c.hum.toFixed(1)} %`)
+      expect(within(detalle).getByText(/Días seguidos sin lluvia/).nextSibling).toHaveTextContent(`${Math.round(c.canicula)} días`)
+      expect(within(detalle).getByText(/de ejemplo/)).toBeInTheDocument()
+    })
+
+    it('muestra los consejos del lugar, con el detalle tecnico y el aviso fijo', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
+      const consejos = consejosPara('HN-CH', 'maiz', 'seco')
+      const tarjeta = screen.getByRole('region', { name: 'Consejos para Choluteca' })
+      for (const c of consejos) {
+        expect(within(tarjeta).getByRole('heading', { level: 3, name: c.titulo })).toBeInTheDocument()
+        expect(within(tarjeta).getByText(c.texto)).toBeInTheDocument()
+        expect(within(tarjeta).getByText(c.detalle)).toBeInTheDocument()
+      }
+      expect(within(tarjeta).getAllByText('Ver el detalle técnico')).toHaveLength(consejos.length)
+      expect(
+        within(tarjeta).getByText('Puntajes y consejos de ejemplo, todavía sin validar con técnicos. Consulte a su técnico.'),
+      ).toBeInTheDocument()
     })
   })
 })

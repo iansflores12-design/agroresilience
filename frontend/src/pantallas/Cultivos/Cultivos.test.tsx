@@ -1,7 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { buscarCultivo } from '../../datos/cultivos'
-import { rotaciones } from '../../datos/rotaciones'
+import { departamentoDeZona, rotacionesPara } from '../../datos/aptitud'
+import { zonas } from '../../datos/zonas'
+import { CLAVE_ESTADO } from '../../estado/EstadoApp'
 import { renderizarApp } from '../../pruebas/renderizar'
 
 vi.mock('../../lib/avisos', () => ({
@@ -18,6 +20,10 @@ vi.mock('../../lib/sonido', () => ({
 import { avisar } from '../../lib/avisos'
 import { confirmar } from '../../lib/sonido'
 
+function guardar(zonaId: string | null, cultivoId: string | null) {
+  window.localStorage.setItem(CLAVE_ESTADO, JSON.stringify({ zonaId, cultivoId, edadSemanas: 3, sonido: false }))
+}
+
 describe('Pantalla Cultivos', () => {
   beforeEach(() => {
     window.localStorage.clear()
@@ -25,13 +31,44 @@ describe('Pantalla Cultivos', () => {
     vi.clearAllMocks()
   })
 
-  it('lista las cuatro rotaciones con su beneficio y la nota de referencia', () => {
+  it('sin cultivo muestra el parrafo de rotaciones y ninguna opcion desplegable', () => {
     renderizarApp('/')
-    for (const r of rotaciones) {
-      expect(screen.getByRole('heading', { level: 3, name: r.nombre })).toBeInTheDocument()
-      expect(screen.getByText(r.beneficio)).toBeInTheDocument()
-    }
-    expect(screen.getByText('Calendario de referencia. Consulte a su técnico.')).toBeInTheDocument()
+    expect(screen.getByText('Elija su cultivo arriba y le decimos qué le conviene sembrar después.')).toBeInTheDocument()
+    expect(document.querySelector('[aria-expanded]')).toBeNull()
+  })
+
+  it('con cultivo y sin lugar ofrece elegir lugar', () => {
+    guardar(null, 'maiz')
+    renderizarApp('/')
+    expect(screen.getByText('Para recomendarle qué sembrar después necesitamos saber dónde está su parcela.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Elegir lugar' })).toHaveAttribute('href', '/mapa')
+  })
+
+  it('con cultivo y lugar recomienda la mejor opcion y abre el porque sin cambiar el cultivo', async () => {
+    const usuario = userEvent.setup()
+    guardar(zonas[0].id, 'maiz')
+    renderizarApp('/')
+    const opciones = rotacionesPara(departamentoDeZona(zonas[0].id), 'maiz', 'normal')
+    const mejor = opciones.find((r) => r.mejor)!
+    const seccion = screen.getByRole('region', { name: /^Qué sembrar después en / })
+
+    expect(within(seccion).getByText('Lo que más le conviene')).toBeInTheDocument()
+    expect(within(seccion).getByRole('heading', { level: 3, name: mejor.nombre })).toBeInTheDocument()
+    const botones = within(seccion).getAllByRole('button', { expanded: false })
+    expect(botones).toHaveLength(opciones.length)
+    expect(within(seccion).getByText('Toque una opción para ver por qué.')).toBeInTheDocument()
+
+    await usuario.click(botones[1])
+    expect(botones[1]).toHaveAttribute('aria-expanded', 'true')
+    expect(within(seccion).getByText('A favor')).toBeInTheDocument()
+    await usuario.click(botones[1])
+    expect(botones[1]).toHaveAttribute('aria-expanded', 'false')
+    expect(within(seccion).queryByText('A favor')).not.toBeInTheDocument()
+
+    await usuario.click(botones[1])
+    expect(avisar.exito).not.toHaveBeenCalled()
+    const tira = screen.getByRole('group', { name: 'Contexto elegido' })
+    expect(within(tira).getByText(/^Maíz/)).toBeInTheDocument()
   })
 
   it('sin cultivo invita a elegir uno y no muestra el selector', () => {
@@ -41,19 +78,10 @@ describe('Pantalla Cultivos', () => {
     expect(screen.queryByRole('slider')).not.toBeInTheDocument()
   })
 
-  it('elegir un cultivo en una rotacion lo marca en todas, avisa y suena', async () => {
+  it('elegir un cultivo en la rejilla avisa y suena', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
-    const milpa = screen.getByRole('heading', { level: 3, name: 'Milpa de ladera' }).closest('li')!
-    await usuario.click(within(milpa).getByRole('button', { name: /^Maíz, primera/ }))
-
-    const maiz = screen.getAllByRole('button', { name: /^Maíz/ })
-    expect(maiz.length).toBeGreaterThan(2)
-    for (const b of maiz) expect(b).toHaveAttribute('aria-pressed', 'true')
-    for (const b of screen.getAllByRole('button', { name: /^Frijol, / })) {
-      expect(b).toHaveAttribute('aria-pressed', 'false')
-    }
-
+    await usuario.click(screen.getByRole('button', { name: /^Maíz\s*Unas/ }))
     expect(avisar.exito).toHaveBeenCalledTimes(1)
     expect(avisar.exito).toHaveBeenCalledWith(
       expect.objectContaining({

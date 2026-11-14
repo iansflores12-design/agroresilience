@@ -1,0 +1,102 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.hoja {
+  display: flex;
+  flex-direction: column;
+}
+
+.hoja > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  min-height: var(--alto-accion);
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--forma-lg-mas);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  font: var(--tipo-cuerpo-fuerte);
+  cursor: pointer;
+  list-style: none;
+}
+
+.hoja > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hoja > summary svg {
+  transition: transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.hoja[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.hoja[open] > summary {
+  margin-block-end: var(--esp-3);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.departamento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-3);
+  width: 100%;
+  min-height: var(--alto-accion);
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--forma-lg-mas);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  text-align: start;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.departamento:active {
+  border-radius: var(--forma-md);
+}
+
+.elegido,
+.elegido:active {
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font: var(--tipo-cuerpo-fuerte);
+  overflow-wrap: anywhere;
+}
+
+.datos {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-3);
+}
+
+.puntaje {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--esp-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.puntaje > b {
+  font: 700 1.5rem/1.75rem var(--fuente);
+}

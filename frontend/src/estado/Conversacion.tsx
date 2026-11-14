@@ -6,6 +6,8 @@ export interface MensajeChat {
   rol: 'usuario' | 'asistente'
   texto: string
   fecha: string
+  /** De donde viene el mensaje: texto guardado, asistente o la persona. Opcional: lo guardado antes no lo trae. */
+  origen?: 'preset' | 'asistente' | 'usuario'
 }
 
 interface ValorConversacion {
@@ -30,12 +32,20 @@ function esMensaje(x: unknown): x is MensajeChat {
   )
 }
 
+const ORIGENES: readonly string[] = ['preset', 'asistente', 'usuario']
+
+/** Lectura tolerante: un origen desconocido se descarta, el mensaje se conserva. */
+function normalizar(m: MensajeChat): MensajeChat {
+  const { origen, ...resto } = m
+  return typeof origen === 'string' && ORIGENES.includes(origen) ? { ...resto, origen } : resto
+}
+
 function leerConversacionGuardada(): MensajeChat[] {
   try {
     const crudo = window.sessionStorage.getItem(CLAVE_CONVERSACION)
     if (!crudo) return []
     const dato: unknown = JSON.parse(crudo)
-    return Array.isArray(dato) ? dato.filter(esMensaje) : []
+    return Array.isArray(dato) ? dato.filter(esMensaje).map(normalizar) : []
   } catch {
     return []
   }

@@ -40,4 +40,19 @@ describe('Conversacion', () => {
     window.sessionStorage.setItem(CLAVE_CONVERSACION, JSON.stringify([{ id: 1 }, 'x']))
     expect(renderHook(() => useConversacion(), { wrapper: envoltorio }).result.current.mensajes).toEqual([])
   })
+
+  it('guarda el origen y descarta uno desconocido sin perder el mensaje', () => {
+    const base = { rol: 'asistente', texto: 'x', fecha: '2026-01-01T00:00:00.000Z' }
+    window.sessionStorage.setItem(
+      CLAVE_CONVERSACION,
+      JSON.stringify([
+        { ...base, id: 'a', origen: 'preset' },
+        { ...base, id: 'b', origen: 'raro' },
+        { ...base, id: 'c' },
+      ]),
+    )
+    const { result } = renderHook(() => useConversacion(), { wrapper: envoltorio })
+    expect(result.current.mensajes.map((m) => m.origen)).toEqual(['preset', undefined, undefined])
+    expect(result.current.mensajes[1]).not.toHaveProperty('origen')
+  })
 })

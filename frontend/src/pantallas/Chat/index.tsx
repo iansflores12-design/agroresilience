@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Boton } from '../../componentes/Boton'
-import { BotonIcono } from '../../componentes/BotonIcono'
+import { avisarDemoUnaVez, descripcionError } from '../../componentes/chat/avisosChat'
+import { ListaMensajes } from '../../componentes/chat/ListaMensajes'
+import { Redactor } from '../../componentes/chat/Redactor'
 import { Chip } from '../../componentes/Chip'
 import { buscarZona, estadoHumedad, humedadPorcentaje } from '../../datos/zonas'
 import { useConversacion, type MensajeChat } from '../../estado/Conversacion'
@@ -11,7 +13,6 @@ import { armarContexto, crearClienteChat, ErrorChat, esModoDemo, type ClienteCha
 import estilos from './Chat.module.css'
 import { armarSugerencias } from './sugerencias'
 
-const CLAVE_AVISO_DEMO = 'agroresilience.chat.demo.avisado'
 const VISTAS: ContextoChat['vista'][] = ['cultivos', 'mapa', 'zona']
 
 export interface PropsChat {
@@ -19,28 +20,6 @@ export interface PropsChat {
   cliente?: ClienteChat
   /** Fuerza el modo demostracion (por defecto segun `VITE_API_URL`). */
   modoDemo?: boolean
-}
-
-function avisarDemoUnaVez() {
-  try {
-    if (window.sessionStorage.getItem(CLAVE_AVISO_DEMO)) return
-    window.sessionStorage.setItem(CLAVE_AVISO_DEMO, '1')
-  } catch {
-    // Sin sessionStorage se avisa en cada carga de la pagina.
-  }
-  avisar.info({
-    titulo: 'Modo de demostración',
-    descripcion: 'Las respuestas son locales: el asistente real se conectará al backend.',
-  })
-}
-
-function descripcionError(e: unknown): string {
-  if (e instanceof ErrorChat) {
-    if (e.causa === 'red') return 'Revisa tu conexión e inténtalo de nuevo.'
-    if (e.causa === 'servidor') return 'El servidor no pudo responder en este momento.'
-    if (e.causa === 'respuesta') return 'El servidor envió una respuesta que no se entiende.'
-  }
-  return 'Inténtalo de nuevo.'
 }
 
 export default function Chat({ cliente, modoDemo }: PropsChat) {
@@ -86,14 +65,6 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
       abortar.current?.abort()
     }
   }, [])
-
-  // Altura del campo: crece hasta unas cuatro lineas (el tope lo pone el CSS).
-  useLayoutEffect(() => {
-    const el = campo.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [texto])
 
   // Desplazamiento automatico al ultimo mensaje.
   useEffect(() => {
@@ -156,13 +127,6 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
     campo.current?.focus()
   }
 
-  function alTeclear(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key !== 'Enter' || e.shiftKey) return
-    if (e.nativeEvent.isComposing || e.keyCode === 229) return
-    e.preventDefault()
-    enviar(texto)
-  }
-
   function borrarConversacion() {
     const previos = mensajes
     abortar.current?.abort()
@@ -222,58 +186,21 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
           </div>
         )}
 
-        <div className={estilos.lista} role="log" aria-live="polite" aria-label="Conversación con el asistente">
-          {mensajes.map((m) => (
-            <div
-              key={m.id}
-              className={`${estilos.fila} ${m.rol === 'usuario' ? estilos.filaUsuario : estilos.filaAsistente}`}
-            >
-              {m.rol === 'asistente' && <span className={estilos.etiqueta}>Asistente</span>}
-              <p className={`${estilos.burbuja} ${m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}`}>
-                {m.texto}
-              </p>
-            </div>
-          ))}
-          {esperando && (
-            <div className={`${estilos.fila} ${estilos.filaAsistente}`}>
-              <span className={estilos.etiqueta}>Asistente</span>
-              <div className={`${estilos.burbuja} ${estilos.burbujaAsistente}`}>
-                <span className={estilos.puntos} aria-hidden="true">
-                  <span className={estilos.punto} />
-                  <span className={estilos.punto} />
-                  <span className={estilos.punto} />
-                </span>
-                <span className="solo-lectores">El asistente está escribiendo</span>
-              </div>
-            </div>
-          )}
+        <ListaMensajes mensajes={mensajes} esperando={esperando}>
           <div ref={fin} className={estilos.fin} />
-        </div>
+        </ListaMensajes>
       </section>
 
       <div className={`plano-superior ${estilos.redactor}`}>
-        <div className={estilos.redactorInterior}>
-          {demo && <span className={estilos.insignia}>Modo de prueba: todavía sin conexión al asistente real</span>}
-          <div className={estilos.campoFila}>
-            <textarea
-              ref={campo}
-              className={estilos.campo}
-              aria-label="Mensaje"
-              placeholder="Escriba su pregunta"
-              rows={1}
-              value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              onKeyDown={alTeclear}
-            />
-            {esperando ? (
-              <BotonIcono icono="stop" etiqueta="Detener" variante="relleno" onClick={detener} />
-            ) : (
-              <Boton icono="send" disabled={texto.trim() === ''} onClick={() => enviar(texto)}>
-                Enviar
-              </Boton>
-            )}
-          </div>
-        </div>
+        <Redactor
+          texto={texto}
+          alCambiar={setTexto}
+          alEnviar={enviar}
+          alDetener={detener}
+          esperando={esperando}
+          demo={demo}
+          campoRef={campo}
+        />
       </div>
     </div>
   )

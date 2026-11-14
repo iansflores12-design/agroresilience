@@ -163,12 +163,14 @@ interface EstadoApp {
   zonaId: string | null
   edadSemanas: number      // semanas desde la siembra
   sonido: boolean          // por defecto true
+  enfoques: Enfoque[]      // "¿Qué le importa más?": hasta 2 de agua, seguro, tierra, venta
 }
 function useEstadoApp(): EstadoApp & {
   elegirCultivo(id: string): void   // reinicia edadSemanas a 0 si cambia el cultivo
   elegirZona(id: string): void
   fijarEdad(semanas: number): void
   alternarSonido(): void
+  alternarEnfoque(id: Enfoque): void // lo quita si estaba; si no, lo agrega y descarta el más antiguo si pasan de 2
 }
 ```
 
@@ -176,7 +178,10 @@ function useEstadoApp(): EstadoApp & {
 más `sessionStorage`) para que la discusión siga al cambiar de vista:
 
 ```ts
-interface MensajeChat { id: string; rol: 'usuario' | 'asistente'; texto: string; fecha: string }
+interface MensajeChat {
+  id: string; rol: 'usuario' | 'asistente'; texto: string; fecha: string
+  origen?: 'preset' | 'asistente' | 'usuario' // opcional: lo guardado antes no lo trae; uno desconocido se descarta al leer
+}
 function useConversacion(): {
   mensajes: MensajeChat[]
   agregar(m: Omit<MensajeChat, 'id' | 'fecha'>): MensajeChat
@@ -185,28 +190,27 @@ function useConversacion(): {
 }
 ```
 
+La portada (`Recomendacion`) y la pantalla Chat escriben en este mismo hilo, así que la
+conversación que empieza en la portada sigue en `/chat`. `origen: 'preset'` se muestra con la
+etiqueta "Texto guardado"; el resto del asistente, con "Asistente".
+
 ## 5. Datos
 
-- `src/datos/cultivos.ts` y `src/datos/rotaciones.ts`: contenido **ilustrativo** para la
+- `src/datos/cultivos.ts`: contenido **ilustrativo** para la
   interfaz, pendiente de validar con el equipo agronómico (se dice en el archivo y, en
   letra pequeña, en la pantalla).
 
 ```ts
 interface EtapaCultivo { id: string; nombre: string; desdeSemana: number; hastaSemana: number; sensibilidadAgua: 'baja' | 'media' | 'alta' }
 interface Cultivo { id: string; nombre: string; nombreCientifico: string; familia: 'gramínea' | 'leguminosa' | 'hortaliza' | 'cobertura'; cicloSemanas: number; etapas: EtapaCultivo[] }
-interface PasoRotacion { cultivoId: string; temporada: 'primera' | 'postrera' | 'verano'; mesInicio: number; mesFin: number }  // meses 1 a 12
-interface Rotacion { id: string; nombre: string; resumen: string; beneficio: string; pasos: PasoRotacion[] }
 export const cultivos: Cultivo[]; export function buscarCultivo(id: string | null): Cultivo | null
 export function etapaEnSemana(cultivo: Cultivo, semana: number): EtapaCultivo
-export const rotaciones: Rotacion[]
 ```
 
   Cultivos: maíz (17 semanas), frijol (12), sorgo o maicillo (16), arroz (18), tomate (16),
-  frijol terciopelo como cobertura (20). Rotaciones: "Milpa de ladera" (maíz de primera,
-  frijol de postrera, frijol terciopelo en verano), "Granos del corredor seco" (maíz de
-  primera, sorgo de postrera), "Valle con riego" (arroz, frijol, tomate) y "Hortaliza y
-  grano" (tomate en verano, maíz de primera, frijol de postrera). Temporadas de Honduras:
-  primera de mayo a agosto, postrera de septiembre a diciembre, verano de enero a abril.
+  frijol terciopelo como cobertura (20). Temporadas de Honduras: primera de mayo a agosto,
+  postrera de septiembre a diciembre, verano de enero a abril. Las rotaciones ya no son una
+  lista fija: salen de `aptitud.rotacionesPara` según el cultivo y el departamento.
 
 - `src/datos/aptitud.ts`: puntaje **ilustrativo** de qué tan bien se da cada cultivo en cada
   departamento y de qué sembrar de postrera. Pendiente de validar; no sale de
@@ -214,6 +218,16 @@ export const rotaciones: Rotacion[]
   `tieneAptitud`, `escenarios`, `factores`, `nivelDePuntaje`, `palabraNivel`, `ranking`,
   `aptitud` y `rotacionesPara`. `src/datos/departamentos.geo.json` son los límites **reales**
   de los 18 departamentos (geoBoundaries y OpenStreetMap, licencia ODbL), simplificados.
+
+- `src/lib/recomendacion/`: la recomendación de rotación. `motor.ts` puntúa con los pesos del
+  enfoque y da un ganador instantáneo (sin red); `orquestador.ts` es lógica pura (sin React, con
+  relojes y peticiones inyectables) que emite `decision`, `mostrarPreset`, `mostrarExplicacion`,
+  `seguimiento` y `error`; `clienteDecision.ts` y `clienteExplicacion.ts` hablan con
+  `{VITE_API_URL}/decision` y `/explicacion` (esta última en flujo de texto, con `TextDecoder`
+  en modo `stream` para no romper letras con tilde); `useRecomendacion.ts` lo conecta a React.
+  Constantes configurables: `LIMITE_DECISION_MS` = 2500 y `LIMITE_EXPLICACION_MS` = 6000, ambas
+  contadas desde el toque. `src/datos/presets.ts` guarda los textos de respaldo (ilustrativos,
+  pendientes de validar) y `src/datos/perspectiva.ts` cómo viene el año por zona.
 
 - `src/datos/zonas.generado.json`: datos **reales** resumidos de `data/processed/` por
   `scripts/generar_datos_zonas.py` (SMAP, IMERG, POWER, SoilGrids). Forma:
@@ -300,11 +314,35 @@ cuatro pantallas (sección 1, regla 2).
    departamento de la pantalla Mapa, sin los puntos de lugares, con su leyenda, una frase
    ("Se da mejor en ..." o el puntaje del departamento tocado) y el botón "Ver el mapa
    completo".
-4. **Qué sembrar después (rotaciones).** Una tarjeta por rotación con su nombre, su
-   beneficio en una frase y sus pasos como lista vertical: icono de temporada, nombre
-   completo del cultivo (botón que lo elige) y meses en palabras ("Mayo a agosto"). La
-   regla de 12 iniciales de la versión 1 se quita: las iniciales sueltas no se leen y
-   obligaban a cortar nombres. Nota: "Calendario de referencia. Consulte a su técnico".
+4. **Qué sembrar después.** Sin cultivo elegido, un texto invita a elegirlo arriba. Con
+   cultivo y sin lugar, una tarjeta pide el lugar y lleva al botón "Elegir lugar" (`/mapa`).
+   Con cultivo y lugar aparecen: chips "¿Cómo viene el año?" (Año seco, Año normal, Año
+   lluvioso, el mismo estado que usa el Mapa), una línea con la humedad real del satélite
+   para ese lugar y el enlace "Ver cómo está la tierra", la recomendación (abajo), el
+   `ComparadorRotaciones` y la nota "Puntajes y opciones de siembra de ejemplo, todavía sin validar. Consulte a su
+   técnico.". Elegir cultivo se hace solo en la rejilla de tarjetas de arriba: ninguna
+   opción del comparador cambia el cultivo.
+   **¿Cómo viene el año?** Si hay señal clara para la zona, el chip más probable queda elegido la
+   primera vez (sin pisar lo que la persona ya eligió, aquí o en el Mapa) y lleva la marca "Lo
+   más probable". Si no la hay, una línea corta ("Este año no hay una señal clara...") y el
+   escenario sigue en lo que la persona elija. Un desplegable "Ver de dónde sale este dato"
+   (fuente, índice ONI, años parecidos y aciertos) es para el agrónomo; el primer nivel no usa jerga.
+   **Recomendación** (`pantallas/Cultivos/Recomendacion.tsx`): chips "¿Qué le importa más?" (uno o
+   dos), botón grande "Recomiéndeme" (icono más palabra, 56 px) y debajo "Lo que le
+   recomendamos": el texto con su etiqueta honesta ("Texto guardado" si es el respaldo,
+   "Asistente" si es de Gemini; el texto guardado nunca se hace pasar por el asistente), una
+   entrada corta (sube 8 px y aparece; sin movimiento con `prefers-reduced-motion`) y el redactor
+   "Pregunte más", que usa los mismos componentes que Chat (`componentes/chat/ListaMensajes` y
+   `Redactor`) y el mismo hilo. Se reserva alto para el resultado y no hay desplazamiento
+   automático, así el texto no mueve la página a saltos. El `ComparadorRotaciones` resalta la
+   opción recomendada (`elegidaId`: borde grueso y "Recomendada para usted") y sigue mostrando
+   todas. Si cambian cultivo, lugar, enfoques o tipo de año, se cancela todo y la recomendación
+   anterior deja de mostrarse (queda en el hilo de `/chat`). Sin backend (modo demostración) o
+   sin red, sale el texto guardado y un aviso una sola vez por sesión: "Modo de demostración" o
+   "Sin conexión: le mostramos el texto guardado".
+   Motivo: el reto pide comparar al menos tres estrategias de rotación, incluida la actual,
+   y explicar por qué se sugiere cada una, en qué se basa, qué beneficios da, qué falta
+   saber y qué riesgos revisar con un técnico.
 
 ### Mapa (`/mapa`): "¿Dónde está su parcela?"
 - El mapa ocupa el alto disponible. `componentes/mapa/ContenedorMapa.tsx` le da tamaño, forma
@@ -331,10 +369,11 @@ cuatro pantallas (sección 1, regla 2).
   "Año normal" y "Año lluvioso", el nivel en grande, "74 de 100. Puesto 16 de 18
   departamentos.", lo que más le cuesta en una frase y el desplegable "Ver el puntaje por
   partes". El departamento es el que se tocó o, si no, el del lugar elegido.
-- **"Qué sembrar después en <departamento>"**: una tarjeta por opción de postrera (repetir el
-  cultivo primero, luego las demás de mejor a peor) con nombre en palabras ("Maíz y después
-  frijol"), nivel y puntaje. Tocar una abre su detalle debajo (`aria-expanded`): cuándo se
-  siembra, puntaje por partes, a favor, cuidados y qué falta saber. Tocarla otra vez lo cierra.
+- **"Qué sembrar después en <departamento>"**: usa el mismo `ComparadorRotaciones` que la
+  pantalla Cultivo. Arriba, la tarjeta "Lo que más le conviene"; debajo, una columna con
+  todas las opciones (incluida "Lo que hace hoy"), cada una un acordeón que se abre justo
+  debajo y solo una a la vez. Su detalle dice cuándo se siembra, el puntaje por partes, a
+  favor, cuidados y qué falta saber. Tocarla otra vez la cierra.
 - Los puntajes son **ilustrativos** (`datos/aptitud.ts`) y se dice en la pantalla.
 
 ### Tierra (`/zona`): "¿Cómo está la tierra en <zona>?"
@@ -355,9 +394,11 @@ cuatro pantallas (sección 1, regla 2).
   coordenadas, percentil y los avisos técnicos (SoilGrids no verificado como agrícola,
   SMAP mide solo los primeros 5 cm).
 - Acciones: "Preguntar sobre esta tierra" (`/chat?desde=zona`) y "Copiar resumen".
-- Debajo, `componentes/fenomeno/EspacioFenomeno.tsx` (`data-placeholder="fenomeno"`,
-  comentario `PLACEHOLDER(fenomeno)`, contrato `PropsFenomeno`), con el título
-  "¿Por qué pasa esto?".
+- Debajo, `componentes/fenomeno/EspacioFenomeno.tsx` (`data-fenomeno="sequia"`,
+  contrato `PropsFenomeno`), con el título "¿Por qué pasa esto?": escena SVG de la sequía
+  (cielo, suelo, raíces, cultivo y río), un deslizador "¿Cuánta sequía?" con las palabras
+  Normal, Seca y Muy seca (arranca en "hoy" según el percentil de la zona) y una sola
+  frase que cambia con la zona y el nivel. Agua en el color `agua`, el resto tinta.
 - Expandida: dos columnas (respuesta, número y gráfica a la izquierda; fichas y acciones
   a la derecha).
 
@@ -369,6 +410,8 @@ cuatro pantallas (sección 1, regla 2).
 - Burbujas de 16 px; el asistente con su etiqueta. Redactor fijo con botón de enviar con
   icono y texto "Enviar" en ventanas medianas y grandes, solo icono con nombre accesible
   en compacta.
+- Los mensajes de la recomendación de la portada (con su etiqueta "Texto guardado" o "Asistente")
+  aparecen en este mismo hilo.
 - Insignia fija "Modo de prueba: todavía sin conexión al asistente real" en el modo de
   demostración. El contrato con el backend no cambia.
 - Ancho máximo de lectura en expandida.
@@ -443,8 +486,8 @@ psychiatry, stop, location_on, expand_more (alias de `keyboard_arrow_down`, porq
   { titulo; descripcion?; accion?: { texto; alPulsar } }`.
 - `lib/sonido.ts`: `tic(mayor?)`, `asentar()`, `confirmar()`, `vibrar(ms)`,
   `configurarSonido(activo)` (lo sincroniza el estado; no hace falta llamarlo).
-- `datos/cultivos.ts`: `cultivos`, `buscarCultivo`, `etapaEnSemana`. `datos/rotaciones.ts`:
-  `rotaciones`. `datos/zonas.ts`: `zonas`, `cajaHonduras`, `fuentes`, `fechaGeneracion`,
+- `datos/cultivos.ts`: `cultivos`, `buscarCultivo`, `etapaEnSemana`. `componentes/rotaciones/ComparadorRotaciones`:
+  comparador de rotaciones usado por Cultivo y Mapa. `datos/zonas.ts`: `zonas`, `cajaHonduras`, `fuentes`, `fechaGeneracion`,
   `buscarZona`, `humedadPorcentaje`, `estadoHumedad` y los tipos `Zona`, `HumedadZona`,
   `DatosZonas`, `EstadoHumedad`.
 

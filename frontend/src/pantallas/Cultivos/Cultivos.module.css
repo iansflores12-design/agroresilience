@@ -156,77 +156,67 @@
   align-self: flex-start;
 }
 
-/* Rotaciones */
-.rotaciones {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+/* Que sembrar despues */
+.escenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--esp-3);
 }
 
-.rotacion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
+/* Marca "Lo mas probable" dentro del chip del ano. */
+.marca {
+  margin-inline-start: var(--esp-2);
+  padding-inline-start: var(--esp-2);
+  border-inline-start: 1px solid currentColor;
+  font: var(--tipo-etiqueta);
+  opacity: 0.85;
 }
 
-.beneficio {
-  font: var(--tipo-cuerpo);
-  color: var(--md-sys-color-on-surface-variant);
+/* Desplegable "Ver de donde sale este dato", para el agronomo. */
+.fuente {
+  width: 100%;
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
 }
 
-.pasos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-  margin-block-start: var(--esp-2);
-}
-
-.paso {
+.fuenteResumen {
   display: flex;
   align-items: center;
-  gap: var(--esp-3);
-  width: 100%;
-  min-height: var(--alto-accion);
-  padding: var(--esp-2) var(--esp-4) var(--esp-2) var(--esp-2);
-  border-radius: var(--forma-lg-mas);
-  background-color: var(--md-sys-color-surface-container-lowest);
-  color: var(--md-sys-color-on-surface);
-  text-align: start;
-  transition:
-    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
-    background-color var(--mov-efecto) var(--curva-efecto);
+  min-height: var(--zona-tactil);
+  padding: var(--esp-2) var(--esp-4);
+  font: var(--tipo-etiqueta);
+  cursor: pointer;
 }
 
-.paso:active {
-  border-radius: var(--forma-md);
+.fuenteResumen:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+  border-radius: var(--forma-lg);
 }
 
-.pasoElegido {
-  background-color: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.iconoPaso {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--forma-completa);
-  background-color: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.textoPaso {
+.fuenteCuerpo {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  min-width: 0;
+  gap: var(--esp-2);
+  padding: 0 var(--esp-4) var(--esp-4);
+  font: var(--tipo-cuerpo);
+  overflow-wrap: anywhere;
 }
 
-.nombrePaso {
-  font: var(--tipo-cuerpo-fuerte);
-  overflow-wrap: anywhere;
+.fuenteCuerpo ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding-inline-start: var(--esp-4);
+  list-style: disc;
 }
 
 @media (min-width: 600px) {
@@ -236,10 +226,6 @@
 
   .cultivos {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .rotaciones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -261,5 +247,28 @@
 @media (min-width: 1200px) {
   .cultivos {
     grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* Modo oscuro: la tarjeta elegida va en verde oscuro con texto blanco. */
+@media (prefers-color-scheme: dark) {
+  .cultivoElegido,
+  .cultivoElegido:active {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 28%, var(--md-sys-color-surface-container-lowest));
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .cultivoElegido :global(.tipo-nota) {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .cultivoElegido .iconoCultivo {
+    background-color: var(--md-sys-color-surface-container-lowest);
+    color: var(--md-sys-color-primary);
+  }
+
+  .visto {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
   }
 }

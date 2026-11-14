@@ -44,7 +44,14 @@ import RiceBowl from '@material-symbols/svg-400/rounded/rice_bowl.svg?react'
 import Nutrition from '@material-symbols/svg-400/rounded/nutrition.svg?react'
 import LocalFlorist from '@material-symbols/svg-400/rounded/local_florist.svg?react'
 import CheckCircle from '@material-symbols/svg-400/rounded/check_circle.svg?react'
+import Lightbulb from '@material-symbols/svg-400/rounded/lightbulb.svg?react'
 import WbSunny from '@material-symbols/svg-400/rounded/wb_sunny.svg?react'
+import PlayArrow from '@material-symbols/svg-400/rounded/play_arrow.svg?react'
+import Pause from '@material-symbols/svg-400/rounded/pause.svg?react'
+import BugReport from '@material-symbols/svg-400/rounded/bug_report.svg?react'
+import Microbiology from '@material-symbols/svg-400/rounded/microbiology.svg?react'
+import ImageIcono from '@material-symbols/svg-400/rounded/image.svg?react'
+import Agriculture from '@material-symbols/svg-400/rounded/agriculture.svg?react'
 
 export const iconos = {
   grass: Grass,
@@ -88,6 +95,13 @@ export const iconos = {
   local_florist: LocalFlorist,
   check_circle: CheckCircle,
   wb_sunny: WbSunny,
+  lightbulb: Lightbulb,
+  play_arrow: PlayArrow,
+  pause: Pause,
+  bug_report: BugReport,
+  microbiology: Microbiology,
+  image: ImageIcono,
+  agriculture: Agriculture,
 } as const
 
 export type NombreIcono = keyof typeof iconos

@@ -1,0 +1,107 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--esp-3);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+/* Fila grande: puesto, nombre completo, puntaje y nivel. Todo el renglon se toca. */
+.fila {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'puesto nombre puntaje'
+    'puesto nivel nivel'
+    'barra barra barra';
+  align-items: center;
+  gap: var(--esp-1) var(--esp-3);
+  width: 100%;
+  min-height: var(--alto-accion);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--forma-lg-mas);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  text-align: start;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.fila:active {
+  border-radius: var(--forma-md);
+}
+
+.elegida,
+.elegida:active {
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.puesto {
+  grid-area: puesto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  font: 700 1.25rem/1.5rem var(--fuente);
+}
+
+.nombre {
+  grid-area: nombre;
+  font: var(--tipo-titulo);
+  overflow-wrap: anywhere;
+}
+
+.puntaje {
+  grid-area: puntaje;
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.puntaje > b {
+  font: 700 2rem/2.25rem var(--fuente);
+}
+
+.nivel {
+  grid-area: nivel;
+  justify-self: start;
+}
+
+.barra {
+  grid-area: barra;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.barra > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-on-surface);
+  transform-origin: left center;
+  transition: transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.elegida .barra {
+  background-color: var(--md-sys-color-surface-container-lowest);
+}

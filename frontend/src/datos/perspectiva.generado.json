@@ -1,0 +1,797 @@
+{
+  "generado": "2026-11-14",
+  "fuentes": {
+    "lluvia": "NASA POWER, comunidad AG, PRECTOTCORR",
+    "oni": "NOAA CPC, Oceanic Nino Index"
+  },
+  "metodo": {
+    "k": 10,
+    "descripcion": "Se suma la lluvia de cada temporada (primera: mayo a agosto; postrera: septiembre a diciembre) y se reparte en tres grupos iguales: seco, normal y lluvioso. Se buscan los 10 años cuyo Niño (ONI del mismo trimestre y con el mismo adelanto) y su tendencia más se parecen a los de hoy; la probabilidad sale de cuántos fueron de cada tipo, más uno por clase. Se publica solo si, dejando un año fuera, acierta claramente más que el azar (p<0.01) y mejora a la climatología en puntaje de probabilidad (RPSS), y si además mejora a la climatología al entrenar con 1981-2009 y probar 2010-2025; si no, se muestran 1/3 por clase y no se publica una señal."
+  },
+  "oni": {
+    "anio": 2026,
+    "trimestre": "ASO",
+    "valor": 2.46,
+    "tendencia": 1.07,
+    "fase": "nino"
+  },
+  "temporadas": [
+    {
+      "id": "primera-2027",
+      "tipo": "primera",
+      "anio": 2027,
+      "nombre": "Primera 2027",
+      "meses": "mayo a agosto",
+      "zonas": [
+        {
+          "id": "choluteca",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.39,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 548.2,
+          "canicula": {
+            "normalDias": 7,
+            "parecidosDias": 8
+          },
+          "rpss": -0.024,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.029
+        },
+        {
+          "id": "nacaome",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.39,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 548.2,
+          "canicula": {
+            "normalDias": 7,
+            "parecidosDias": 8
+          },
+          "rpss": -0.024,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.029
+        },
+        {
+          "id": "tegucigalpa",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.39,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 525.0,
+          "canicula": {
+            "normalDias": 6,
+            "parecidosDias": 6
+          },
+          "rpss": -0.019,
+          "aciertosRetencion": 0.38,
+          "rpssRetencion": 0.049
+        },
+        {
+          "id": "comayagua",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 4,
+            "lluvioso": 2
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.46,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 498.3,
+          "canicula": {
+            "normalDias": 5,
+            "parecidosDias": 4
+          },
+          "rpss": 0.033,
+          "aciertosRetencion": 0.19,
+          "rpssRetencion": 0.056
+        },
+        {
+          "id": "danli",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 3,
+            "normal": 4,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.3,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 495.0,
+          "canicula": {
+            "normalDias": 6,
+            "parecidosDias": 4
+          },
+          "rpss": -0.026,
+          "aciertosRetencion": 0.56,
+          "rpssRetencion": 0.098
+        },
+        {
+          "id": "juticalpa",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 3,
+            "normal": 3,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.3,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 444.6,
+          "canicula": {
+            "normalDias": 5,
+            "parecidosDias": 4
+          },
+          "rpss": -0.072,
+          "aciertosRetencion": 0.62,
+          "rpssRetencion": 0.158
+        },
+        {
+          "id": "catacamas",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 3,
+            "normal": 3,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.33,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 444.6,
+          "canicula": {
+            "normalDias": 5,
+            "parecidosDias": 4
+          },
+          "rpss": -0.071,
+          "aciertosRetencion": 0.19,
+          "rpssRetencion": 0.093
+        },
+        {
+          "id": "santa_rosa_copan",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 2,
+            "normal": 6,
+            "lluvioso": 2
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.33,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 572.2,
+          "canicula": {
+            "normalDias": 4,
+            "parecidosDias": 3
+          },
+          "rpss": -0.02,
+          "aciertosRetencion": 0.44,
+          "rpssRetencion": 0.061
+        },
+        {
+          "id": "la_esperanza",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 3,
+            "normal": 3,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.43,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 562.8,
+          "canicula": {
+            "normalDias": 4,
+            "parecidosDias": 4
+          },
+          "rpss": 0.008,
+          "aciertosRetencion": 0.5,
+          "rpssRetencion": 0.036
+        },
+        {
+          "id": "yoro",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.37,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 432.1,
+          "canicula": {
+            "normalDias": 4,
+            "parecidosDias": 3
+          },
+          "rpss": -0.001,
+          "aciertosRetencion": 0.5,
+          "rpssRetencion": 0.097
+        },
+        {
+          "id": "san_pedro_sula",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.39,
+          "aniosProbados": 46,
+          "lluviaNormalMm": 512.1,
+          "canicula": {
+            "normalDias": 4,
+            "parecidosDias": 4
+          },
+          "rpss": 0.016,
+          "aciertosRetencion": 0.5,
+          "rpssRetencion": 0.054
+        }
+      ]
+    },
+    {
+      "id": "postrera-2027",
+      "tipo": "postrera",
+      "anio": 2027,
+      "nombre": "Postrera 2027",
+      "meses": "septiembre a diciembre",
+      "zonas": [
+        {
+          "id": "choluteca",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.38,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 419.8,
+          "canicula": null,
+          "rpss": -0.044,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.042
+        },
+        {
+          "id": "nacaome",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.38,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 419.8,
+          "canicula": null,
+          "rpss": -0.044,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.042
+        },
+        {
+          "id": "tegucigalpa",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.38,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 391.2,
+          "canicula": null,
+          "rpss": -0.032,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.042
+        },
+        {
+          "id": "comayagua",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.4,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 395.5,
+          "canicula": null,
+          "rpss": -0.023,
+          "aciertosRetencion": 0.25,
+          "rpssRetencion": -0.015
+        },
+        {
+          "id": "danli",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 5,
+            "normal": 2,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.24,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 372.8,
+          "canicula": null,
+          "rpss": -0.064,
+          "aciertosRetencion": 0.38,
+          "rpssRetencion": 0.049
+        },
+        {
+          "id": "juticalpa",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.4,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 353.7,
+          "canicula": null,
+          "rpss": -0.03,
+          "aciertosRetencion": 0.5,
+          "rpssRetencion": 0.021
+        },
+        {
+          "id": "catacamas",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.29,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 419.5,
+          "canicula": null,
+          "rpss": -0.067,
+          "aciertosRetencion": 0.06,
+          "rpssRetencion": 0.033
+        },
+        {
+          "id": "santa_rosa_copan",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.29,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 469.2,
+          "canicula": null,
+          "rpss": -0.063,
+          "aciertosRetencion": 0.69,
+          "rpssRetencion": 0.112
+        },
+        {
+          "id": "la_esperanza",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.31,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 419.7,
+          "canicula": null,
+          "rpss": -0.038,
+          "aciertosRetencion": 0.62,
+          "rpssRetencion": 0.123
+        },
+        {
+          "id": "yoro",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 3,
+            "lluvioso": 3
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.27,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 481.3,
+          "canicula": null,
+          "rpss": -0.067,
+          "aciertosRetencion": 0.31,
+          "rpssRetencion": 0.018
+        },
+        {
+          "id": "san_pedro_sula",
+          "prob": {
+            "seco": 0.33,
+            "normal": 0.33,
+            "lluvioso": 0.33
+          },
+          "conteo": {
+            "seco": 4,
+            "normal": 2,
+            "lluvioso": 4
+          },
+          "aniosParecidos": [
+            1983,
+            1987,
+            1988,
+            1992,
+            1998,
+            2003,
+            2007,
+            2010,
+            2016,
+            2024
+          ],
+          "usable": false,
+          "aciertos": 0.33,
+          "aniosProbados": 45,
+          "lluviaNormalMm": 547.6,
+          "canicula": null,
+          "rpss": -0.043,
+          "aciertosRetencion": 0.38,
+          "rpssRetencion": 0.077
+        }
+      ]
+    }
+  ]
+}

@@ -48,6 +48,28 @@ describe('EstadoApp', () => {
     expect(b.result.current).toMatchObject({ cultivoId: null, edadSemanas: 0, sonido: true })
   })
 
+  it('alternarEnfoque agrega, quita y descarta el mas antiguo al pasar de 2', () => {
+    const { result } = renderHook(() => useEstadoApp(), { wrapper: envoltorio })
+    expect(result.current.enfoques).toEqual([])
+    act(() => result.current.alternarEnfoque('agua'))
+    act(() => result.current.alternarEnfoque('venta'))
+    expect(result.current.enfoques).toEqual(['agua', 'venta'])
+    act(() => result.current.alternarEnfoque('tierra'))
+    expect(result.current.enfoques).toEqual(['venta', 'tierra'])
+    act(() => result.current.alternarEnfoque('venta'))
+    expect(result.current.enfoques).toEqual(['tierra'])
+  })
+
+  it('lee enfoques de forma tolerante', () => {
+    window.localStorage.setItem(CLAVE_ESTADO, JSON.stringify({ enfoques: ['agua', 'x', 3, 'seguro', 'venta'] }))
+    const a = renderHook(() => useEstadoApp(), { wrapper: envoltorio })
+    expect(a.result.current.enfoques).toEqual(['agua', 'seguro'])
+    a.unmount()
+    window.localStorage.setItem(CLAVE_ESTADO, JSON.stringify({ enfoques: 'agua' }))
+    const b = renderHook(() => useEstadoApp(), { wrapper: envoltorio })
+    expect(b.result.current.enfoques).toEqual([])
+  })
+
   it('falla con mensaje claro fuera del proveedor', () => {
     expect(() => renderHook(() => useEstadoApp())).toThrow(/ProveedorEstadoApp/)
   })

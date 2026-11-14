@@ -52,26 +52,95 @@
   stroke-dasharray: 6 4;
 }
 
-/* Puntaje del departamento elegido: pastilla clara para que se lea sobre cualquier color. */
-.puntaje.puntaje {
-  padding: 0 var(--esp-1);
+/* Puntajes escritos sobre cada departamento. Pastilla opaca con su propio fondo, asi el numero se
+   lee igual sobre cualquier nivel y en los dos esquemas de color. Nunca recibe toques. */
+.capaEtiqueta.capaEtiqueta {
+  width: 0;
+  height: 0;
   border: 0;
-  border-radius: var(--forma-sm);
-  background-color: var(--md-sys-color-surface-container-lowest);
-  box-shadow: none;
-  font: var(--tipo-nota);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  color: var(--md-sys-color-on-surface);
+  background: none;
   pointer-events: none;
 }
 
-.puntaje.puntaje::before {
-  display: none;
+.etiqueta {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
-.puntaje.puntaje[hidden] {
-  display: none;
+.numero {
+  min-width: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  font: 700 1rem/1.25rem var(--fuente);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Guia que une un puntaje alejado con su departamento. */
+.raiz path.guia {
+  fill: none;
+  stroke: var(--md-sys-color-on-surface);
+  stroke-width: 1.5px;
+}
+
+.raiz path.guiaPunto {
+  fill: var(--md-sys-color-on-surface);
+  stroke: var(--md-sys-color-surface-container-lowest);
+  stroke-width: 1.5px;
+}
+
+/* Los tres mejores: icono y numero de puesto, para no depender del color. */
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--esp-2) 0 var(--esp-1);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  font: 700 0.875rem/1.25rem var(--fuente);
+  font-variant-numeric: tabular-nums;
+}
+
+.insignia svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Departamento elegido: tarjeta oscura con el nombre y el puntaje. */
+.etiqueta[data-elegido='true'] {
+  padding: var(--esp-1) var(--esp-3) var(--esp-1);
+  border-radius: var(--forma-md);
+  background-color: var(--md-sys-color-inverse-surface);
+  box-shadow: var(--elevacion-1);
+  color: var(--md-sys-color-inverse-on-surface);
+}
+
+.etiqueta[data-elegido='true'] .numero {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+}
+
+.nombreDepto {
+  order: -1;
+  font: 600 0.875rem/1.25rem var(--fuente);
 }
 
 /* Lugares con datos: punto pequeno dentro de una zona tactil de 48 px. */
