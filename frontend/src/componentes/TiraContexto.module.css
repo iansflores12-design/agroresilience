@@ -1,0 +1,6 @@
+.tira {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  min-width: 0;
+}

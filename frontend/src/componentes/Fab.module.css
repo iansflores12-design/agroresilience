@@ -1,0 +1,28 @@
+.fab {
+  --alto: var(--alto-fab);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-width: var(--alto);
+  height: var(--alto);
+  border: 0;
+  border-radius: calc(var(--alto) / 2);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font: var(--tipo-etiqueta);
+  text-decoration: none;
+  user-select: none;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.extendido {
+  padding: 0 var(--esp-6) 0 var(--esp-4);
+}
+
+.fab:active {
+  border-radius: var(--forma-md);
+  transform: scale(0.96);
+}

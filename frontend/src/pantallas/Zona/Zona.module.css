@@ -1,0 +1,120 @@
+.pantalla {
+  padding-block: var(--esp-4) var(--esp-8);
+  padding-inline: var(--esp-4);
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+}
+
+/* Selector de zona: una fila desplazable en compacta, con ajuste de linea en expandida. */
+.selector {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--esp-2);
+  overflow-x: auto;
+  padding-block: var(--esp-2);
+  margin-inline: calc(-1 * var(--esp-4));
+  padding-inline: var(--esp-4);
+  scrollbar-width: none;
+}
+
+.selector > * {
+  flex: none;
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-3);
+}
+
+.hoja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.humedad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  /* La tarjeta de la grafica sube sobre las letras del fondo. */
+}
+
+.tarjetaGrafica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.fichas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--esp-3);
+}
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.tituloFicha {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font: var(--tipo-etiqueta);
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.agua {
+  background-color: var(--agro-color-agua-container);
+  color: var(--agro-color-on-agua-container);
+}
+
+.tierra {
+  background-color: var(--agro-color-tierra-container);
+  color: var(--agro-color-on-tierra-container);
+}
+
+.valor {
+  font: var(--tipo-titulo);
+}
+
+.cultivo {
+  font: var(--tipo-cuerpo);
+}
+
+.sinCultivo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-2);
+}
+
+@media (min-width: 840px) {
+  .pantalla {
+    padding-inline: var(--esp-6);
+  }
+
+  .selector {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}

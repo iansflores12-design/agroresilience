@@ -1,0 +1,60 @@
+.boton {
+  --alto: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--alto);
+  height: var(--alto);
+  border: 1px solid transparent;
+  border-radius: calc(var(--alto) / 2);
+  text-decoration: none;
+  user-select: none;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto),
+    color var(--mov-efecto) var(--curva-efecto);
+}
+
+.boton:active:not(:disabled) {
+  border-radius: var(--forma-md);
+}
+
+.boton:disabled {
+  opacity: var(--estado-deshabilitado);
+  cursor: default;
+}
+
+.seleccionado,
+.seleccionado:active:not(:disabled) {
+  border-radius: var(--forma-lg);
+}
+
+.estandar {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.estandar.seleccionado {
+  color: var(--md-sys-color-primary);
+}
+
+.relleno {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.tonal {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.contorno {
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.contorno.seleccionado {
+  border-color: transparent;
+  background-color: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+}

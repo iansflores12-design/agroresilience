@@ -1,0 +1,22 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.lienzo {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: var(--esp-4);
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .lienzo {
+    aspect-ratio: 16 / 9;
+  }
+}

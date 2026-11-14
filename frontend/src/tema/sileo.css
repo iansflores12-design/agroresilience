@@ -1,0 +1,62 @@
+/* Ajustes de Sileo al sistema (DISENO.md, seccion 6). Se importa despues de sileo/styles.css.
+   Los selectores de abajo llevan el prefijo [data-sileo-viewport] [data-sileo-toast] para
+   ganar a las reglas de sileo/styles.css (titulo: [data-sileo-title] + :is(...)[data-state]
+   = 0,2,0) sin depender solo del orden de carga. */
+
+:root {
+  /* Todos los estados se leen como tinta sobre inverse-surface: el color de senal
+     queda reservado a lo tocable. */
+  --sileo-state-success: var(--md-sys-color-inverse-on-surface);
+  --sileo-state-loading: var(--md-sys-color-inverse-on-surface);
+  --sileo-state-error: var(--md-sys-color-inverse-on-surface);
+  --sileo-state-warning: var(--md-sys-color-inverse-on-surface);
+  --sileo-state-info: var(--md-sys-color-inverse-on-surface);
+  --sileo-state-action: var(--md-sys-color-inverse-on-surface);
+  --sileo-duration: var(--mov-espacial);
+  --sileo-spring-easing: var(--curva-resorte);
+  --sileo-width: min(350px, calc(100vw - var(--esp-6)));
+}
+
+/* Fondo opaco del aviso (el relleno es un rect SVG). */
+[data-sileo-canvas] rect {
+  fill: var(--md-sys-color-inverse-surface) !important;
+}
+
+/* Insignia de estado: tinta sobre inverse-surface; error usa error-container. */
+[data-sileo-viewport] [data-sileo-toast] [data-sileo-badge][data-state] {
+  --sileo-tone: var(--md-sys-color-inverse-on-surface);
+  --sileo-tone-bg: transparent;
+  color: var(--sileo-tone);
+}
+
+[data-sileo-viewport] [data-sileo-toast] [data-sileo-badge][data-state="error"] {
+  --sileo-tone: var(--md-sys-color-error-container);
+}
+
+/* Titulo: texto tal cual se escribe (sin capitalize), tipografia de etiqueta. */
+[data-sileo-viewport] [data-sileo-toast] [data-sileo-title][data-state] {
+  --sileo-tone: var(--md-sys-color-inverse-on-surface);
+  --sileo-tone-bg: transparent;
+  color: var(--md-sys-color-inverse-on-surface);
+  font: var(--tipo-etiqueta);
+  text-transform: none;
+}
+
+/* Descripcion: tinta sobre inverse-surface, tipografia de nota. */
+[data-sileo-viewport][data-theme] [data-sileo-toast] [data-sileo-description] {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-inverse-on-surface);
+}
+
+/* Boton de accion: fondo inverse-primary, texto inverse-surface. */
+[data-sileo-viewport] [data-sileo-toast] [data-sileo-button] {
+  font: var(--tipo-etiqueta);
+  min-height: 32px;
+  border: 0;
+  color: var(--md-sys-color-inverse-surface);
+  background-color: var(--md-sys-color-inverse-primary);
+}
+
+[data-sileo-viewport] [data-sileo-toast] [data-sileo-button]:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-inverse-primary) 85%, var(--md-sys-color-inverse-surface));
+}

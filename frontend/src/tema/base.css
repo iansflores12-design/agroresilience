@@ -1,0 +1,168 @@
+@import '@fontsource-variable/roboto-flex/wdth.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  background-color: var(--md-sys-color-surface);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font: var(--tipo-cuerpo);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--md-sys-color-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+
+svg {
+  display: block;
+}
+
+/* Foco visible: anillo de 3 px secondary con separacion de 2 px. */
+:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}
+
+/* Clases utilitarias */
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tres planos (DISENO.md, seccion 1). El contenedor de pantalla debe ser `position: relative`. */
+.pantalla {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.plano-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  color: var(--md-sys-color-surface-container-high);
+}
+
+.plano-medio {
+  position: relative;
+  z-index: var(--z-medio);
+}
+
+.plano-superior {
+  z-index: var(--z-superior);
+  box-shadow: var(--elevacion-3);
+}
+
+/* Titulos de seccion y notas */
+.tipo-titulo {
+  font: var(--tipo-titulo);
+}
+
+.tipo-nota {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Capa de estado: se anade a cualquier control tocable. Tinta del color del contenido. */
+.capa-estado {
+  position: relative;
+  isolation: isolate;
+}
+
+.capa-estado::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--mov-efecto) var(--curva-efecto);
+}
+
+@media (hover: hover) {
+  .capa-estado:hover::before {
+    opacity: var(--estado-hover);
+  }
+}
+
+.capa-estado:focus-visible::before {
+  opacity: var(--estado-foco);
+}
+
+.capa-estado:active::before {
+  opacity: var(--estado-presionado);
+}
+
+/* Zona tactil minima de 48 px aunque el control se vea mas bajo o estrecho. */
+.zona-tactil::after {
+  content: '';
+  position: absolute;
+  inset-block: min(0px, calc((100% - var(--zona-tactil)) / 2));
+  inset-inline: min(0px, calc((100% - var(--zona-tactil)) / 2));
+}

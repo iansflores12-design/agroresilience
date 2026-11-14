@@ -1,0 +1,6 @@
+.icono {
+  flex: none;
+  width: var(--tamano-icono, 24px);
+  height: var(--tamano-icono, 24px);
+  fill: currentColor;
+}

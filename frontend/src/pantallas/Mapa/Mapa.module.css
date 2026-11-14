@@ -1,0 +1,55 @@
+.pantalla {
+  min-height: 28rem;
+  padding-block-start: var(--esp-12);
+  padding-inline: var(--esp-4);
+  padding-block-end: var(--esp-2);
+}
+
+/* El mapa llena todo el alto que deja el armazon (barra superior y navegacion ya descontadas). */
+.mapa {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 24rem;
+}
+
+.mapa > section {
+  flex: 1;
+}
+
+.controles {
+  position: absolute;
+  inset-block-start: var(--esp-3);
+  inset-inline-end: var(--esp-3);
+}
+
+.tarjeta {
+  /* Flota sobre el borde inferior del mapa: solapa solo la franja sin puntos. */
+  position: relative;
+  margin-block-start: calc(-1 * var(--esp-6));
+  margin-inline: var(--esp-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+
+@media (min-width: 840px) {
+  .pantalla {
+    padding-inline: var(--esp-6);
+  }
+
+  .tarjeta {
+    align-self: flex-start;
+    min-width: 22rem;
+  }
+}

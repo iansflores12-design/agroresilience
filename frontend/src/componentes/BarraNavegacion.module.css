@@ -1,0 +1,85 @@
+.nav {
+  grid-area: nav;
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background-color: var(--md-sys-color-surface-container);
+}
+
+.lista {
+  display: flex;
+  height: var(--alto-navegacion);
+}
+
+.elemento {
+  flex: 1;
+  display: flex;
+}
+
+.enlace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-1);
+  min-width: var(--zona-tactil);
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--tipo-nota);
+  text-decoration: none;
+}
+
+.indicador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 32px;
+  border-radius: var(--forma-completa);
+  transition: background-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.activo {
+  color: var(--md-sys-color-on-surface);
+}
+
+.activo .indicador {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.etiqueta {
+  font: var(--tipo-nota);
+}
+
+.activo .etiqueta {
+  font-weight: 700;
+}
+
+@media (min-width: 840px) {
+  .nav {
+    position: sticky;
+    inset-inline: auto;
+    inset-block: var(--alto-barra-superior) auto;
+    align-self: start;
+    width: var(--ancho-riel);
+    height: calc(100dvh - var(--alto-barra-superior));
+    padding: var(--esp-4) 0 0 env(safe-area-inset-left);
+    box-shadow: none;
+    background-color: var(--md-sys-color-surface);
+  }
+
+  .lista {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--esp-3);
+    height: auto;
+  }
+
+  .enlace {
+    flex: none;
+    min-height: var(--zona-tactil);
+    padding: var(--esp-1) 0;
+  }
+}

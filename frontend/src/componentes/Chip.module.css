@@ -1,0 +1,59 @@
+.chip {
+  --alto: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  max-width: 100%;
+  height: var(--alto);
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: calc(var(--alto) / 2);
+  font: var(--tipo-etiqueta);
+  text-decoration: none;
+  user-select: none;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto),
+    color var(--mov-efecto) var(--curva-efecto),
+    border-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.conIcono {
+  padding-inline-start: var(--esp-2);
+}
+
+.texto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip:active:not(:disabled) {
+  border-radius: var(--forma-sm);
+}
+
+.chip:disabled {
+  opacity: var(--estado-deshabilitado);
+  cursor: default;
+}
+
+.asistente {
+  color: var(--md-sys-color-on-surface);
+}
+
+.asistente > svg {
+  color: var(--md-sys-color-primary);
+}
+
+.filtro {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Al quedar seleccionado, la forma pasa a `md` (a 32 px de alto `lg` no se distinguiria). */
+.seleccionado,
+.seleccionado:active:not(:disabled) {
+  border-color: transparent;
+  border-radius: var(--forma-md);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}

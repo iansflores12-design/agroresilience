@@ -1,0 +1,12 @@
+.texto {
+  position: absolute;
+  inset-block-start: var(--esp-2);
+  inset-inline-start: -0.04em;
+  font-family: var(--fuente);
+  font-size: var(--tipo-fondo);
+  font-weight: var(--tipo-fondo-peso);
+  font-stretch: var(--tipo-fondo-ancho);
+  line-height: var(--tipo-gigante-alto);
+  letter-spacing: var(--tipo-gigante-espaciado);
+  white-space: nowrap;
+}

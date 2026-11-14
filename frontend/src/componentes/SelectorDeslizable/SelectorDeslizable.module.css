@@ -1,0 +1,79 @@
+.conjunto {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--esp-2);
+  width: 100%;
+}
+
+.raiz {
+  position: relative;
+  height: 64px;
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-high);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.raiz:active {
+  cursor: grabbing;
+}
+
+/* Los bordes de la regla se desvanecen con una mascara de gradiente (sin desenfoque). */
+.ventana {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  -webkit-mask-image: linear-gradient(to right, transparent, var(--md-sys-color-shadow) 22%, var(--md-sys-color-shadow) 78%, transparent);
+  mask-image: linear-gradient(to right, transparent, var(--md-sys-color-shadow) 22%, var(--md-sys-color-shadow) 78%, transparent);
+}
+
+/* El origen de la regla es el centro; el JS la desplaza con translate3d. */
+.regla {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  width: 0;
+  will-change: transform;
+}
+
+.marca {
+  position: absolute;
+  inset-block-start: 14px;
+  width: 2px;
+  height: 12px;
+  margin-inline-start: -1px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-outline);
+}
+
+.mayor {
+  height: 20px;
+  background-color: var(--md-sys-color-on-surface);
+}
+
+.numero {
+  position: absolute;
+  inset-block-start: 24px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  font: var(--tipo-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Aguja fija al centro, en color de senal. */
+.aguja {
+  position: absolute;
+  inset-block-start: 4px;
+  height: 32px;
+  inset-inline-start: 50%;
+  width: 3px;
+  margin-inline-start: -1.5px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-primary);
+  pointer-events: none;
+}

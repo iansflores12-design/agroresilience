@@ -1,0 +1,106 @@
+/* Tokens de diseno (DISENO.md, seccion 2). Los colores estan en colores.css. */
+
+:root {
+  /* Tipografia */
+  --fuente: 'Roboto Flex Variable', 'Roboto Flex', system-ui, sans-serif;
+
+  /* Tamanos gigantes: los unicos permitidos entre 17 y 71 px o mayores. */
+  --tipo-fondo: clamp(7.5rem, 34vw, 26rem);
+  --tipo-heroe: clamp(4.5rem, 18vw, 10rem);
+  --tipo-gigante-alto: 0.86;
+  --tipo-gigante-espaciado: -0.03em;
+  --tipo-fondo-peso: 900;
+  --tipo-fondo-ancho: 62%;
+  --tipo-heroe-peso: 800;
+  --tipo-heroe-ancho: 100%;
+
+  /* Tamanos pequenos, como abreviatura de `font`: peso tam/alto familia. */
+  --tipo-titulo: 600 16px/24px var(--fuente);
+  --tipo-cuerpo: 400 14px/20px var(--fuente);
+  --tipo-etiqueta: 600 14px/20px var(--fuente);
+  --tipo-nota: 500 12px/16px var(--fuente);
+  --tipo-micro: 500 11px/16px var(--fuente);
+
+  /* Forma */
+  --forma-xs: 4px;
+  --forma-sm: 8px;
+  --forma-md: 12px;
+  --forma-lg: 16px;
+  --forma-lg-mas: 20px;
+  --forma-xl: 28px;
+  --forma-xl-mas: 32px;
+  --forma-xxl: 48px;
+  --forma-completa: 9999px;
+
+  /* Movimiento. Resorte amortiguado, factor 0.8 (sobreimpulso maximo de 1.5 %).
+     Calculado con x(t) = 1 - e^(-z w t) (cos(wd t) + z / sqrt(1 - z^2) sin(wd t)),
+     z = 0.8, w = 9, wd = w sqrt(1 - z^2), t normalizado de 0 a 1 en 36 pasos. */
+  --curva-resorte: linear(
+    0, 0.0273, 0.0955, 0.1875, 0.2909, 0.3965, 0.4982, 0.5921, 0.6759, 0.7488, 0.8104,
+    0.8615, 0.9028, 0.9355, 0.9607, 0.9796, 0.9933, 1.0029, 1.0091, 1.0129, 1.0147, 1.0152,
+    1.0147, 1.0136, 1.0122, 1.0107, 1.0091, 1.0075, 1.0061, 1.0048, 1.0038, 1.0028, 1.0021,
+    1.0014, 1.001, 1.0006, 1
+  );
+  --mov-espacial-rapido: 350ms;
+  --mov-espacial: 500ms;
+  --mov-espacial-lento: 650ms;
+  --curva-efecto: cubic-bezier(0.2, 0, 0, 1);
+  --mov-efecto: 200ms;
+
+  /* Elevacion (valores M3). Solo para lo que flota. */
+  --elevacion-1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --elevacion-2: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --elevacion-3: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+
+  /* Capa de estado */
+  --estado-hover: 0.08;
+  --estado-foco: 0.1;
+  --estado-presionado: 0.1;
+  --estado-deshabilitado: 0.38;
+  --anillo-foco: 3px;
+  --anillo-foco-separacion: 2px;
+
+  /* Espaciado (rejilla de 8) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+  --zona-tactil: 48px;
+
+  /* Armazon */
+  --alto-barra-superior: 56px;
+  --alto-navegacion: 80px;
+  --ancho-riel: 96px;
+  --alto-fab: 56px;
+  --ancho-lectura: 720px;
+
+  /* Capas */
+  --z-medio: 1;
+  --z-superior: 20;
+
+  /* Breakpoints (informativos: una media query no puede leer variables).
+     Compacta < 600px, media 600 a 839px, expandida >= 840px. */
+  --bp-media: 600px;
+  --bp-expandida: 840px;
+}
+
+/* Con movimiento reducido se anulan los movimientos espaciales; quedan fundidos cortos. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --curva-resorte: linear;
+    --mov-espacial-rapido: 1ms;
+    --mov-espacial: 1ms;
+    --mov-espacial-lento: 1ms;
+    --mov-efecto: 100ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,24 @@
+.barra {
+  grid-area: barra;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-superior);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: calc(var(--esp-2) + env(safe-area-inset-top)) calc(var(--esp-4) + env(safe-area-inset-right))
+    var(--esp-3) calc(var(--esp-4) + env(safe-area-inset-left));
+  background-color: var(--md-sys-color-surface);
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--zona-tactil);
+}
+
+.nombre {
+  font: var(--tipo-titulo);
+  color: var(--md-sys-color-on-surface);
+}

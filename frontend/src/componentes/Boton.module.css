@@ -1,0 +1,56 @@
+.boton {
+  --alto: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  height: var(--alto);
+  padding: 0 var(--esp-6);
+  border: 1px solid transparent;
+  border-radius: calc(var(--alto) / 2);
+  font: var(--tipo-etiqueta);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto),
+    color var(--mov-efecto) var(--curva-efecto);
+}
+
+.conIcono {
+  padding-inline-start: var(--esp-4);
+}
+
+.boton:active:not(:disabled) {
+  border-radius: var(--forma-md);
+}
+
+.boton:disabled {
+  opacity: var(--estado-deshabilitado);
+  cursor: default;
+}
+
+.relleno {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.tonal {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.contorno {
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-primary);
+}
+
+.texto {
+  padding-inline: var(--esp-3);
+  color: var(--md-sys-color-primary);
+}
+
+.texto.conIcono {
+  padding-inline-start: var(--esp-3);
+}
