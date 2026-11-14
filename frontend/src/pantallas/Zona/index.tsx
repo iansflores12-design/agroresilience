@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Boton } from '../../componentes/Boton'
 import { Chip } from '../../componentes/Chip'
-import { PlanoFondo } from '../../componentes/PlanoFondo'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { EspacioFenomeno } from '../../componentes/fenomeno/EspacioFenomeno'
 import { nombreCorto } from '../../componentes/mapa/formato'
@@ -61,10 +60,11 @@ export default function Zona() {
 
   return (
     <div className={`pantalla ${estilos.pantalla}`}>
-      <PlanoFondo texto={zona ? nombreCorto(zona.nombre) : 'Zona'} />
       <div className={`plano-medio ${estilos.contenido}`}>
-        <h1 className="solo-lectores">Zona</h1>
-        <div role="group" aria-label="Elegir zona" className={estilos.selector} ref={selectorRef}>
+        <h1 className={estilos.pregunta}>
+          {zona ? `¿Cómo está la tierra en ${nombreCorto(zona.nombre)}?` : '¿Cómo está la tierra?'}
+        </h1>
+        <div role="group" aria-label="Elegir lugar" className={estilos.selector} ref={selectorRef}>
           {zonas.map((z) => (
             <span key={z.id} data-zona={z.id}>
               <Chip variante="filtro" seleccionado={z.id === zonaId} onClick={() => elegirZona(z.id)}>
@@ -84,8 +84,8 @@ export default function Zona() {
           />
         ) : (
           <Tarjeta className={estilos.vacio}>
-            <h2 className="tipo-titulo">Aún no hay zona elegida</h2>
-            <p className="tipo-nota">Elige una zona arriba, o en el mapa, para ver su humedad, lluvia, temperatura y suelo.</p>
+            <h2 className="tipo-titulo">Aún no eligió un lugar</h2>
+            <p className="tipo-nota">Elija un lugar arriba, o en el mapa, para ver cómo está su tierra.</p>
             <Boton variante="tonal" icono="map" to="/mapa">
               Ver el mapa
             </Boton>

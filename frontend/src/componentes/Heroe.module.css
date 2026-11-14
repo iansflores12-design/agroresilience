@@ -1,5 +1,6 @@
 .heroe {
   display: flex;
+  padding-block-start: 0.05em;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--esp-1);
@@ -10,8 +11,9 @@
   font-size: var(--tipo-heroe);
   font-weight: var(--tipo-heroe-peso);
   font-stretch: var(--tipo-heroe-ancho);
-  line-height: var(--tipo-gigante-alto);
-  letter-spacing: var(--tipo-gigante-espaciado);
+  line-height: var(--tipo-heroe-alto);
+  letter-spacing: var(--tipo-heroe-espaciado);
+  font-variant-numeric: tabular-nums;
   color: var(--md-sys-color-on-surface);
 }
 

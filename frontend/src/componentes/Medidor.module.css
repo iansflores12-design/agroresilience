@@ -1,0 +1,36 @@
+.medidor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-height: 32px;
+  padding: var(--esp-1) var(--esp-3) var(--esp-1) var(--esp-2);
+  border-radius: var(--forma-completa);
+  font: var(--tipo-cuerpo-fuerte);
+  white-space: nowrap;
+}
+
+.grande {
+  min-height: 48px;
+  padding-inline: var(--esp-4) var(--esp-6);
+  font: var(--tipo-titulo);
+}
+
+.seco {
+  background-color: var(--agro-color-tierra-container);
+  color: var(--agro-color-on-tierra-container);
+}
+
+.normal {
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.humedo {
+  background-color: var(--agro-color-agua-container);
+  color: var(--agro-color-on-agua-container);
+}
+
+.sin {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+}

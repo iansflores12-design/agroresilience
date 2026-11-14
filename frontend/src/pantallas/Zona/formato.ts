@@ -46,3 +46,40 @@ export function diasEntre(a: string, b: string): number {
 export function decimal(valor: number, cifras = 1): string {
   return valor.toFixed(cifras)
 }
+
+/** "Hace 2 días (12 de noviembre)", "Hoy" o "Ayer". `hoy` es la fecha ISO de referencia. */
+export function hace(iso: string, hoy: string): string {
+  const dias = diasEntre(iso, hoy)
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso)
+  const mes = m ? MESES[Number(m[2]) - 1] : undefined
+  const dia = m && mes ? `${Number(m[3])} de ${mes}` : iso
+  if (dias <= 0) return `Hoy (${dia})`
+  if (dias === 1) return `Ayer (${dia})`
+  return `Hace ${dias} días (${dia})`
+}
+
+/** Clase de textura segun el triangulo de texturas del USDA (porcentajes de arena, limo y arcilla). */
+export function texturaUsda(arena: number, limo: number, arcilla: number): string {
+  if (limo + 1.5 * arcilla < 15) return 'Arenosa'
+  if (limo + 1.5 * arcilla >= 15 && limo + 2 * arcilla < 30) return 'Franco arenosa'
+  if (arcilla >= 7 && arcilla < 20 && arena > 52 && limo + 2 * arcilla >= 30) return 'Franco arenosa'
+  if (arcilla < 7 && limo < 50 && limo + 2 * arcilla >= 30) return 'Franco arenosa'
+  if (arcilla >= 40 && arena > 45) return 'Arcillosa'
+  if (arcilla >= 35 && arena > 45) return 'Arcillo arenosa'
+  if (arcilla >= 40 && limo >= 40) return 'Arcillo limosa'
+  if (arcilla >= 40) return 'Arcillosa'
+  if (arcilla >= 27 && arena > 20 && arena <= 45) return 'Franco arcillosa'
+  if (arcilla >= 27 && arena <= 20) return 'Franco arcillo limosa'
+  if (arcilla >= 20 && arena > 45 && limo < 28) return 'Franco arcillo arenosa'
+  if (limo >= 80 && arcilla < 12) return 'Limosa'
+  if (limo >= 50 && (arcilla >= 12 || limo < 80)) return 'Franco limosa'
+  return 'Franca'
+}
+
+/** Palabra para el pH del suelo. */
+export function acidez(ph: number): string {
+  if (ph < 5.5) return 'muy ácido'
+  if (ph < 6.5) return 'ácido'
+  if (ph <= 7.3) return 'casi neutro'
+  return 'alcalino'
+}

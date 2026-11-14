@@ -27,7 +27,7 @@ describe('Zona (pantalla)', () => {
 
   it('sin zona muestra el estado vacio con los chips visibles y el espacio del fenomeno', () => {
     const { container } = renderizarApp('/zona')
-    expect(screen.getByText('Aún no hay zona elegida')).toBeInTheDocument()
+    expect(screen.getByText('Aún no eligió un lugar')).toBeInTheDocument()
     for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toHaveAttribute('aria-pressed', 'false')
     expect(container.querySelector('[data-placeholder="fenomeno"]')).toBeInTheDocument()
   })
@@ -50,14 +50,14 @@ describe('Zona (pantalla)', () => {
     guardarZona(zonas[0].id)
     renderizarApp('/zona')
     expect(avisar.alerta).not.toHaveBeenCalledWith(expect.objectContaining({ titulo: 'Aún no eliges cultivo' }))
-    expect(screen.getByText('Sin cultivo elegido. Con un cultivo, la hoja suma su etapa.')).toBeInTheDocument()
+    expect(screen.getByText('Sin cultivo elegido')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
   })
 
   it('con cultivo muestra su etapa y sensibilidad con la nota de validacion', () => {
     guardarZona(zonas[0].id, 'maiz')
     renderizarApp('/zona')
-    expect(screen.getByText(/Sensibilidad a la falta de agua/)).toBeInTheDocument()
+    expect(screen.getByText(/Necesita (poca agua|agua con regularidad)|no le puede faltar agua/)).toBeInTheDocument()
     expect(screen.getByText(/pendiente de validación agronómica/)).toBeInTheDocument()
     expect(avisar.alerta).not.toHaveBeenCalledWith(expect.objectContaining({ titulo: 'Aún no eliges cultivo' }))
   })
@@ -69,6 +69,7 @@ describe('Zona (pantalla)', () => {
     const escribir = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: escribir }, configurable: true })
     await usuario.click(screen.getByRole('button', { name: 'Copiar resumen' }))
+    expect(screen.getByRole('link', { name: 'Preguntar sobre esta tierra' })).toHaveAttribute('href', '/chat?desde=zona')
     expect(escribir).toHaveBeenCalledWith(expect.stringContaining(zonas[0].nombre))
     expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: 'Resumen copiado' }))
 
@@ -102,11 +103,13 @@ describe('HojaZona con datos sinteticos', () => {
         <HojaZona zona={z} cultivoId={null} edadSemanas={0} fuentes={{ humedad: 'F-H', lluvia: 'F-L', temperatura: 'F-T', suelo: 'F-S' }} />
       </MemoryRouter>,
     )
-    expect(screen.getByText(/Fuente: F-H/)).toBeInTheDocument()
-    expect(screen.getByText(/Fuente: F-S/)).toBeInTheDocument()
-    const lluvia = screen.getByRole('heading', { name: 'Lluvia de 30 días' }).closest('article') as HTMLElement
-    expect(within(lluvia).getByText(/Fuente: F-L/)).toBeInTheDocument()
-    expect(within(lluvia).getByText(/^Hasta el \d+ de \w+ de \d{4}/)).toBeInTheDocument()
+    const fuentes = screen.getByText('Ver de dónde salen estos datos').closest('details') as HTMLElement
+    expect(within(fuentes).getByText(/F-H/)).toBeInTheDocument()
+    expect(within(fuentes).getByText(/F-S/)).toBeInTheDocument()
+    expect(within(fuentes).getByText(/F-L/)).toBeInTheDocument()
+    expect(within(fuentes).getByText(/F-T/)).toBeInTheDocument()
+    const lluvia = screen.getByRole('heading', { name: 'Lluvia' }).closest('article') as HTMLElement
+    expect(within(lluvia).getByText(/mm en 30 días/)).toBeInTheDocument()
   })
 })
 

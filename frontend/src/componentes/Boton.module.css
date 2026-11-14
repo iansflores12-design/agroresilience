@@ -1,5 +1,5 @@
 .boton {
-  --alto: 40px;
+  --alto: var(--alto-accion);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -47,6 +47,7 @@
 }
 
 .texto {
+  --alto: var(--zona-tactil);
   padding-inline: var(--esp-3);
   color: var(--md-sys-color-primary);
 }

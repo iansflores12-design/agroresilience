@@ -1,21 +1,33 @@
 .pantalla {
-  min-height: 28rem;
-  padding-block-start: var(--esp-12);
-  padding-inline: var(--esp-4);
-  padding-block-end: var(--esp-2);
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  gap: var(--esp-4);
+  padding: var(--esp-4);
 }
 
-/* El mapa llena todo el alto que deja el armazon (barra superior y navegacion ya descontadas). */
+.pregunta {
+  font: var(--tipo-pregunta);
+  letter-spacing: -0.01em;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+/* El mapa lleva su propio alto: en compacta ocupa buena parte de la pantalla. */
 .mapa {
   position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 24rem;
+  min-height: 22rem;
+  height: 52dvh;
+  max-height: 40rem;
 }
 
 .mapa > section {
-  flex: 1;
+  height: 100%;
 }
 
 .controles {
@@ -24,32 +36,107 @@
   inset-inline-end: var(--esp-3);
 }
 
-.tarjeta {
-  /* Flota sobre el borde inferior del mapa: solapa solo la franja sin puntos. */
-  position: relative;
-  margin-block-start: calc(-1 * var(--esp-6));
-  margin-inline: var(--esp-3);
+.lateral {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--esp-4);
+  min-width: 0;
+}
+
+.lugares {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.lugar {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--esp-3);
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-3);
+  width: 100%;
+  min-height: var(--alto-accion);
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--forma-lg-mas);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  text-align: start;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.lugar:active {
+  border-radius: var(--forma-md);
+}
+
+.lugarElegido,
+.lugarElegido:active {
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.nombreLugar {
+  font: var(--tipo-cuerpo-fuerte);
+  overflow-wrap: anywhere;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-4);
 }
 
 .datos {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  align-items: flex-start;
+  gap: var(--esp-2);
   min-width: 0;
 }
 
-@media (min-width: 840px) {
+.detalle summary {
+  cursor: pointer;
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-primary);
+}
+
+.vacio {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+@media (min-width: 600px) {
   .pantalla {
     padding-inline: var(--esp-6);
   }
+}
 
-  .tarjeta {
-    align-self: flex-start;
-    min-width: 22rem;
+@media (min-width: 840px) {
+  .cuerpo {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .mapa {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+    min-height: 32rem;
+  }
+
+  .lateral {
+    flex: none;
+    width: 24rem;
   }
 }

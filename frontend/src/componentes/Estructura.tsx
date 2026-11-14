@@ -1,17 +1,31 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { destinoActual } from '../destinos'
 import { BarraNavegacion } from './BarraNavegacion'
 import { BarraSuperior } from './BarraSuperior'
 import estilos from './Estructura.module.css'
-import { Fab } from './Fab'
 
 /** Armazon de la aplicacion: enlace de salto, barra superior, contenido y navegacion. */
 export function Estructura() {
   const { pathname } = useLocation()
   const principal = useRef<HTMLElement>(null)
   const previa = useRef(pathname)
-  const destino = destinoActual(pathname)
+  const [contraido, setContraido] = useState(() => {
+    try {
+      return window.localStorage.getItem('agroresilience.menu.contraido') === '1'
+    } catch {
+      return false
+    }
+  })
+  function alternarMenu() {
+    setContraido((c) => {
+      try {
+        window.localStorage.setItem('agroresilience.menu.contraido', c ? '0' : '1')
+      } catch {
+        // Sin almacenamiento el menu simplemente no recuerda su estado.
+      }
+      return !c
+    })
+  }
 
   // Al cambiar de ruta el foco pasa al <main> (no en la carga inicial).
   useEffect(() => {
@@ -22,20 +36,15 @@ export function Estructura() {
   }, [pathname])
 
   return (
-    <div className={estilos.armazon}>
+    <div className={estilos.armazon} data-contraido={contraido || undefined}>
       <a className={estilos.salto} href="#contenido">
         Saltar al contenido
       </a>
       <BarraSuperior />
-      <BarraNavegacion />
+      <BarraNavegacion contraido={contraido} alContraer={alternarMenu} />
       <main id="contenido" ref={principal} tabIndex={-1} className={estilos.principal}>
         <Outlet />
       </main>
-      {destino && destino.vista !== 'chat' && (
-        <div className={estilos.zonaFab}>
-          <Fab to={`/chat?desde=${destino.vista}`} icono="forum" etiqueta="Preguntar" extendido />
-        </div>
-      )}
     </div>
   )
 }

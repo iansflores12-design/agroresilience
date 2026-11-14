@@ -1,25 +1,21 @@
 /* Tokens de diseno (DISENO.md, seccion 2). Los colores estan en colores.css. */
 
 :root {
-  /* Tipografia */
-  --fuente: 'Roboto Flex Variable', 'Roboto Flex', system-ui, sans-serif;
+  /* Tipografia: Google Sans Flex en toda la interfaz (DISENO.md, seccion 2). Tamanos en rem. */
+  --fuente: 'Google Sans Flex Variable', 'Google Sans Flex', system-ui, sans-serif;
 
-  /* Tamanos gigantes: los unicos permitidos entre 17 y 71 px o mayores. */
-  --tipo-fondo: clamp(7.5rem, 34vw, 26rem);
-  --tipo-heroe: clamp(4.5rem, 18vw, 10rem);
-  --tipo-gigante-alto: 0.86;
-  --tipo-gigante-espaciado: -0.03em;
-  --tipo-fondo-peso: 900;
-  --tipo-fondo-ancho: 62%;
-  --tipo-heroe-peso: 800;
+  --tipo-heroe: clamp(4rem, 16vw, 8rem);
+  --tipo-heroe-alto: 0.9;
+  --tipo-heroe-peso: 700;
   --tipo-heroe-ancho: 100%;
+  --tipo-heroe-espaciado: -0.02em;
 
-  /* Tamanos pequenos, como abreviatura de `font`: peso tam/alto familia. */
-  --tipo-titulo: 600 16px/24px var(--fuente);
-  --tipo-cuerpo: 400 14px/20px var(--fuente);
-  --tipo-etiqueta: 600 14px/20px var(--fuente);
-  --tipo-nota: 500 12px/16px var(--fuente);
-  --tipo-micro: 500 11px/16px var(--fuente);
+  --tipo-pregunta: 600 1.75rem/2.25rem var(--fuente);
+  --tipo-titulo: 600 1.25rem/1.75rem var(--fuente);
+  --tipo-cuerpo: 400 1rem/1.5rem var(--fuente);
+  --tipo-cuerpo-fuerte: 600 1rem/1.5rem var(--fuente);
+  --tipo-etiqueta: 600 1rem/1.5rem var(--fuente);
+  --tipo-nota: 500 0.875rem/1.25rem var(--fuente);
 
   /* Forma */
   --forma-xs: 4px;
@@ -45,7 +41,11 @@
   --mov-espacial: 500ms;
   --mov-espacial-lento: 650ms;
   --curva-efecto: cubic-bezier(0.2, 0, 0, 1);
-  --mov-efecto: 200ms;
+  --curva-estandar: cubic-bezier(0.2, 0, 0, 1);
+  --mov-efecto: 150ms;
+  --mov-rapido: 200ms;
+  --mov-medio: 300ms;
+  --mov-lento: 450ms;
 
   /* Elevacion (valores M3). Solo para lo que flota. */
   --elevacion-1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
@@ -70,13 +70,15 @@
   --esp-12: 48px;
   --esp-16: 64px;
   --zona-tactil: 48px;
+  --alto-accion: 56px;
 
   /* Armazon */
   --alto-barra-superior: 56px;
   --alto-navegacion: 80px;
   --ancho-riel: 96px;
   --alto-fab: 56px;
-  --ancho-lectura: 720px;
+  --ancho-lectura: 40rem;
+  --ancho-contenido: 72rem;
 
   /* Capas */
   --z-medio: 1;

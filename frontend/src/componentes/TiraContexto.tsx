@@ -4,19 +4,23 @@ import { useEstadoApp } from '../estado/EstadoApp'
 import { Chip } from './Chip'
 import estilos from './TiraContexto.module.css'
 
-/** Muestra el cultivo y la zona elegidos. Cada chip lleva a la pantalla donde se elige. */
+/** Dice en palabras completas el cultivo y el lugar elegidos. Cada chip lleva a donde se elige. */
 export function TiraContexto() {
   const { cultivoId, zonaId, edadSemanas } = useEstadoApp()
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
-  const textoCultivo = cultivo ? `${cultivo.nombre}, ${edadSemanas} sem` : 'Sin cultivo'
-  const textoZona = zona ? zona.nombre : 'Sin zona'
+  const textoCultivo = cultivo ? `${cultivo.nombre}, semana ${edadSemanas}` : 'Elegir cultivo'
+  const textoZona = zona ? zona.nombre : 'Elegir lugar'
   return (
     <div className={estilos.tira} role="group" aria-label="Contexto elegido">
-      <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${cultivo.nombre}, ${edadSemanas} semanas` : 'Sin cultivo. Elegir cultivo'}>
+      <Chip
+        to="/"
+        icono="grass"
+        aria-label={cultivo ? `Cultivo: ${cultivo.nombre}, semana ${edadSemanas}` : 'Sin cultivo. Elegir cultivo'}
+      >
         {textoCultivo}
       </Chip>
-      <Chip to="/mapa" icono="location_on" aria-label={zona ? `Zona: ${zona.nombre}` : 'Sin zona. Elegir zona'}>
+      <Chip to="/mapa" icono="location_on" aria-label={zona ? `Lugar: ${zona.nombre}` : 'Sin lugar. Elegir lugar'}>
         {textoZona}
       </Chip>
     </div>

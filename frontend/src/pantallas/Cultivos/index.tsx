@@ -1,8 +1,9 @@
-import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Chip } from '../../componentes/Chip'
+import { Icono } from '../../componentes/Icono'
+import type { NombreIcono } from '../../componentes/iconos'
+import { Control } from '../../componentes/Control'
+import { clases } from '../../componentes/clases'
 import { Heroe } from '../../componentes/Heroe'
-import { PlanoFondo } from '../../componentes/PlanoFondo'
 import { SelectorDeslizable } from '../../componentes/SelectorDeslizable'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { buscarCultivo, cultivos, etapaEnSemana, type Cultivo } from '../../datos/cultivos'
@@ -12,7 +13,6 @@ import { avisar } from '../../lib/avisos'
 import { confirmar } from '../../lib/sonido'
 import estilos from './Cultivos.module.css'
 
-const INICIALES_MESES = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 const NOMBRES_MESES = [
   'enero',
   'febrero',
@@ -28,25 +28,26 @@ const NOMBRES_MESES = [
   'diciembre',
 ]
 
-interface Tramo {
-  /** Columna inicial y final (inclusive) en la regla de 12 meses. */
-  desde: number
-  hasta: number
-  continuacion: boolean
+const ICONO_CULTIVO: Record<string, NombreIcono> = {
+  maiz: 'grain',
+  frijol: 'eco',
+  sorgo: 'spa',
+  arroz: 'rice_bowl',
+  tomate: 'nutrition',
+  'frijol-terciopelo': 'local_florist',
 }
 
-/** Un paso ocupa sus meses; si cruza de diciembre a enero se parte en dos tramos. */
-function tramosDe(paso: PasoRotacion): Tramo[] {
-  if (paso.mesFin >= paso.mesInicio) return [{ desde: paso.mesInicio, hasta: paso.mesFin, continuacion: false }]
-  return [
-    { desde: paso.mesInicio, hasta: 12, continuacion: false },
-    { desde: 1, hasta: paso.mesFin, continuacion: true },
-  ]
+const ICONO_TEMPORADA: Record<PasoRotacion['temporada'], NombreIcono> = {
+  primera: 'rainy',
+  postrera: 'water_drop',
+  verano: 'wb_sunny',
 }
 
-function etiquetaPaso(nombre: string, paso: PasoRotacion, continuacion: boolean): string {
-  const meses = `de ${NOMBRES_MESES[paso.mesInicio - 1]} a ${NOMBRES_MESES[paso.mesFin - 1]}`
-  return `${nombre}, ${paso.temporada}, ${meses}${continuacion ? ' (continúa)' : ''}`
+/** "Mayo a agosto" */
+function mesesEnPalabras(paso: PasoRotacion): string {
+  const inicio = NOMBRES_MESES[paso.mesInicio - 1]
+  const fin = NOMBRES_MESES[paso.mesFin - 1]
+  return `${inicio[0].toUpperCase()}${inicio.slice(1)} a ${fin}`
 }
 
 function TarjetaRotacion({
@@ -64,36 +65,33 @@ function TarjetaRotacion({
       <h3 id={titulo} className="tipo-titulo">
         {rotacion.nombre}
       </h3>
-      <p className="tipo-nota">{rotacion.resumen}</p>
-      <p className="tipo-nota">{rotacion.beneficio}</p>
-      <div className={estilos.regla}>
+      <p className={estilos.beneficio}>{rotacion.beneficio}</p>
+      <ol className={estilos.pasos} aria-labelledby={titulo}>
         {rotacion.pasos.flatMap((paso) => {
           const cultivo = buscarCultivo(paso.cultivoId)
           if (!cultivo) return []
-          return tramosDe(paso).map((t) => (
-            <div
-              key={`${paso.cultivoId}-${paso.temporada}-${t.desde}`}
-              className={estilos.barra}
-              style={{ gridColumn: `${t.desde} / ${t.hasta + 1}` }}
-            >
-              <Chip
-                variante="filtro"
-                seleccionado={cultivo.id === cultivoId}
-                aria-label={etiquetaPaso(cultivo.nombre, paso, t.continuacion)}
-                title={`${cultivo.nombre}, ${paso.temporada}`}
+          const elegido = cultivo.id === cultivoId
+          return (
+            <li key={`${paso.cultivoId}-${paso.temporada}`}>
+              <Control
+                className={clases(estilos.paso, elegido && estilos.pasoElegido, 'capa-estado')}
+                aria-label={`${cultivo.nombre}, ${paso.temporada}, ${mesesEnPalabras(paso).toLowerCase()}`}
+                aria-pressed={elegido}
                 onClick={() => alElegir(cultivo.id)}
               >
-                {cultivo.nombre}
-              </Chip>
-            </div>
-          ))
+                <span className={estilos.iconoPaso}>
+                  <Icono nombre={ICONO_TEMPORADA[paso.temporada]} tamano={22} />
+                </span>
+                <span className={estilos.textoPaso}>
+                  <span className={estilos.nombrePaso}>{cultivo.nombre}</span>
+                  <span className="tipo-nota">{mesesEnPalabras(paso)}</span>
+                </span>
+                {elegido && <Icono nombre="check" tamano={22} />}
+              </Control>
+            </li>
+          )
         })}
-        {INICIALES_MESES.map((inicial, i) => (
-          <span key={NOMBRES_MESES[i]} className={estilos.mes} aria-hidden="true">
-            {inicial}
-          </span>
-        ))}
-      </div>
+      </ol>
     </Tarjeta>
   )
 }
@@ -120,95 +118,90 @@ export default function Cultivos() {
   const navegar = useNavigate()
   const cultivo = buscarCultivo(cultivoId)
   const semana = cultivo ? Math.min(edadSemanas, cultivo.cicloSemanas) : 0
-  // Etapa vigente al soltar el selector por ultima vez (o al elegir el cultivo).
-  const etapaBase = useRef<string | null>(cultivo ? etapaEnSemana(cultivo, semana).id : null)
 
   const elegir = (id: string) => {
     const elegido = buscarCultivo(id)
     if (!elegido || id === cultivoId) return
     elegirCultivo(id)
-    etapaBase.current = etapaEnSemana(elegido, 0).id
     confirmar()
     avisar.exito({
       titulo: `Cultivo: ${elegido.nombre}`,
-      descripcion: 'Se usará en el mapa, la hoja de zona y el asistente.',
+      descripcion: 'Se usará en el mapa, la tierra y las preguntas.',
       accion: { texto: 'Ver mapa', alPulsar: () => navegar('/mapa') },
     })
   }
 
-  const alSoltarEdad = (valor: number) => {
-    if (!cultivo) return
-    const etapa = etapaEnSemana(cultivo, valor)
-    if (etapaBase.current !== etapa.id) {
-      avisar.info({ titulo: `Etapa: ${etapa.nombre}`, descripcion: `Semana ${valor} de ${cultivo.cicloSemanas}` })
-    }
-    etapaBase.current = etapa.id
-  }
-
   return (
     <div className="pantalla">
-      {/* La clave reinicia la animacion de entrada cuando cambia la palabra. */}
-      <div key={cultivo?.id ?? 'ninguno'} className={estilos.fondo}>
-        <PlanoFondo texto={cultivo?.nombre ?? 'Cultivos'} />
-      </div>
-      <div className={`plano-medio ${estilos.medio}`}>
-        <h1 className="tipo-titulo">Cultivos</h1>
+      <div className={estilos.medio}>
+        <h1 className={estilos.pregunta}>¿Qué sembró?</h1>
+
+        <section className={estilos.seccion} aria-labelledby="titulo-todos">
+          <h2 id="titulo-todos" className="solo-lectores">
+            Elegir cultivo
+          </h2>
+          <ul className={estilos.cultivos}>
+            {cultivos.map((c) => {
+              const elegido = c.id === cultivoId
+              return (
+                <li key={c.id}>
+                  <Control
+                    className={clases(estilos.cultivo, elegido && estilos.cultivoElegido, 'capa-estado')}
+                    aria-pressed={elegido}
+                    onClick={() => elegir(c.id)}
+                  >
+                    <span className={estilos.iconoCultivo}>
+                      <Icono nombre={ICONO_CULTIVO[c.id] ?? 'grass'} tamano={32} />
+                    </span>
+                    <span className={estilos.nombreCultivo}>{c.nombre}</span>
+                    <span className="tipo-nota">Unas {c.cicloSemanas} semanas</span>
+                    {elegido && (
+                      <span className={estilos.visto}>
+                        <Icono nombre="check" tamano={20} />
+                      </span>
+                    )}
+                  </Control>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+
+        {cultivo && (
+          <section className={estilos.edad} aria-labelledby="titulo-edad">
+            <h2 id="titulo-edad" className="tipo-titulo">
+              ¿Hace cuánto sembró?
+            </h2>
+            <Heroe
+              valor={semana}
+              unidad="semanas desde la siembra"
+              nota={`Está en la etapa de ${etapaEnSemana(cultivo, semana).nombre.toLowerCase()}`}
+            />
+            <SelectorDeslizable
+              etiqueta="Edad del cultivo"
+              valor={semana}
+              min={0}
+              max={cultivo.cicloSemanas}
+              paso={1}
+              marcaMayorCada={4}
+              unidad="semanas"
+              alCambiar={fijarEdad}
+              textoValor={(v) => `${v} semanas, etapa ${etapaEnSemana(cultivo, v).nombre}`}
+            />
+            <TiraEtapas cultivo={cultivo} semana={semana} />
+          </section>
+        )}
 
         <section className={estilos.seccion} aria-labelledby="titulo-rotaciones">
           <h2 id="titulo-rotaciones" className="tipo-titulo">
-            Rotaciones
+            Qué sembrar después
           </h2>
           <ul className={estilos.rotaciones}>
             {rotaciones.map((r) => (
               <TarjetaRotacion key={r.id} rotacion={r} cultivoId={cultivoId} alElegir={elegir} />
             ))}
           </ul>
-          <p className="tipo-nota">Calendario de referencia, pendiente de validación agronómica.</p>
-        </section>
-
-        <section className={estilos.seccion} aria-labelledby="titulo-edad">
-          <h2 id="titulo-edad" className="tipo-titulo">
-            Edad del cultivo
-          </h2>
-          {cultivo ? (
-            <div className={estilos.edad}>
-              <Heroe
-                valor={semana}
-                unidad="semanas desde la siembra"
-                nota={`Etapa: ${etapaEnSemana(cultivo, semana).nombre}. ${cultivo.nombreCientifico}`}
-              />
-              <SelectorDeslizable
-                etiqueta="Edad del cultivo"
-                valor={semana}
-                min={0}
-                max={cultivo.cicloSemanas}
-                paso={1}
-                marcaMayorCada={4}
-                unidad="semanas"
-                alCambiar={fijarEdad}
-                alSoltar={alSoltarEdad}
-                textoValor={(v) => `${v} semanas, etapa ${etapaEnSemana(cultivo, v).nombre}`}
-              />
-              <TiraEtapas cultivo={cultivo} semana={semana} />
-            </div>
-          ) : (
-            <p className="tipo-nota">Elige un cultivo en alguna rotación para indicar cuántas semanas lleva sembrado.</p>
-          )}
-        </section>
-
-        <section className={estilos.seccion} aria-labelledby="titulo-todos">
-          <h2 id="titulo-todos" className="tipo-titulo">
-            Todos los cultivos
-          </h2>
-          <ul className={estilos.chips}>
-            {cultivos.map((c) => (
-              <li key={c.id}>
-                <Chip variante="filtro" seleccionado={c.id === cultivoId} onClick={() => elegir(c.id)}>
-                  {c.nombre}
-                </Chip>
-              </li>
-            ))}
-          </ul>
+          <p className="tipo-nota">Calendario de referencia. Consulte a su técnico.</p>
         </section>
       </div>
     </div>

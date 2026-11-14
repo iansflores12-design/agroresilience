@@ -5,10 +5,10 @@ import { zonas } from '../datos/zonas'
 import { renderizarApp } from '../pruebas/renderizar'
 
 const rutas = [
-  { etiqueta: 'Cultivos', titulo: 'Cultivos' },
-  { etiqueta: 'Mapa', titulo: 'Mapa' },
-  { etiqueta: 'Zona', titulo: 'Zona' },
-  { etiqueta: 'Asistente', titulo: 'Asistente' },
+  { etiqueta: 'Cultivo', titulo: '¿Qué sembró?' },
+  { etiqueta: 'Mapa', titulo: '¿Dónde está su parcela?' },
+  { etiqueta: 'Tierra', titulo: '¿Cómo está la tierra?' },
+  { etiqueta: 'Preguntar', titulo: 'Pregunte lo que quiera' },
 ]
 
 describe('Estructura', () => {
@@ -40,11 +40,11 @@ describe('Estructura', () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
     const tira = screen.getByRole('group', { name: 'Contexto elegido' })
-    expect(within(tira).getByText('Sin cultivo')).toBeInTheDocument()
-    expect(within(tira).getByText('Sin zona')).toBeInTheDocument()
+    expect(within(tira).getByText('Elegir cultivo')).toBeInTheDocument()
+    expect(within(tira).getByText('Elegir lugar')).toBeInTheDocument()
 
     const cultivo = cultivos[0]
-    await usuario.click(screen.getByRole('button', { name: cultivo.nombre }))
+    await usuario.click(screen.getByRole('button', { name: new RegExp(`^${cultivo.nombre}\\s*Unas`) }))
     expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
 
     const nav = screen.getByRole('navigation', { name: 'Principal' })
@@ -52,19 +52,18 @@ describe('Estructura', () => {
     const zona = zonas[0]
     await usuario.click(screen.getByRole('button', { name: zona.nombre }))
 
-    for (const etiqueta of ['Zona', 'Asistente', 'Cultivos']) {
+    for (const etiqueta of ['Tierra', 'Preguntar', 'Cultivo']) {
       await usuario.click(within(nav).getByRole('link', { name: etiqueta }))
       expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
       expect(within(tira).getByText(zona.nombre)).toBeInTheDocument()
     }
   })
 
-  it('el FAB Preguntar enlaza a /chat con la vista de origen y no aparece en el chat', async () => {
-    const usuario = userEvent.setup()
+  it('no hay boton flotante: Preguntar solo esta en la navegacion', () => {
     renderizarApp('/mapa')
-    expect(screen.getByRole('link', { name: 'Preguntar' })).toHaveAttribute('href', '/chat?desde=mapa')
-    await usuario.click(screen.getByRole('link', { name: 'Preguntar' }))
-    expect(screen.queryByRole('link', { name: 'Preguntar' })).not.toBeInTheDocument()
+    const enlaces = screen.getAllByRole('link', { name: 'Preguntar' })
+    expect(enlaces).toHaveLength(1)
+    expect(enlaces[0].closest('nav')).not.toBeNull()
   })
 
   it('el boton de sonido alterna su etiqueta', async () => {

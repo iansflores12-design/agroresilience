@@ -6,7 +6,7 @@ describe('EspacioFenomeno', () => {
     const { container } = render(<EspacioFenomeno zona={null} cultivoId={null} />)
     const seccion = container.querySelector('[data-placeholder="fenomeno"]')
     expect(seccion).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Explicación gráfica' })).toBe(seccion)
+    expect(screen.getByRole('region', { name: '¿Por qué pasa esto?' })).toBe(seccion)
     expect(screen.getByText('Espacio reservado: aquí irá la explicación gráfica de un fenómeno')).toBeInTheDocument()
   })
 })

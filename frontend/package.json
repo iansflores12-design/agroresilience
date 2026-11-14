@@ -13,7 +13,7 @@
     "tema": "node --import ./scripts/registrar_resolver.mjs scripts/generar_tema.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/roboto-flex": "^5.3.0",
+    "@fontsource-variable/google-sans-flex": "^5.3.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",

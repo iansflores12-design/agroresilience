@@ -5,6 +5,13 @@
   inset-block-end: 0;
   padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background-color: var(--md-sys-color-surface-container);
+  border-start-start-radius: var(--forma-xl);
+  border-start-end-radius: var(--forma-xl);
+}
+
+.marca,
+.pie {
+  display: none;
 }
 
 .lista {
@@ -26,7 +33,6 @@
   gap: var(--esp-1);
   min-width: var(--zona-tactil);
   color: var(--md-sys-color-on-surface-variant);
-  font: var(--tipo-nota);
   text-decoration: none;
 }
 
@@ -37,7 +43,9 @@
   width: 64px;
   height: 32px;
   border-radius: var(--forma-completa);
-  transition: background-color var(--mov-efecto) var(--curva-efecto);
+  transition:
+    background-color var(--mov-efecto) var(--curva-efecto),
+    width var(--mov-espacial-rapido) var(--curva-resorte);
 }
 
 .activo {
@@ -45,6 +53,7 @@
 }
 
 .activo .indicador {
+  width: 72px;
   background-color: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
 }
@@ -61,25 +70,136 @@
   .nav {
     position: sticky;
     inset-inline: auto;
-    inset-block: var(--alto-barra-superior) auto;
+    inset-block-start: var(--esp-3);
     align-self: start;
-    width: var(--ancho-riel);
-    height: calc(100dvh - var(--alto-barra-superior));
-    padding: var(--esp-4) 0 0 env(safe-area-inset-left);
+    display: flex;
+    flex-direction: column;
+    gap: var(--esp-2);
+    width: auto;
+    height: calc(100dvh - var(--esp-6));
+    margin: var(--esp-3) 0 var(--esp-3) var(--esp-3);
+    padding: var(--esp-4) var(--esp-3);
+    border-radius: var(--forma-xl);
+    background-color: var(--md-sys-color-surface-container-low);
     box-shadow: none;
-    background-color: var(--md-sys-color-surface);
+    overflow: hidden;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    min-height: var(--alto-accion);
+    padding-inline: var(--esp-2);
+    margin-block-end: var(--esp-2);
+  }
+
+  .logo {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--forma-lg);
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+  }
+
+  .nombre {
+    font: var(--tipo-titulo);
+    white-space: nowrap;
   }
 
   .lista {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--esp-3);
+    gap: var(--esp-1);
     height: auto;
+    flex: 1;
+  }
+
+  .elemento {
+    flex: none;
   }
 
   .enlace {
     flex: none;
-    min-height: var(--zona-tactil);
-    padding: var(--esp-1) 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--esp-4);
+    min-height: var(--alto-accion);
+    padding-inline: var(--esp-3);
+    border-radius: var(--forma-lg-mas);
+    transition:
+      background-color var(--mov-efecto) var(--curva-efecto),
+      border-radius var(--mov-espacial-rapido) var(--curva-resorte);
+  }
+
+  .enlace:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+  }
+
+  .enlace:active {
+    border-radius: var(--forma-md);
+  }
+
+  .indicador,
+  .activo .indicador {
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    color: inherit;
+  }
+
+  .activo,
+  .activo:hover {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+  }
+
+  .etiqueta {
+    font: var(--tipo-etiqueta);
+    white-space: nowrap;
+  }
+
+  .activo .etiqueta {
+    font-weight: 700;
+  }
+
+  .pie {
+    display: block;
+    padding-block-start: var(--esp-3);
+    border-block-start: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  .contraer {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-4);
+    width: 100%;
+    min-height: var(--alto-accion);
+    padding-inline: var(--esp-3);
+    border-radius: var(--forma-lg-mas);
+    color: var(--md-sys-color-on-surface-variant);
+    font: var(--tipo-etiqueta);
+    white-space: nowrap;
+  }
+
+  /* Menu contraido: solo iconos. */
+  :global([data-contraido]) .nombre,
+  :global([data-contraido]) .etiqueta,
+  :global([data-contraido]) .etiquetaContraer {
+    display: none;
+  }
+
+  :global([data-contraido]) .nav {
+    padding-inline: var(--esp-2);
+  }
+
+  :global([data-contraido]) .enlace,
+  :global([data-contraido]) .contraer,
+  :global([data-contraido]) .marca {
+    justify-content: center;
+    padding-inline: 0;
   }
 }

@@ -7,9 +7,9 @@ describe('App', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('arranca en Cultivos con el nombre de la aplicacion', () => {
+  it('arranca en Cultivo con el nombre de la aplicacion', () => {
     render(<App />)
-    expect(screen.getByText('AgroResilience')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 1, name: 'Cultivos' })).toBeInTheDocument()
+    expect(screen.getAllByText('AgroResilience').length).toBeGreaterThan(0)
+    expect(screen.getByRole('heading', { level: 1, name: '¿Qué sembró?' })).toBeInTheDocument()
   })
 })

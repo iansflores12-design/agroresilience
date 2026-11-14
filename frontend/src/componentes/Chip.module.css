@@ -1,14 +1,15 @@
 .chip {
-  --alto: 32px;
+  --alto: 40px;
   display: inline-flex;
   align-items: center;
   gap: var(--esp-2);
   max-width: 100%;
-  height: var(--alto);
-  padding: 0 var(--esp-4);
+  min-height: var(--alto);
+  padding: var(--esp-2) var(--esp-4);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: calc(var(--alto) / 2);
   font: var(--tipo-etiqueta);
+  text-align: start;
   text-decoration: none;
   user-select: none;
   transition:
@@ -19,17 +20,17 @@
 }
 
 .conIcono {
-  padding-inline-start: var(--esp-2);
+  padding-inline-start: var(--esp-3);
 }
 
+/* Los nombres no se cortan: si no caben en una linea, pasan a la siguiente. */
 .texto {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .chip:active:not(:disabled) {
-  border-radius: var(--forma-sm);
+  border-radius: var(--forma-md);
 }
 
 .chip:disabled {
@@ -38,6 +39,7 @@
 }
 
 .asistente {
+  background-color: var(--md-sys-color-surface-container-low);
   color: var(--md-sys-color-on-surface);
 }
 
@@ -49,7 +51,6 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* Al quedar seleccionado, la forma pasa a `md` (a 32 px de alto `lg` no se distinguiria). */
 .seleccionado,
 .seleccionado:active:not(:disabled) {
   border-color: transparent;

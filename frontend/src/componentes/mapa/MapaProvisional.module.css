@@ -21,7 +21,7 @@
 
 .eje {
   position: absolute;
-  font: var(--tipo-micro);
+  font: var(--tipo-nota);
   color: var(--md-sys-color-on-surface-variant);
 }
 
@@ -73,7 +73,7 @@
   position: absolute;
   padding: 1px var(--esp-2);
   border-radius: var(--forma-sm);
-  font: var(--tipo-micro);
+  font: var(--tipo-nota);
   white-space: nowrap;
   pointer-events: none;
   color: var(--md-sys-color-on-surface-variant);
@@ -118,7 +118,7 @@
   max-width: calc(100% - 9rem);
   padding: var(--esp-1) var(--esp-3);
   border-radius: var(--forma-sm);
-  font: var(--tipo-micro);
+  font: var(--tipo-nota);
   color: var(--md-sys-color-on-surface-variant);
   background-color: var(--md-sys-color-surface-container-highest);
   pointer-events: none;

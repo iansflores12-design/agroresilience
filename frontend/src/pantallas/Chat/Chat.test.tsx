@@ -41,7 +41,7 @@ describe('pantalla Chat', () => {
     expect(screen.getByRole('textbox', { name: 'Mensaje' })).toBeInTheDocument()
     expect(screen.getByRole('log', { name: /Conversación/ })).toHaveAttribute('aria-live', 'polite')
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeDisabled()
-    expect(screen.getByText('Demostración: sin backend conectado')).toBeInTheDocument()
+    expect(screen.getByText('Modo de prueba: todavía sin conexión al asistente real')).toBeInTheDocument()
     expect(screen.getByText('Sin cultivo')).toBeInTheDocument()
     expect(screen.getByText('Sin zona')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Borrar conversación' })).not.toBeInTheDocument()
@@ -93,7 +93,7 @@ describe('pantalla Chat', () => {
     montar(clienteDe(), '/chat?desde=zona')
     expect(screen.getByRole('link', { name: 'Choluteca' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /humedad en Choluteca para maíz/ })).toBeInTheDocument()
-    expect(screen.getByText(/Humedad \d+(\.\d)? % · \d{1,2} [a-z]{3} \d{4}/)).toBeInTheDocument()
+    expect(screen.getByText(/Tierra: /)).toBeInTheDocument()
   })
 
   it('manda la vista de ?desde= en el contexto', async () => {

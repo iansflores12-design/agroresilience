@@ -37,6 +37,14 @@ import Science from '@material-symbols/svg-400/rounded/science.svg?react'
 import Schedule from '@material-symbols/svg-400/rounded/schedule.svg?react'
 import Person from '@material-symbols/svg-400/rounded/person.svg?react'
 import ExpandMore from '@material-symbols/svg-400/rounded/keyboard_arrow_down.svg?react' // equivalente de expand_more
+import Grain from '@material-symbols/svg-400/rounded/grain.svg?react'
+import Eco from '@material-symbols/svg-400/rounded/eco.svg?react'
+import Spa from '@material-symbols/svg-400/rounded/spa.svg?react'
+import RiceBowl from '@material-symbols/svg-400/rounded/rice_bowl.svg?react'
+import Nutrition from '@material-symbols/svg-400/rounded/nutrition.svg?react'
+import LocalFlorist from '@material-symbols/svg-400/rounded/local_florist.svg?react'
+import CheckCircle from '@material-symbols/svg-400/rounded/check_circle.svg?react'
+import WbSunny from '@material-symbols/svg-400/rounded/wb_sunny.svg?react'
 
 export const iconos = {
   grass: Grass,
@@ -72,6 +80,14 @@ export const iconos = {
   schedule: Schedule,
   person: Person,
   expand_more: ExpandMore,
+  grain: Grain,
+  eco: Eco,
+  spa: Spa,
+  rice_bowl: RiceBowl,
+  nutrition: Nutrition,
+  local_florist: LocalFlorist,
+  check_circle: CheckCircle,
+  wb_sunny: WbSunny,
 } as const
 
 export type NombreIcono = keyof typeof iconos

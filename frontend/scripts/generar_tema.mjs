@@ -60,8 +60,8 @@ const fuente = argbFromHex(SEMILLA)
 const dinamicos = new MaterialDynamicColors()
 const propios = COLORES_PROPIOS.map((c) => customColor(fuente, c))
 
-function bloque(oscuro) {
-  const esquema = new SchemeFidelity(Hct.fromInt(fuente), oscuro, 0)
+function bloque(oscuro, contraste) {
+  const esquema = new SchemeFidelity(Hct.fromInt(fuente), oscuro, contraste)
   const lineas = ROLES.map(
     ([css, metodo]) =>
       `  --md-sys-color-${css}: ${hexFromArgb(dinamicos[metodo]().getArgb(esquema))};`,
@@ -79,19 +79,35 @@ function bloque(oscuro) {
   return lineas.join('\n')
 }
 
+const sangrar = (t, n) =>
+  t
+    .split('\n')
+    .map((l) => ' '.repeat(n) + l)
+    .join('\n')
+
 const css = `/* GENERADO, NO EDITAR. Fuente: scripts/generar_tema.mjs (npm run tema).
-   Semilla ${SEMILLA}, SchemeFidelity, contraste 0. */
+   Semilla ${SEMILLA}, SchemeFidelity. Contraste medio (0.5) por defecto, alto (1.0) con
+   prefers-contrast: more. */
 
 :root {
-${bloque(false)}
+${bloque(false, 0.5)}
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-${bloque(true)
-  .split('\n')
-  .map((l) => '  ' + l)
-  .join('\n')}
+${sangrar(bloque(true, 0.5), 2)}
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+${sangrar(bloque(false, 1), 2)}
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+${sangrar(bloque(true, 1), 2)}
   }
 }
 `

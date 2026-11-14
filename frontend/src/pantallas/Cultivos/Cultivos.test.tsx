@@ -25,18 +25,19 @@ describe('Pantalla Cultivos', () => {
     vi.clearAllMocks()
   })
 
-  it('lista las cuatro rotaciones con su resumen y la nota de referencia', () => {
+  it('lista las cuatro rotaciones con su beneficio y la nota de referencia', () => {
     renderizarApp('/')
     for (const r of rotaciones) {
       expect(screen.getByRole('heading', { level: 3, name: r.nombre })).toBeInTheDocument()
-      expect(screen.getByText(r.resumen)).toBeInTheDocument()
+      expect(screen.getByText(r.beneficio)).toBeInTheDocument()
     }
-    expect(screen.getByText('Calendario de referencia, pendiente de validación agronómica.')).toBeInTheDocument()
+    expect(screen.getByText('Calendario de referencia. Consulte a su técnico.')).toBeInTheDocument()
   })
 
   it('sin cultivo invita a elegir uno y no muestra el selector', () => {
     renderizarApp('/')
-    expect(screen.getByText(/Elige un cultivo/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: '¿Qué sembró?' })).toBeInTheDocument()
+    expect(screen.queryByText('¿Hace cuánto sembró?')).not.toBeInTheDocument()
     expect(screen.queryByRole('slider')).not.toBeInTheDocument()
   })
 
@@ -57,7 +58,7 @@ describe('Pantalla Cultivos', () => {
     expect(avisar.exito).toHaveBeenCalledWith(
       expect.objectContaining({
         titulo: 'Cultivo: Maíz',
-        descripcion: 'Se usará en el mapa, la hoja de zona y el asistente.',
+        descripcion: 'Se usará en el mapa, la tierra y las preguntas.',
         accion: expect.objectContaining({ texto: 'Ver mapa' }),
       }),
     )
@@ -67,28 +68,25 @@ describe('Pantalla Cultivos', () => {
   it('con cultivo elegido aparece la edad con el selector de 0 al ciclo', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
-    await usuario.click(screen.getByRole('button', { name: 'Arroz' }))
+    await usuario.click(screen.getByRole('button', { name: /^Arroz\s*Unas/ }))
     const arroz = buscarCultivo('arroz')!
     const selector = screen.getByRole('slider', { name: 'Edad del cultivo' })
     expect(selector).toHaveAttribute('aria-valuemin', '0')
     expect(selector).toHaveAttribute('aria-valuemax', String(arroz.cicloSemanas))
     expect(screen.getByText('semanas desde la siembra')).toBeInTheDocument()
-    expect(screen.getByText(new RegExp(arroz.nombreCientifico))).toBeInTheDocument()
+    expect(screen.getByText('¿Hace cuánto sembró?')).toBeInTheDocument()
   })
 
-  it('al mover la edad al final avisa del cambio de etapa', async () => {
+  it('al mover la edad al final muestra la etapa sin lanzar aviso', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
-    await usuario.click(screen.getByRole('button', { name: 'Maíz' }))
+    await usuario.click(screen.getByRole('button', { name: /^Maíz\s*Unas/ }))
     const ciclo = buscarCultivo('maiz')!.cicloSemanas
     const selector = screen.getByRole('slider')
     selector.focus()
     await usuario.keyboard('{End}')
     await waitFor(() => expect(selector).toHaveAttribute('aria-valuenow', String(ciclo)))
-    await waitFor(() => expect(avisar.info).toHaveBeenCalledTimes(1))
-    expect(avisar.info).toHaveBeenCalledWith(
-      expect.objectContaining({ descripcion: `Semana ${ciclo} de ${ciclo}` }),
-    )
-    expect(vi.mocked(avisar.info).mock.calls[0][0].titulo).toMatch(/^Etapa: /)
+    expect(screen.getByText(/^Está en la etapa de /)).toBeInTheDocument()
+    expect(avisar.info).not.toHaveBeenCalled()
   })
 })

@@ -1,4 +1,4 @@
-@import '@fontsource-variable/roboto-flex/wdth.css';
+@import '@fontsource-variable/google-sans-flex/wdth.css';
 
 *,
 *::before,
@@ -21,6 +21,7 @@ body {
   background-color: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
   font: var(--tipo-cuerpo);
+  font-optical-sizing: auto;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

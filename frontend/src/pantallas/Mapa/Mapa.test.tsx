@@ -19,7 +19,7 @@ describe('Mapa', () => {
     const { container } = renderizarApp('/mapa')
     expect(container.querySelector('[data-placeholder="mapa"]')).toBeInTheDocument()
     for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toBeInTheDocument()
-    expect(screen.getByText('Toca un punto para elegir una zona')).toBeInTheDocument()
+    expect(screen.getByText('Toque un punto del mapa o un lugar de la lista.')).toBeInTheDocument()
   })
 
   it('elegir un punto cambia la zona del estado, avisa y muestra la tarjeta', async () => {
@@ -28,23 +28,23 @@ describe('Mapa', () => {
     renderizarApp('/mapa')
     await usuario.click(screen.getByRole('button', { name: zona.nombre }))
     expect(screen.getByRole('button', { name: zona.nombre })).toHaveAttribute('aria-pressed', 'true')
-    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: `Zona: ${zona.nombre}` }))
-    const tarjeta = screen.getByRole('complementary', { name: 'Zona elegida' })
+    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: `Lugar: ${zona.nombre}` }))
+    const tarjeta = screen.getByRole('complementary', { name: 'Lugar elegido' })
     expect(within(tarjeta).getByText(zona.nombre)).toBeInTheDocument()
-    expect(within(tarjeta).getByText(`Humedad del suelo: ${humedadPorcentaje(zona)?.toFixed(1)} %`)).toBeInTheDocument()
-    expect(within(tarjeta).getByRole('link', { name: 'Ver hoja de la zona' })).toHaveAttribute('href', '/zona')
+    expect(within(tarjeta).getByText(`${humedadPorcentaje(zona)?.toFixed(1)} % de agua en la tierra`)).toBeInTheDocument()
+    expect(within(tarjeta).getByRole('link', { name: 'Ver cómo está la tierra' })).toHaveAttribute('href', '/zona')
     // El estado compartido llega a la tira de contexto.
     expect(within(screen.getByRole('group', { name: 'Contexto elegido' })).getByText(zona.nombre)).toBeInTheDocument()
   })
 
-  it('la accion "Ver hoja" del aviso lleva a /zona', async () => {
+  it('la accion "Ver la tierra" del aviso lleva a /zona', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/mapa')
     await usuario.click(screen.getByRole('button', { name: zonas[0].nombre }))
     const aviso = vi.mocked(avisar.exito).mock.calls[0][0]
-    expect(aviso.accion?.texto).toBe('Ver hoja')
+    expect(aviso.accion?.texto).toBe('Ver la tierra')
     aviso.accion?.alPulsar()
-    expect(await screen.findByRole('heading', { level: 1, name: 'Zona' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: /^¿Cómo está la tierra/ })).toBeInTheDocument()
   })
 
   it('los controles que dependen del mapa real avisan', async () => {

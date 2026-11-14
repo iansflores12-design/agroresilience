@@ -1,4 +1,4 @@
-import { decimal, diasEntre, fechaCorta, fechaLarga, marcaDia } from './formato'
+import { decimal, diasEntre, fechaLarga, marcaDia } from './formato'
 import estilos from './GraficaHumedad.module.css'
 
 /** Mas de estos dias entre dos lecturas: la linea se corta en vez de unirlas. */
@@ -19,7 +19,7 @@ export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
     .map(([fecha, v]) => ({ fecha, t: marcaDia(fecha), pct: v * 100 }))
     .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.pct))
     .sort((a, b) => a.t - b.t)
-  if (puntos.length === 0) return <p className="tipo-nota">Sin lectura: la serie de los últimos 120 días está vacía.</p>
+  if (puntos.length === 0) return <p className="tipo-nota">Sin lecturas en los últimos 4 meses.</p>
 
   const normalPct = normal === null ? null : normal * 100
   const valores = puntos.map((p) => p.pct).concat(normalPct === null ? [] : [normalPct])
@@ -54,10 +54,6 @@ export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
 
   return (
     <div className={estilos.grafica} role="img" aria-label={resumen}>
-      <div className={estilos.ejeY} aria-hidden="true">
-        <span>{decimal(max)} %</span>
-        <span>{decimal(min)} %</span>
-      </div>
       <div className={estilos.area} aria-hidden="true">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className={estilos.svg} focusable="false">
           {normalPct !== null && (
@@ -74,14 +70,14 @@ export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
         </svg>
         {normalPct !== null && (
           <span className={estilos.etiquetaNormal} style={{ top: `${py(normalPct)}%` }}>
-            Normal {decimal(normalPct)} %
+            Lo normal: {decimal(normalPct)} %
           </span>
         )}
         <span className={estilos.ultimo} style={{ left: `${px(ultimo.t)}%`, top: `${py(ultimo.pct)}%` }} />
       </div>
       <div className={estilos.ejeX} aria-hidden="true">
-        <span>{fechaCorta(primero.fecha)}</span>
-        <span>{fechaCorta(ultimo.fecha)}</span>
+        <span>Hace 4 meses</span>
+        <span>Hoy</span>
       </div>
     </div>
   )

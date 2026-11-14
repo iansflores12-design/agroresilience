@@ -3,10 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Boton } from '../../componentes/Boton'
 import { BotonIcono } from '../../componentes/BotonIcono'
 import { Chip } from '../../componentes/Chip'
-import { Heroe } from '../../componentes/Heroe'
-import { PlanoFondo } from '../../componentes/PlanoFondo'
-import { buscarZona, humedadPorcentaje } from '../../datos/zonas'
-import { fechaCorta } from '../Zona/formato'
+import { buscarZona, estadoHumedad, humedadPorcentaje } from '../../datos/zonas'
 import { useConversacion, type MensajeChat } from '../../estado/Conversacion'
 import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
@@ -60,6 +57,7 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   const sugerencias = useMemo(() => armarSugerencias(contexto), [contexto])
   const zona = buscarZona(zonaId)
   const pctHumedad = zona ? humedadPorcentaje(zona) : null
+  const estadoZona = zona ? estadoHumedad(zona).toLowerCase() : ''
 
   const [texto, setTexto] = useState('')
   const [esperando, setEsperando] = useState(false)
@@ -179,14 +177,13 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
   return (
     <div className="pantalla">
-      <PlanoFondo texto="Asistente" />
       <section className={`plano-medio ${estilos.medio}`} aria-labelledby="chat-titulo">
-        <h1 className="solo-lectores" id="chat-titulo">
-          Asistente
+        <h1 className={estilos.pregunta} id="chat-titulo">
+          Pregunte lo que quiera
         </h1>
         <div className={estilos.tira}>
           <p className={estilos.tiraEtiqueta} id="chat-ve-esto">
-            El asistente ve esto
+            El asistente sabe que
           </p>
           <div className={estilos.chips} role="group" aria-labelledby="chat-ve-esto">
             <Chip to="/" icono="grass">
@@ -200,7 +197,7 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
             {zona && (
               <Chip to="/zona" icono="water_drop">
                 {contexto.humedad && pctHumedad !== null
-                  ? `Humedad ${pctHumedad} % · ${fechaCorta(contexto.humedad.fecha)}`
+                  ? `Tierra: ${estadoZona}`
                   : 'Sin lectura de humedad'}
               </Chip>
             )}
@@ -214,10 +211,10 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
         {mensajes.length === 0 && (
           <div className={estilos.vacio}>
-            <Heroe valor="Pregunta" nota="Responde con lo que estás viendo ahora." />
+            <p className={estilos.ayuda}>Toque una pregunta o escriba la suya abajo.</p>
             <div className={estilos.sugerencias} role="group" aria-label="Sugerencias">
               {sugerencias.map((s) => (
-                <Chip key={s} onClick={() => enviar(s)}>
+                <Chip key={s} className={estilos.sugerencia} onClick={() => enviar(s)}>
                   {s}
                 </Chip>
               ))}
@@ -256,13 +253,13 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
       <div className={`plano-superior ${estilos.redactor}`}>
         <div className={estilos.redactorInterior}>
-          {demo && <span className={estilos.insignia}>Demostración: sin backend conectado</span>}
+          {demo && <span className={estilos.insignia}>Modo de prueba: todavía sin conexión al asistente real</span>}
           <div className={estilos.campoFila}>
             <textarea
               ref={campo}
               className={estilos.campo}
               aria-label="Mensaje"
-              placeholder="Escribe tu pregunta"
+              placeholder="Escriba su pregunta"
               rows={1}
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
@@ -271,13 +268,9 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
             {esperando ? (
               <BotonIcono icono="stop" etiqueta="Detener" variante="relleno" onClick={detener} />
             ) : (
-              <BotonIcono
-                icono="send"
-                etiqueta="Enviar"
-                variante="relleno"
-                disabled={texto.trim() === ''}
-                onClick={() => enviar(texto)}
-              />
+              <Boton icono="send" disabled={texto.trim() === ''} onClick={() => enviar(texto)}>
+                Enviar
+              </Boton>
             )}
           </div>
         </div>

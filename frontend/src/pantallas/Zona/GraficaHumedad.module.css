@@ -1,23 +1,17 @@
 .grafica {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: 10rem auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 11rem auto;
   column-gap: var(--esp-2);
   row-gap: var(--esp-1);
-  padding-inline-end: var(--esp-2);
-  font: var(--tipo-micro);
+  font: var(--tipo-nota);
   color: var(--md-sys-color-on-surface-variant);
-}
-
-.ejeY {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: end;
 }
 
 .area {
   position: relative;
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-lowest);
   border-block: 1px solid var(--md-sys-color-outline-variant);
 }
 
@@ -32,7 +26,7 @@
 .linea {
   fill: none;
   stroke: var(--agro-color-agua);
-  stroke-width: 2.5;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -40,7 +34,8 @@
 .normal {
   stroke: var(--md-sys-color-on-surface-variant);
   stroke-width: 1.5;
-  stroke-dasharray: 4 4;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
 }
 
 .etiquetaNormal {
@@ -48,9 +43,9 @@
   inset-inline-end: 0;
   transform: translateY(-110%);
   padding-inline: var(--esp-1);
-  background-color: var(--md-sys-color-surface-container-low);
+  background-color: var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-surface-variant);
-  font: var(--tipo-micro);
+  font: var(--tipo-nota);
 }
 
 .ultimo {
@@ -64,7 +59,6 @@
 }
 
 .ejeX {
-  grid-column: 2;
   display: flex;
   justify-content: space-between;
 }

@@ -24,7 +24,7 @@ export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
       className={estilos.seccion}
     >
       <h2 id={idTitulo} className="tipo-titulo">
-        Explicación gráfica
+        ¿Por qué pasa esto?
       </h2>
       <div className={estilos.lienzo}>
         <p className="tipo-nota">Espacio reservado: aquí irá la explicación gráfica de un fenómeno</p>
