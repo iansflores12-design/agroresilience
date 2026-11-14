@@ -3,3 +3,7 @@ __pycache__/
 .env
 .netrc
 .venv/
+
+# Archivos locales que no son parte de la app
+.claude/
+agromapa.zip
