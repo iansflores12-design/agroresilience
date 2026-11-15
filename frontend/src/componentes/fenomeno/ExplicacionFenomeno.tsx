@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BotonIcono } from '../BotonIcono'
 import { Chip } from '../Chip'
@@ -97,24 +97,53 @@ function Escena({ ver }: { ver: string }) {
   )
 }
 
+/** Un tema de la explicación: el clima (fenómenos) o el lugar (tierra, altura, por qué del cultivo). */
+export interface TemaExplicacion {
+  id: string
+  nombre: string
+  icono: NombreIcono
+  pasos: string[]
+  /** El dibujo de cada paso. */
+  escena: (paso: number) => ReactNode
+  /** Icono de la recomendación, en el último paso. */
+  consejo?: NombreIcono
+}
+
 export interface PropsExplicacion {
-  /** Fenómeno con el que empieza. Por defecto El Niño. */
-  inicial?: Fenomeno
-  /** Oculta los chips para elegir otro fenómeno (en el chat se muestra solo el que pidió el asistente). */
+  /** Tema con el que empieza. Por defecto el primero (o El Niño). */
+  inicial?: string
+  /** Oculta los chips para elegir otro tema (en el chat se muestra solo el que pidió el asistente). */
   fijo?: boolean
+  /** Temas del lugar, que van antes de los fenómenos del clima. */
+  temasExtra?: TemaExplicacion[]
 }
 
 /**
  * Explicación gráfica de un fenómeno del clima en tres pasos: qué es, cómo afecta al cultivo y qué
  * hacer. Los pasos avanzan solos; con movimiento reducido no avanzan ni se animan.
  */
-export function ExplicacionFenomeno({ inicial = 'nino', fijo = false }: PropsExplicacion) {
+export function ExplicacionFenomeno({ inicial, fijo = false, temasExtra = [] }: PropsExplicacion) {
   const { t } = useTranslation()
   const id = useId()
-  const [fenomeno, fijarFenomeno] = useState<Fenomeno>(inicial)
+  const clima = useMemo<TemaExplicacion[]>(
+    () =>
+      FENOMENOS.map((f) => ({
+        id: f,
+        nombre: t(`fenomeno.${f}.nombre`),
+        icono: ICONO[f],
+        pasos: t(`fenomeno.${f}.pasos`, { returnObjects: true }) as string[],
+        escena: (p: number) => <Escena ver={ESCENAS[f][p]} />,
+        consejo: ICONO_CONSEJO[f],
+      })),
+    [t],
+  )
+  const temas = [...temasExtra, ...clima]
+  const [temaId, fijarTemaId] = useState<string>(inicial ?? temas[0].id)
+  // Si el tema elegido deja de existir (otro lugar sin datos de suelo, por ejemplo), se usa el primero.
+  const tema = temas.find((x) => x.id === temaId) ?? temas[0]
   const [paso, fijarPaso] = useState(0)
   const [pausado, fijarPausado] = useState(reducido)
-  const pasos = t(`fenomeno.${fenomeno}.pasos`, { returnObjects: true }) as string[]
+  const pasos = tema.pasos
   const total = pasos.length
 
   useEffect(() => {
@@ -123,47 +152,47 @@ export function ExplicacionFenomeno({ inicial = 'nino', fijo = false }: PropsExp
     return () => window.clearTimeout(reloj)
   }, [pausado, paso, total])
 
-  function elegir(f: Fenomeno) {
-    fijarFenomeno(f)
+  function elegir(id: string) {
+    fijarTemaId(id)
     fijarPaso(0)
   }
   const ir = (p: number) => {
     fijarPaso(Math.max(0, Math.min(total - 1, p)))
     fijarPausado(true)
   }
-  const terminado = paso === total - 1
+  const terminado = paso >= total - 1
 
   return (
-    <div className={estilos.explicacion} data-fenomeno={fenomeno}>
+    <div className={estilos.explicacion} data-fenomeno={tema.id}>
       {!fijo && (
         <div className={estilos.selector} role="group" aria-label={t('fenomeno.elegir')}>
-          {FENOMENOS.map((f) => (
-            <Chip key={f} variante="filtro" icono={ICONO[f]} seleccionado={f === fenomeno} onClick={() => elegir(f)}>
-              {t(`fenomeno.${f}.nombre`)}
+          {temas.map((x) => (
+            <Chip key={x.id} variante="filtro" icono={x.icono} seleccionado={x.id === tema.id} onClick={() => elegir(x.id)}>
+              {x.nombre}
             </Chip>
           ))}
         </div>
       )}
       <div className={estilos.lienzo}>
-        <Escena ver={ESCENAS[fenomeno][paso]} />
-        {terminado && (
+        {tema.escena(Math.min(paso, total - 1))}
+        {terminado && tema.consejo && (
           <span className={estilos.insignia} aria-hidden="true">
-            <Icono nombre={ICONO_CONSEJO[fenomeno]} tamano={28} />
+            <Icono nombre={tema.consejo} tamano={28} />
           </span>
         )}
       </div>
       <div className={estilos.pie}>
         <div className={estilos.progreso} aria-hidden="true">
           {pasos.map((_, i) => (
-            <span key={`${fenomeno}-${i}`} className={estilos.marca} data-estado={i < paso ? 'hecho' : i === paso ? (pausado ? 'quieto' : 'activo') : 'pendiente'} />
+            <span key={`${tema.id}-${i}`} className={estilos.marca} data-estado={i < paso ? 'hecho' : i === paso ? (pausado ? 'quieto' : 'activo') : 'pendiente'} />
           ))}
         </div>
         <p className={estilos.contador} id={`${id}-paso`}>
-          {fijo ? `${t(`fenomeno.${fenomeno}.nombre`)} · ` : ''}
+          {fijo ? `${tema.nombre} · ` : ''}
           {t('fenomeno.paso', { n: paso + 1, total })}
         </p>
-        <p key={`${fenomeno}-${paso}`} className={estilos.texto} aria-live="polite">
-          {pasos[paso]}
+        <p key={`${tema.id}-${paso}`} className={estilos.texto} aria-live="polite">
+          {pasos[Math.min(paso, total - 1)]}
         </p>
         <div className={estilos.controles}>
           <BotonIcono icono="arrow_back" etiqueta={t('fenomeno.anterior')} disabled={paso === 0} onClick={() => ir(paso - 1)} />

@@ -140,9 +140,11 @@ function temporadasDesde(t: Temporada): Temporada[] {
 }
 
 function candidatos(cultivoId: string): Candidato[] {
+  // Un cultivo permanente sigue todo el ano: no hay rotacion por temporadas que comparar.
+  if (CULTIVOS[cultivoId]?.perenne) return [{ id: 'actual', actual: true, cultivos: [cultivoId, cultivoId, cultivoId], icono: cultivoId }]
   const lista: Candidato[] = [{ id: 'actual', actual: true, cultivos: [cultivoId, cultivoId, null], icono: cultivoId }]
   for (const otro of Object.keys(CULTIVOS)) {
-    if (otro === cultivoId) continue
+    if (otro === cultivoId || CULTIVOS[otro].perenne) continue
     // El frijol terciopelo dura unas 20 semanas: ocupa dos temporadas.
     const cultivos = otro === 'frijol-terciopelo' ? [cultivoId, otro, otro] : [cultivoId, otro, null]
     lista.push({ id: `${cultivoId}-${otro}`, actual: false, cultivos, icono: otro })
@@ -201,7 +203,7 @@ function calcularPasos(p: PuntoKharis, e: EntradaDecision, cand: Candidato, ajus
   return cand.cultivos.map((id, i) => {
     const t = temporadas[i]
     if (!id) return { temporada: t, cultivoId: null, continua: false, v: null, agua: null, calor: null }
-    const continua = i > 0 && cand.cultivos[i - 1] === id && id === 'frijol-terciopelo'
+    const continua = i > 0 && cand.cultivos[i - 1] === id && (id === 'frijol-terciopelo' || Boolean(CULTIVOS[id].perenne))
     const c = CULTIVOS[id]
     const v = ventana(p, t, c, ajusteTemp)
     return {

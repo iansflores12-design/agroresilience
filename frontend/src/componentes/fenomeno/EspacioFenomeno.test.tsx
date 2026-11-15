@@ -54,3 +54,20 @@ describe('ExplicacionFenomeno', () => {
     }
   })
 })
+
+describe('explicaciones del lugar', () => {
+  it('explica el porqué del cultivo, la tierra y la altura con los datos del departamento', async () => {
+    const { zonas } = await import('../../datos/zonas')
+    const zona = zonas.find((z) => z.id === 'choluteca')!
+    const u = userEvent.setup()
+    render(<EspacioFenomeno zona={zona} cultivoId="maiz" departamentoId="HN-CH" />)
+    // El primer tema es el porqué del cultivo en ese departamento.
+    expect(screen.getByText(/^Maíz en Choluteca saca \d+ de 100/)).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Su tierra' }))
+    expect(screen.getByText(/La tierra en Choluteca tiene \d+ % de arcilla/)).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'La altura' }))
+    expect(screen.getByText(/Choluteca está, en promedio, a unos 120 m/)).toBeInTheDocument()
+    // Los fenómenos del clima siguen después.
+    expect(screen.getByRole('button', { name: 'Huracanes' })).toBeInTheDocument()
+  })
+})

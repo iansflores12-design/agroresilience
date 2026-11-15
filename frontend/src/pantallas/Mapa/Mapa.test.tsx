@@ -4,6 +4,7 @@ import { aptitud, rotacionesPara } from '../../datos/aptitud'
 import { humedadPorcentaje, zonas } from '../../datos/zonas'
 import { avisar } from '../../lib/avisos'
 import { detectarAnio } from '../../componentes/mapa/escenario'
+import { departamentosConDatos, zonaDeDepartamento } from '../../datos/lugarDepartamento'
 
 const anioCholuteca = () => detectarAnio(zonas.find((z) => z.id === 'choluteca') ?? null).escenario
 import { renderizarApp } from '../../pruebas/renderizar'
@@ -19,38 +20,53 @@ describe('Mapa', () => {
     vi.clearAllMocks()
   })
 
-  it('muestra el mapa, un boton por zona y la invitacion a elegir', () => {
+  it('muestra el mapa, un boton por departamento y la invitacion a elegir', () => {
     renderizarApp('/mapa')
     expect(screen.getByRole('region', { name: 'Mapa' })).toBeInTheDocument()
-    for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toBeInTheDocument()
-    expect(screen.getByText('Toque un punto del mapa o use su ubicación.')).toBeInTheDocument()
+    const lista = departamentosConDatos()
+    expect(lista).toHaveLength(18)
+    for (const d of lista) expect(screen.getByRole('button', { name: new RegExp(`^${d.nombre}`) })).toBeInTheDocument()
+    // Ya no hay un boton por municipio sobre el mapa.
+    expect(screen.queryByRole('button', { name: 'Nacaome (Valle)' })).not.toBeInTheDocument()
+    expect(screen.getByText('Toque su departamento en el mapa o use su ubicación.')).toBeInTheDocument()
     expect(screen.getByText('Todavía no eligió un lugar.')).toBeInTheDocument()
-    // En telefono (jsdom no es ancho) la lista de lugares empieza plegada.
-    expect(screen.getByText(`Todos los lugares (${zonas.length})`).closest('details')).not.toHaveAttribute('open')
+    // En telefono (jsdom no es ancho) la lista de departamentos empieza plegada.
+    expect(screen.getByText('Todos los departamentos (18)').closest('details')).not.toHaveAttribute('open')
     // Sin cultivo no hay puntajes: se invita a elegirlo.
     expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
   })
 
-  it('elegir un punto cambia la zona del estado, avisa y muestra la tarjeta', async () => {
+  it('elegir un departamento cambia el lugar del estado, avisa y muestra la tarjeta', async () => {
     const usuario = userEvent.setup()
-    const zona = zonas[2]
+    const zona = zonas.find((z) => z.id === 'tegucigalpa')!
     renderizarApp('/mapa')
-    await usuario.click(screen.getByRole('button', { name: zona.nombre }))
-    expect(screen.getByRole('button', { name: zona.nombre })).toHaveAttribute('aria-pressed', 'true')
-    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: `Lugar: ${zona.nombre}` }))
+    await usuario.click(screen.getByRole('button', { name: /^Francisco Morazán/ }))
+    expect(screen.getByRole('button', { name: /^Francisco Morazán/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: 'Lugar: Francisco Morazán' }))
     const tarjeta = screen.getByRole('complementary', { name: 'Lugar elegido' })
-    expect(within(tarjeta).getByText(zona.nombre)).toBeInTheDocument()
+    expect(within(tarjeta).getByText('Francisco Morazán')).toBeInTheDocument()
     expect(within(tarjeta).getByText(`${humedadPorcentaje(zona)?.toFixed(1)} % de agua en la tierra`)).toBeInTheDocument()
     expect(within(tarjeta).getByRole('link', { name: 'Ver cómo está la tierra' })).toHaveAttribute('href', '/zona')
     // El estado compartido llega a la tira de contexto.
-    expect(within(screen.getByRole('group', { name: 'Contexto elegido' })).getByText(zona.nombre)).toBeInTheDocument()
+    expect(within(screen.getByRole('group', { name: 'Contexto elegido' })).getByText('Francisco Morazán')).toBeInTheDocument()
+  })
+
+  it('un departamento sin punto propio usa el mas cercano sin decirlo; tocarlo en el mapa tambien lo elige', async () => {
+    const usuario = userEvent.setup()
+    renderizarApp('/mapa')
+    await usuario.click(screen.getByRole('button', { name: /^Departamento de Atlántida/ }))
+    const cercana = zonaDeDepartamento('HN-AT')!
+    const tarjeta = screen.getByRole('complementary', { name: 'Lugar elegido' })
+    expect(within(tarjeta).getByText('Atlántida')).toBeInTheDocument()
+    // No se dice de qué punto salen los datos.
+    expect(within(tarjeta).queryByText(new RegExp(cercana.nombre))).not.toBeInTheDocument()
   })
 
   it('la accion "Ver la tierra" del aviso lleva a /zona', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/mapa')
-    await usuario.click(screen.getByRole('button', { name: zonas[0].nombre }))
+    await usuario.click(screen.getByRole('button', { name: /^Choluteca/ }))
     const aviso = vi.mocked(avisar.exito).mock.calls[0][0]
     expect(aviso.accion?.texto).toBe('Ver la tierra')
     aviso.accion?.alPulsar()

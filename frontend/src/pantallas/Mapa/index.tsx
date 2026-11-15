@@ -27,6 +27,7 @@ import {
 import { buscarCultivo } from '../../datos/cultivos'
 import { buscarZona, cajaHonduras, humedadPorcentaje, zonas } from '../../datos/zonas'
 import { useEstadoApp } from '../../estado/EstadoApp'
+import { departamentoElegido, departamentoEnPunto, departamentosConDatos } from '../../datos/lugarDepartamento'
 import { avisar } from '../../lib/avisos'
 import estilos from './Mapa.module.css'
 import { Rotaciones } from './Rotaciones'
@@ -53,8 +54,13 @@ function LeyendaDatos({ capa }: { capa: CapaDatos }) {
   )
 }
 
+const SIN_LUGARES: never[] = []
+const sinAccion = () => {}
+
 export default function Mapa() {
-  const { zonaId, cultivoId, elegirZona } = useEstadoApp()
+  const estado = useEstadoApp()
+  const { zonaId, cultivoId, elegirDepartamento } = estado
+  const elegidoId = departamentoElegido(estado)
   const navegar = useNavigate()
   const { t } = useTranslation()
   const [departamentoTocado, fijarDepartamentoTocado] = useState<string | null>(null)
@@ -65,25 +71,28 @@ export default function Mapa() {
   const [datos, fijarDatos] = useState<CapaDatos | null>(null)
 
   const zona = buscarZona(zonaId)
+  const listaDepartamentos = departamentosConDatos()
+  const departamentoElegidoDatos = listaDepartamentos.find((d) => d.id === elegidoId) ?? null
   const anio = detectarAnio(zona)
   const escenario = anio.escenario
   const humedad = zona ? humedadPorcentaje(zona) : null
   const cultivo = tieneAptitud(cultivoId) ? buscarCultivo(cultivoId) : null
   const elCultivo = cultivo ? t(`cultivos.${cultivo.id}.el`) : ''
   // Sin tocar un departamento, se muestra el del lugar elegido.
-  const departamentoId = departamentoTocado ?? departamentoDeZona(zonaId)
+  const departamentoId = departamentoTocado ?? elegidoId
   const departamento = buscarDepartamento(departamentoId)
   const resultado = aptitud(departamentoId, cultivoId, escenario)
   const rotaciones = rotacionesPara(departamentoId, cultivoId, escenario)
 
-  function alSeleccionarZona(id: string) {
-    const elegida = buscarZona(id)
-    if (!elegida) return
-    fijarDepartamentoTocado(departamentoDeZona(id))
-    if (id === zonaId) return
-    elegirZona(id)
+  /** Tocar un departamento (en el mapa o en la lista) lo elige como el lugar de la parcela. */
+  function alSeleccionarDepartamento(id: string) {
+    const d = buscarDepartamento(id)
+    if (!d) return
+    fijarDepartamentoTocado(null)
+    if (id === elegidoId) return
+    elegirDepartamento(id)
     avisar.exito({
-      titulo: t('mapa.lugarAviso', { lugar: elegida.nombre }),
+      titulo: t('mapa.lugarAviso', { lugar: d.nombre }),
       accion: { texto: t('mapa.verTierra'), alPulsar: () => navegar('/zona') },
     })
   }
@@ -104,7 +113,8 @@ export default function Mapa() {
         const distancia = (z: (typeof zonas)[number]) => (z.lat - lat) ** 2 + (z.lon - lon) ** 2
         const cercana = zonas.reduce((a, b) => (distancia(b) < distancia(a) ? b : a))
         controlMapa.current?.irA(lat, lon)
-        alSeleccionarZona(cercana.id)
+        const id = departamentoEnPunto(lat, lon) ?? departamentoDeZona(cercana.id)
+        if (id) alSeleccionarDepartamento(id)
       },
       sinUbicacion,
       { timeout: 10000, maximumAge: 600000 },
@@ -122,13 +132,13 @@ export default function Mapa() {
           <div className={estilos.mapa}>
             <ContenedorMapa
               ref={controlMapa}
-              zonas={zonas}
+              zonas={SIN_LUGARES}
               caja={cajaHonduras}
-              zonaSeleccionadaId={zonaId}
+              zonaSeleccionadaId={null}
               cultivoId={cultivoId}
-              alSeleccionarZona={alSeleccionarZona}
+              alSeleccionarZona={sinAccion}
               departamentoId={departamentoId}
-              alSeleccionarDepartamento={fijarDepartamentoTocado}
+              alSeleccionarDepartamento={alSeleccionarDepartamento}
               escenario={escenario}
               base={base}
               datos={datos}
@@ -173,7 +183,7 @@ export default function Mapa() {
             {zona ? (
               <>
                 <div className={estilos.datos}>
-                  <p className="tipo-titulo">{zona.nombre}</p>
+                  <p className="tipo-titulo">{departamentoElegidoDatos?.nombre ?? zona.nombre}</p>
                   <Medidor nivel={nivelDePercentil(zona.humedad?.percentil)} grande />
                   <p className="tipo-nota">
                     {humedad === null ? t('mapa.sinHumedad') : t('mapa.aguaTierra', { pct: humedad.toFixed(1) })}
@@ -195,21 +205,21 @@ export default function Mapa() {
 
           <details className={estilos.plegable} open={listaAbierta}>
             <summary>
-              <span className="tipo-titulo">{t('mapa.todosLugares', { n: zonas.length })}</span>
+              <span className="tipo-titulo">{t('mapa.todosDepartamentos', { n: listaDepartamentos.length })}</span>
               <Icono nombre="expand_more" />
             </summary>
             <ul className={estilos.lista}>
-              {zonas.map((z) => {
-                const elegida = z.id === zonaId
+              {listaDepartamentos.map((d) => {
+                const elegida = d.id === elegidoId
                 return (
-                  <li key={z.id}>
+                  <li key={d.id}>
                     <Control
                       className={clases(estilos.lugar, elegida && estilos.lugarElegido, 'capa-estado')}
                       aria-pressed={elegida}
-                      onClick={() => alSeleccionarZona(z.id)}
+                      onClick={() => alSeleccionarDepartamento(d.id)}
                     >
-                      <span className={estilos.nombreLugar}>{z.nombre}</span>
-                      <Medidor nivel={nivelDePercentil(z.humedad?.percentil)} />
+                      <span className={estilos.nombreLugar}>{d.nombre}</span>
+                      {d.zona && <Medidor nivel={nivelDePercentil(d.zona.humedad?.percentil)} />}
                     </Control>
                   </li>
                 )

@@ -79,6 +79,12 @@ import Air from '@material-symbols/svg-400/rounded/air.svg?react'
 import PlayArrow from '@material-symbols/svg-400/rounded/play_arrow.svg?react'
 import Pause from '@material-symbols/svg-400/rounded/pause.svg?react'
 import PartlyCloudyDay from '@material-symbols/svg-400/rounded/partly_cloudy_day.svg?react'
+import Coffee from '@material-symbols/svg-400/rounded/coffee.svg?react'
+import Nature from '@material-symbols/svg-400/rounded/nature.svg?react'
+import Park from '@material-symbols/svg-400/rounded/park.svg?react'
+import EnergySavingsLeaf from '@material-symbols/svg-400/rounded/energy_savings_leaf.svg?react'
+import Grocery from '@material-symbols/svg-400/rounded/grocery.svg?react'
+import NestEcoLeaf from '@material-symbols/svg-400/rounded/nest_eco_leaf.svg?react'
 export const iconos = {
   grass: Grass,
   map: Map,
@@ -150,6 +156,12 @@ export const iconos = {
   globe: Globe,
   flood: Flood,
   air: Air,
+  nest_eco_leaf: NestEcoLeaf,
+  grocery: Grocery,
+  energy_savings_leaf: EnergySavingsLeaf,
+  park: Park,
+  nature: Nature,
+  coffee: Coffee,
   partly_cloudy_day: PartlyCloudyDay,
   pause: Pause,
   play_arrow: PlayArrow,

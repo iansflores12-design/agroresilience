@@ -56,6 +56,7 @@ export function PreguntaContexto({ clave, alCerrar }: { clave: ClavePregunta | n
                 cultivoId: cultivoValido,
                 temporada: estado.temporada ?? undefined,
                 parcela: estado.parcela,
+                departamentoId: estado.departamentoId,
                 edadSemanas: cultivoValido ? estado.edadSemanas : 0,
                 objetivos: estado.objetivos,
               }}
@@ -68,7 +69,7 @@ export function PreguntaContexto({ clave, alCerrar }: { clave: ClavePregunta | n
                 estado.actualizarPerfil(
                   clave === 'cultivoId'
                     ? { cultivoId: r.cultivoId, edadSemanas: r.edadSemanas }
-                    : { zonaId: r.zonaId, parcela: r.parcela ?? null },
+                    : { zonaId: r.zonaId, departamentoId: r.departamentoId ?? null, parcela: r.parcela ?? null },
                 )
                 alCerrar()
               }}

@@ -1,6 +1,8 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Idioma } from '../i18n/idiomas'
+import { buscarDepartamento, departamentoDeZona } from '../datos/aptitud'
+import { zonaDeDepartamento } from '../datos/lugarDepartamento'
 import { dentroDeHonduras } from '../lib/decision/escala'
 import { OBJETIVOS } from '../lib/decision/parametros'
 import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
@@ -8,7 +10,10 @@ import { configurarSonido } from '../lib/sonido'
 
 export interface EstadoApp {
   cultivoId: string | null
+  /** Punto de datos (humedad, lluvia, pronostico) que usa el lugar elegido. */
   zonaId: string | null
+  /** Departamento elegido (ISO 3166-2, HN-CH). Null en estados viejos: se toma el de `zonaId`. */
+  departamentoId: string | null
   /** Semanas desde la siembra. */
   edadSemanas: number
   sonido: boolean
@@ -26,6 +31,8 @@ export interface Perfil {
   cultivoId: string
   temporada: Temporada
   parcela?: { lat: number; lon: number } | null
+  /** Departamento elegido. Si falta, sale de `zonaId`. */
+  departamentoId?: string | null
   /** Semanas desde la siembra. Si falta, se conserva (o vuelve a 0 si cambio el cultivo). */
   edadSemanas?: number
   /** Si faltan, se conservan los que ya habia. */
@@ -36,6 +43,8 @@ interface AccionesEstadoApp {
   /** Reinicia edadSemanas a 0 si cambia el cultivo. */
   elegirCultivo(id: string): void
   elegirZona(id: string): void
+  /** Elige el lugar por departamento: usa el punto de datos que le corresponde. */
+  elegirDepartamento(id: string): void
   fijarEdad(semanas: number): void
   alternarSonido(): void
   /** Guarda las respuestas del cuestionario de Gemini Decision. */
@@ -50,6 +59,7 @@ export const CLAVE_ESTADO = 'agroresilience.estado.v1'
 const porDefecto: EstadoApp = {
   cultivoId: null,
   zonaId: null,
+  departamentoId: null,
   edadSemanas: 0,
   sonido: true,
   terreno: null,
@@ -80,6 +90,8 @@ function leerEstadoGuardado(): EstadoApp {
     return {
       cultivoId: typeof d.cultivoId === 'string' ? d.cultivoId : null,
       zonaId: typeof d.zonaId === 'string' ? d.zonaId : null,
+      departamentoId:
+        typeof d.departamentoId === 'string' && buscarDepartamento(d.departamentoId) ? d.departamentoId : null,
       edadSemanas:
         typeof d.edadSemanas === 'number' && Number.isFinite(d.edadSemanas) && d.edadSemanas >= 0
           ? d.edadSemanas
@@ -117,7 +129,12 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   }, [])
   const elegirZona = useCallback((id: string) => {
     // Otro lugar elegido a mano: la ubicacion GPS de antes ya no corresponde.
-    setEstado((e) => (e.zonaId === id ? e : { ...e, zonaId: id, parcela: null }))
+    setEstado((e) => (e.zonaId === id ? e : { ...e, zonaId: id, departamentoId: departamentoDeZona(id), parcela: null }))
+  }, [])
+  const elegirDepartamento = useCallback((id: string) => {
+    const zona = zonaDeDepartamento(id)
+    if (!zona) return
+    setEstado((e) => (e.departamentoId === id && e.zonaId === zona.id ? e : { ...e, departamentoId: id, zonaId: zona.id, parcela: null }))
   }, [])
   const fijarEdad = useCallback((semanas: number) => {
     setEstado((e) => ({ ...e, edadSemanas: Math.max(0, semanas) }))
@@ -129,6 +146,10 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
     setEstado((e) => {
       const definidos = Object.fromEntries(Object.entries(p).filter(([, v]) => v !== undefined)) as Partial<Perfil>
       const siguiente = { ...e, ...definidos }
+      // Otro punto de datos sin departamento dicho: el departamento es el del punto.
+      if (definidos.zonaId && definidos.zonaId !== e.zonaId && definidos.departamentoId === undefined) {
+        siguiente.departamentoId = departamentoDeZona(definidos.zonaId)
+      }
       if (definidos.cultivoId && definidos.cultivoId !== e.cultivoId && definidos.edadSemanas === undefined) siguiente.edadSemanas = 0
       return siguiente
     })
@@ -138,6 +159,7 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
       ...e,
       ...p,
       parcela: p.parcela ?? null,
+      departamentoId: p.departamentoId ?? (p.zonaId === e.zonaId && e.departamentoId ? e.departamentoId : departamentoDeZona(p.zonaId)),
       edadSemanas: Math.max(0, p.edadSemanas ?? (e.cultivoId === p.cultivoId ? e.edadSemanas : 0)),
       objetivos: p.objetivos ?? e.objetivos,
     }))
@@ -150,8 +172,8 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   }, [])
 
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo }),
-    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo],
+    () => ({ ...estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo }),
+    [estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buscarCultivo } from '../datos/cultivos'
 import { buscarZona } from '../datos/zonas'
+import { buscarDepartamento } from '../datos/aptitud'
+import { departamentoElegido } from '../datos/lugarDepartamento'
 import { useEstadoApp } from '../estado/EstadoApp'
 import { nombreCultivo } from '../i18n/dominio'
 import { Chip } from './Chip'
@@ -14,10 +16,13 @@ import estilos from './TiraContexto.module.css'
  */
 export function TiraContexto() {
   const { t } = useTranslation()
-  const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
+  const estado = useEstadoApp()
+  const { cultivoId, zonaId, temporada, parcela } = estado
   const [abierta, fijarAbierta] = useState<'cultivoId' | 'zonaId' | null>(null)
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
+  // El lugar se elige por departamento; los estados viejos solo traen el punto de datos.
+  const nombreLugar = buscarDepartamento(departamentoElegido(estado))?.nombre ?? zona?.nombre ?? null
   const textoCultivo = cultivo
     ? temporada
       ? t('contexto.cultivoDeTemporada', {
@@ -29,9 +34,9 @@ export function TiraContexto() {
   const ariaCultivo = cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : t('contexto.sinCultivoAria')
   const conParcela = Boolean(zona && parcela)
   const ariaLugar = conParcela
-    ? t('contexto.suParcelaAria', { lugar: zona!.nombre })
-    : zona
-      ? t('contexto.lugarAria', { lugar: zona.nombre })
+    ? t('contexto.suParcelaAria', { lugar: nombreLugar })
+    : nombreLugar
+      ? t('contexto.lugarAria', { lugar: nombreLugar })
       : t('contexto.sinLugarAria')
 
   return (
@@ -45,7 +50,7 @@ export function TiraContexto() {
         aria-haspopup="dialog"
         onClick={() => fijarAbierta('zonaId')}
       >
-        {conParcela ? t('contexto.suParcela') : zona ? zona.nombre : t('contexto.elegirLugar')}
+        {conParcela ? t('contexto.suParcela') : (nombreLugar ?? t('contexto.elegirLugar'))}
       </Chip>
       <PreguntaContexto clave={abierta} alCerrar={() => fijarAbierta(null)} />
     </div>

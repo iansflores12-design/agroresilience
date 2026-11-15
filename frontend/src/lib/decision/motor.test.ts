@@ -121,7 +121,7 @@ describe('validarEntrada', () => {
   })
   it('rechaza lugar, cultivo, terreno o temporada invalidos', () => {
     expect(validarEntrada({ ...base, zonaId: 'marte' })).toBeNull()
-    expect(validarEntrada({ ...base, cultivoId: 'cafe' })).toBeNull()
+    expect(validarEntrada({ ...base, cultivoId: 'cacao' })).toBeNull()
     expect(validarEntrada({ ...base, terreno: 'raro' })).toBeNull()
     expect(validarEntrada({ ...base, temporada: 'invierno' })).toBeNull()
     expect(validarEntrada(null)).toBeNull()

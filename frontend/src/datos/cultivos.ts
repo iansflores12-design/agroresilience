@@ -15,7 +15,10 @@ export interface Cultivo {
   id: string
   nombre: string
   nombreCientifico: string
-  familia: 'gramínea' | 'leguminosa' | 'hortaliza' | 'cobertura'
+  familia: 'gramínea' | 'leguminosa' | 'hortaliza' | 'cobertura' | 'perenne'
+  /** Cultivo permanente (cafe, platano, palma, cana): no se rota por temporadas. */
+  perenne?: boolean
+  /** Semanas desde la siembra hasta la primera cosecha (o el ciclo completo si no es permanente). */
   cicloSemanas: number
   etapas: EtapaCultivo[]
 }
@@ -108,6 +111,92 @@ export const cultivos: Cultivo[] = [
       etapa('crecimiento', 'Crecimiento de cobertura', 4, 12, 'baja'),
       etapa('floracion', 'Floración', 13, 16, 'baja'),
       etapa('maduracion', 'Maduración', 17, 20, 'baja'),
+    ],
+  },
+  // Los mayores cultivos de exportacion de Honduras segun el Atlas of Economic Complexity (Harvard
+  // Growth Lab, exportaciones de 2024): cafe US$1,240 M, aceite de palma US$366 M, banano y platano
+  // US$263 M, puros (tabaco) US$149 M, cana de azucar US$127 M y melon y papaya US$117 M.
+  // https://atlas.hks.harvard.edu/explore/treemap/?exporter=country-340&importer=group-1
+  {
+    id: 'cafe',
+    nombre: 'Café',
+    nombreCientifico: 'Coffea arabica',
+    familia: 'perenne',
+    perenne: true,
+    cicloSemanas: 156,
+    etapas: [
+      etapa('establecimiento', 'Vivero y establecimiento', 0, 25, 'alta'),
+      etapa('crecimiento', 'Crecimiento del cafeto', 26, 103, 'media'),
+      etapa('produccion', 'Producción', 104, 156, 'media'),
+    ],
+  },
+  {
+    id: 'platano',
+    nombre: 'Banano y plátano',
+    nombreCientifico: 'Musa spp.',
+    familia: 'perenne',
+    perenne: true,
+    cicloSemanas: 52,
+    etapas: [
+      etapa('establecimiento', 'Siembra del hijo', 0, 8, 'alta'),
+      etapa('vegetativa', 'Crecimiento', 9, 28, 'media'),
+      etapa('floracion', 'Parición (floración)', 29, 36, 'alta'),
+      etapa('llenado', 'Llenado del racimo', 37, 48, 'alta'),
+      etapa('cosecha', 'Cosecha', 49, 52, 'media'),
+    ],
+  },
+  {
+    id: 'palma',
+    nombre: 'Palma africana',
+    nombreCientifico: 'Elaeis guineensis',
+    familia: 'perenne',
+    perenne: true,
+    cicloSemanas: 156,
+    etapas: [
+      etapa('establecimiento', 'Establecimiento', 0, 25, 'alta'),
+      etapa('crecimiento', 'Crecimiento', 26, 129, 'media'),
+      etapa('produccion', 'Producción de racimos', 130, 156, 'media'),
+    ],
+  },
+  {
+    id: 'cana',
+    nombre: 'Caña de azúcar',
+    nombreCientifico: 'Saccharum officinarum',
+    familia: 'gramínea',
+    perenne: true,
+    cicloSemanas: 52,
+    etapas: [
+      etapa('brotacion', 'Brotación', 0, 6, 'alta'),
+      etapa('macollamiento', 'Macollamiento', 7, 17, 'alta'),
+      etapa('crecimiento', 'Gran crecimiento', 18, 39, 'alta'),
+      etapa('maduracion', 'Maduración', 40, 52, 'baja'),
+    ],
+  },
+  {
+    id: 'melon',
+    nombre: 'Melón',
+    nombreCientifico: 'Cucumis melo',
+    familia: 'hortaliza',
+    cicloSemanas: 12,
+    etapas: [
+      etapa('emergencia', 'Emergencia', 0, 1, 'media'),
+      etapa('vegetativa', 'Guías', 2, 4, 'media'),
+      etapa('floracion', 'Floración', 5, 6, 'alta'),
+      etapa('fructificacion', 'Crecimiento del fruto', 7, 10, 'alta'),
+      etapa('cosecha', 'Cosecha', 11, 12, 'baja'),
+    ],
+  },
+  {
+    id: 'tabaco',
+    nombre: 'Tabaco',
+    nombreCientifico: 'Nicotiana tabacum',
+    familia: 'hortaliza',
+    cicloSemanas: 16,
+    etapas: [
+      etapa('trasplante', 'Trasplante', 0, 2, 'alta'),
+      etapa('crecimiento', 'Crecimiento', 3, 7, 'media'),
+      etapa('despunte', 'Botón floral y despunte', 8, 10, 'media'),
+      etapa('cosecha', 'Corte de hojas', 11, 16, 'baja'),
     ],
   },
 ]

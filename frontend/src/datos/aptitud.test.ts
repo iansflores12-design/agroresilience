@@ -12,7 +12,7 @@ describe('aptitud', () => {
 
   it('hay puntaje para todos los cultivos y los pesos suman 1', () => {
     for (const c of cultivos) expect(tieneAptitud(c.id)).toBe(true)
-    expect(tieneAptitud('cafe')).toBe(false)
+    expect(tieneAptitud('cacao')).toBe(false)
     expect(tieneAptitud(null)).toBe(false)
     expect(factores.reduce((s, f) => s + f.peso, 0)).toBeCloseTo(1)
   })
@@ -44,7 +44,9 @@ describe('aptitud', () => {
 
   it('las rotaciones empiezan por repetir el cultivo y siguen de mejor a peor', () => {
     const opciones = rotacionesPara('HN-CH', 'maiz', 'seco')
-    expect(opciones).toHaveLength(cultivos.length)
+    // Los permanentes (cafe, platano, palma, cana) no entran como siembra de postrera.
+    expect(opciones).toHaveLength(cultivos.filter((c) => !c.perenne).length)
+    expect(opciones.some((o) => o.id === 'cafe')).toBe(false)
     expect(opciones[0]).toMatchObject({ id: 'maiz', actual: true, diferencia: 0, nombre: 'Maíz y otra vez maíz' })
     const otras = opciones.slice(1)
     for (const [i, r] of otras.entries()) {
@@ -56,5 +58,13 @@ describe('aptitud', () => {
     expect(opciones.find((r) => r.mejor)!.total).toBe(Math.max(...opciones.map((r) => r.total)))
     expect(rotacionesPara(null, 'maiz', 'seco')).toEqual([])
     expect(rotacionesPara('HN-CH', null, 'seco')).toEqual([])
+  })
+
+  it('los cultivos del Atlas se dan donde se espera y los permanentes no tienen rotacion', () => {
+    const mejor = (id: string) => ranking(id, 'normal')[0].id
+    expect(ranking('cafe', 'normal').slice(0, 6).map((d) => d.id)).toEqual(expect.arrayContaining(['HN-IN']))
+    expect(['HN-AT', 'HN-CL', 'HN-GD', 'HN-CR', 'HN-IB']).toContain(mejor('palma'))
+    expect(aptitud('HN-IN', 'palma', 'normal')!.nivel).toBe('dificil')
+    expect(rotacionesPara('HN-CP', 'cafe', 'normal')).toEqual([])
   })
 })

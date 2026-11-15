@@ -28,6 +28,8 @@ interface Interno {
   departamentos: Map<string, L.Path>
   lugares: Map<string, L.Marker>
   verTodo(): void
+  /** El productor acerco o alejo: un cambio de tamano ya no vuelve a encuadrar todo el pais. */
+  marcarMovido(): void
 }
 
 /** Si un lugar cae sobre el centro del departamento, corre el puntaje para que el punto no lo tape. */
@@ -93,9 +95,11 @@ export function MapaHonduras({
       zoom: 7,
       zoomSnap: 0.25,
       zoomDelta: 0.75,
-      minZoom: 5.5,
+      // El minimo real se fija al ver todo el pais (ver `verTodo`): en un telefono angosto el pais
+      // entero ya queda cerca de 5.5 y, con ese tope fijo, el boton de alejar no hacia nada.
+      minZoom: 3,
       maxZoom: 10,
-      maxBounds: honduras.pad(0.5),
+      maxBounds: honduras.pad(1.5),
       zoomControl: false,
       attributionControl: false,
       // La rueda y el dedo mueven la pagina, no el mapa (ver `alAcercar`).
@@ -108,8 +112,12 @@ export function MapaHonduras({
     const verTodo = () => {
       movido = false
       const { x, y } = mapa.getSize()
-      if (x > 0 && y > 0) mapa.fitBounds(honduras, { animate: false })
+      if (x <= 0 || y <= 0) return
+      mapa.setMinZoom(3)
+      mapa.fitBounds(honduras, { animate: false })
       zoomCompleto = mapa.getZoom()
+      // Se puede alejar un paso mas alla del pais completo (sin fondo, mas lejos ya no se ve nada).
+      mapa.setMinZoom(Math.max(3, zoomCompleto - 0.75))
     }
     // En telefono, arrastrar solo mueve el mapa cuando esta acercado; si no, desplaza la pagina.
     const alAcercar = () => {
@@ -173,7 +181,7 @@ export function MapaHonduras({
           })
     observador?.observe(el)
 
-    interno.current = { mapa, departamentos, lugares, verTodo }
+    interno.current = { mapa, departamentos, lugares, verTodo, marcarMovido: () => (movido = true) }
     return () => {
       observador?.disconnect()
       interno.current = null
@@ -264,8 +272,14 @@ export function MapaHonduras({
   useImperativeHandle(
     ref,
     () => ({
-      acercar: () => interno.current?.mapa.zoomIn(),
-      alejar: () => interno.current?.mapa.zoomOut(),
+      acercar: () => {
+        interno.current?.marcarMovido()
+        interno.current?.mapa.zoomIn()
+      },
+      alejar: () => {
+        interno.current?.marcarMovido()
+        interno.current?.mapa.zoomOut()
+      },
       verTodo: () => interno.current?.verTodo(),
       irA: (lat, lon) => {
         const mapa = interno.current?.mapa

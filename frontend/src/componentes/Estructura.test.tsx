@@ -1,7 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { cultivos } from '../datos/cultivos'
-import { zonas } from '../datos/zonas'
 import { renderizarApp } from '../pruebas/renderizar'
 
 const rutas = [
@@ -55,13 +54,13 @@ describe('Estructura', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Principal' })
     await usuario.click(within(nav).getByRole('link', { name: 'Mapa' }))
-    const zona = zonas[0]
-    await usuario.click(screen.getByRole('button', { name: zona.nombre }))
+    // El lugar se elige por departamento (Choluteca tiene su propio punto de datos).
+    await usuario.click(screen.getByRole('button', { name: /^Choluteca/ }))
 
     for (const etiqueta of ['Tierra', 'Preguntar', 'Plan']) {
       await usuario.click(within(nav).getByRole('link', { name: etiqueta }))
       expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
-      expect(within(tira).getByText(zona.nombre)).toBeInTheDocument()
+      expect(within(tira).getByText('Choluteca')).toBeInTheDocument()
     }
   })
 

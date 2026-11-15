@@ -26,6 +26,12 @@ export const ICONO_CULTIVO: Record<string, NombreIcono> = {
   arroz: 'rice_bowl',
   tomate: 'nutrition',
   'frijol-terciopelo': 'local_florist',
+  cafe: 'coffee',
+  platano: 'nature',
+  palma: 'park',
+  cana: 'energy_savings_leaf',
+  melon: 'grocery',
+  tabaco: 'nest_eco_leaf',
 }
 
 export const ICONO_TEMPORADA: Record<Temporada, NombreIcono> = {

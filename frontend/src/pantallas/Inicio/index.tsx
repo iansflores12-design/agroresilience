@@ -280,7 +280,9 @@ export default function Inicio() {
   // 'todo' = el cuestionario completo; una clave = solo esa pregunta, abierta desde un chip.
   const [editando, fijarEditando] = useState<ClavePregunta | 'todo' | null>(null)
   const [intento, fijarIntento] = useState(0)
-  const decision = useDecision(editando ? null : entrada, intento)
+  // Un cultivo permanente (cafe, platano, palma, cana) no se rota por temporadas: no hay rotaciones que calcular.
+  const perenne = Boolean(entrada && CULTIVOS[entrada.cultivoId]?.perenne)
+  const decision = useDecision(editando || perenne ? null : entrada, intento)
   // Los chips de la barra superior abren aquí una pregunta: /?pregunta=cultivoId o zonaId.
   const [params, fijarParams] = useSearchParams()
   const pedida = params.get('pregunta')
@@ -310,6 +312,7 @@ export default function Inicio() {
               cultivoId: cultivoValido,
               temporada: estado.temporada ?? undefined,
               parcela: estado.parcela,
+              departamentoId: estado.departamentoId,
               edadSemanas: cultivoValido ? edadSemanas : 0,
               objetivos,
             }}
@@ -342,7 +345,16 @@ export default function Inicio() {
 
         {cultivo && <DondeSeDa key={`${cultivo.id}-${entrada.zonaId}`} cultivo={cultivo} zonaId={entrada.zonaId} />}
 
-        {decision.estado === 'calculando' && (
+        {perenne && cultivo && (
+          <section className={estilos.seccion} aria-labelledby="titulo-perenne">
+            <h2 id="titulo-perenne" className="tipo-titulo">
+              {t('plan.perenneTitulo', { cultivo: t(`cultivos.${cultivo.id}.nombre`) })}
+            </h2>
+            <p className={estilos.ayuda}>{t('plan.perenneTexto', { el: t(`cultivos.${cultivo.id}.el`) })}</p>
+          </section>
+        )}
+
+        {!perenne && decision.estado === 'calculando' && (
           <section className={estilos.seccion}>
             <p className={estilos.ayuda} role="status">
               {t('comun.calculando')}
@@ -354,7 +366,7 @@ export default function Inicio() {
             </ul>
           </section>
         )}
-        {decision.estado === 'error' && (
+        {!perenne && decision.estado === 'error' && (
           <div className={estilos.error} role="alert">
             <p>{t('comun.errorPronostico')}</p>
             <Boton variante="tonal" icono="refresh" onClick={() => fijarIntento((i) => i + 1)}>
