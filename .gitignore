@@ -1,4 +1,4 @@
-﻿# Secretos
+# Secretos
 config/*token*.txt
 
 # Datos crudos (15 GB): solo locales
@@ -8,9 +8,21 @@ entrada/
 # Entornos, logs y motores fuera del repo
 .venv/
 .venv_kharis/
-kharis_engine/
 logs/
 __pycache__/
 *.pyc
 .claude/
 node_modules/
+
+# Respaldos locales del motor
+respaldos/
+
+# Motor Kharis: solo el codigo va al repo (datos, modelos, corridas y salidas quedan locales)
+kharis_engine/*
+!kharis_engine/kharis/
+!kharis_engine/tests/
+!kharis_engine/*.py
+!kharis_engine/*.md
+!kharis_engine/plantilla_2021_2026.html
+!kharis_engine/requirements.txt
+kharis_engine.zip
