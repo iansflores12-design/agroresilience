@@ -18,6 +18,15 @@ export class ErrorGemini extends Error {
 export interface MensajeGemini {
   rol: 'user' | 'model'
   texto: string
+  /** Foto del productor (base64 sin el prefijo data:), parte multimodal de Gemini. */
+  imagen?: { mimeType: string; data: string }
+}
+
+function partesDe(m: MensajeGemini): object[] {
+  const partes: object[] = []
+  if (m.imagen) partes.push({ inlineData: { mimeType: m.imagen.mimeType, data: m.imagen.data } })
+  if (m.texto || !partes.length) partes.push({ text: m.texto })
+  return partes
 }
 
 export interface PedidoGemini {
@@ -67,7 +76,7 @@ function cuerpo(p: PedidoGemini): string {
   const nivel = process.env.GEMINI_PENSAMIENTO?.trim()
   return JSON.stringify({
     systemInstruction: { parts: [{ text: p.sistema }] },
-    contents: p.mensajes.map((m) => ({ role: m.rol, parts: [{ text: m.texto }] })),
+    contents: p.mensajes.map((m) => ({ role: m.rol, parts: partesDe(m) })),
     ...(p.busqueda ? { tools: [{ google_search: {} }] } : {}),
     generationConfig: {
       temperature: p.temperatura ?? 0.4,

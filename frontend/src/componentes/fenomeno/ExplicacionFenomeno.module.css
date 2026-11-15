@@ -1,0 +1,404 @@
+.explicacion {
+  width: 100%;
+  max-width: var(--ancho-lectura);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.lienzo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container);
+}
+
+@media (min-width: 600px) {
+  .lienzo {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.escena {
+  display: block;
+  /* El cielo y el suelo se salen del viewBox para llenar el lienzo 4:3 sin franjas vacias. */
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Capas: apagadas por defecto, se encienden segun data-ver ---------- */
+
+.capa {
+  opacity: 0;
+  transition: opacity var(--mov-espacial) var(--curva-estandar);
+}
+
+.escena[data-ver~='sol'] .sol,
+.escena[data-ver~='mar'] .mar,
+.escena[data-ver~='calor'] .calor,
+.escena[data-ver~='remolino'] .remolino,
+.escena[data-ver~='nubes'] .nubes,
+.escena[data-ver~='lluvia'] .lluvia,
+.escena[data-ver~='viento'] .viento,
+.escena[data-ver~='suelo'] .suelo,
+.escena[data-ver~='grietas'] .grietas,
+.escena[data-ver~='rastrojo'] .rastrojo,
+.escena[data-ver~='escorrentia'] .escorrentia,
+.escena[data-ver~='barreras'] .barreras,
+.escena[data-ver~='plantas'] .plantas,
+.escena[data-ver~='gotas'] .gotas {
+  opacity: 1;
+}
+
+.cielo {
+  fill: var(--md-sys-color-surface-container-high);
+  transition: fill var(--mov-espacial) var(--curva-estandar);
+}
+
+.escena[data-ver~='oscuras'] .cielo {
+  fill: var(--md-sys-color-surface-container-highest);
+}
+
+.sol {
+  transform: translate(262px, 46px);
+  fill: var(--md-sys-color-tertiary);
+  stroke: var(--md-sys-color-tertiary);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.sol circle {
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--mov-espacial) var(--curva-estandar);
+}
+
+.escena[data-ver~='fuerte'] .sol circle {
+  transform: scale(1.35);
+}
+
+.mar rect {
+  fill: var(--md-sys-color-primary-container);
+}
+
+.ola {
+  fill: none;
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.calor {
+  fill: var(--md-sys-color-error);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.remolino {
+  transform: translate(160px, 78px);
+  fill: none;
+  stroke: var(--md-sys-color-secondary);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.nube {
+  fill: var(--md-sys-color-surface-bright, var(--md-sys-color-surface));
+  stroke: var(--md-sys-color-outline-variant);
+  stroke-width: 2;
+  transition: fill var(--mov-espacial) var(--curva-estandar);
+}
+
+.escena[data-ver~='oscuras'] .nube {
+  fill: var(--md-sys-color-outline);
+}
+
+.lluvia line {
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.escena[data-ver~='fuerte'] .lluvia line {
+  stroke-width: 4;
+}
+
+.viento path {
+  fill: none;
+  stroke: var(--md-sys-color-on-surface-variant);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 40 24;
+}
+
+.suelo > rect {
+  fill: var(--md-sys-color-secondary-container);
+}
+
+.grietas,
+.rastrojo,
+.escorrentia {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.grietas {
+  stroke: var(--md-sys-color-on-secondary-container);
+  stroke-width: 2;
+}
+
+.rastrojo {
+  stroke: var(--md-sys-color-tertiary);
+  stroke-width: 4;
+  stroke-dasharray: 6 4;
+}
+
+.escorrentia {
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 4;
+  stroke-dasharray: 18 12;
+}
+
+.barreras rect {
+  fill: var(--md-sys-color-primary);
+}
+
+.planta {
+  transform-origin: 0 0;
+  transition: transform var(--mov-espacial) var(--curva-estandar);
+}
+
+.tallo {
+  fill: none;
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.hoja {
+  fill: var(--md-sys-color-primary);
+  transition: fill var(--mov-espacial) var(--curva-estandar);
+}
+
+.escena[data-ver~='marchitas'] .planta {
+  transform: rotate(14deg) scaleY(0.85);
+}
+
+.escena[data-ver~='marchitas'] .hoja {
+  fill: var(--md-sys-color-tertiary);
+}
+
+.escena[data-ver~='dobladas'] .planta {
+  transform: rotate(-28deg);
+}
+
+.gotas path {
+  fill: var(--md-sys-color-primary);
+}
+
+.insignia {
+  position: absolute;
+  inset-block-start: var(--esp-3);
+  inset-inline-start: var(--esp-3);
+  display: grid;
+  place-items: center;
+  width: var(--esp-12);
+  height: var(--esp-12);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* ---------- Pie: progreso, texto y controles ---------- */
+
+.pie {
+  display: grid;
+  gap: var(--esp-2);
+}
+
+.progreso {
+  display: flex;
+  gap: var(--esp-1);
+}
+
+.marca {
+  flex: 1;
+  height: var(--esp-1);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  overflow: hidden;
+}
+
+.marca::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background-color: var(--md-sys-color-primary);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.marca[data-estado='hecho']::after,
+.marca[data-estado='quieto']::after {
+  transform: scaleX(1);
+}
+
+.contador {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.texto {
+  font: var(--tipo-cuerpo);
+  min-height: calc(var(--esp-6) * 3);
+}
+
+.controles {
+  display: flex;
+  gap: var(--esp-2);
+}
+
+/* ---------- Movimiento: solo si la persona no pidio reducirlo ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .rayos {
+    animation: girar 18s linear infinite;
+  }
+
+  .ola {
+    animation: deslizar 3s linear infinite;
+  }
+
+  .calor {
+    animation: latir 2.4s var(--curva-estandar) infinite;
+  }
+
+  .giro {
+    animation: girar 4s linear infinite;
+  }
+
+  .nube {
+    animation: flotar 7s ease-in-out infinite alternate;
+  }
+
+  .nubeDos {
+    animation-duration: 9s;
+  }
+
+  .lluvia line {
+    animation: caer 0.8s linear infinite;
+  }
+
+  .escena[data-ver~='fuerte'] .lluvia line {
+    animation-duration: 0.45s;
+  }
+
+  .viento path,
+  .escorrentia {
+    animation: correr 1.2s linear infinite;
+  }
+
+  .marca[data-estado='activo']::after {
+    animation: llenar 5s linear forwards;
+  }
+
+  .texto {
+    animation: entrar var(--mov-medio) var(--curva-estandar) both;
+  }
+
+  .insignia {
+    animation: aparecer var(--mov-medio) var(--curva-estandar) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capa,
+  .cielo,
+  .planta,
+  .hoja,
+  .nube,
+  .sol circle {
+    transition: none;
+  }
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes deslizar {
+  to {
+    transform: translateX(-80px);
+  }
+}
+
+@keyframes latir {
+  0%,
+  100% {
+    transform: scale(0.85);
+    fill-opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.1);
+    fill-opacity: 0.9;
+  }
+}
+
+@keyframes flotar {
+  to {
+    transform: translateX(24px);
+  }
+}
+
+@keyframes caer {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(26px);
+    opacity: 0;
+  }
+}
+
+@keyframes correr {
+  to {
+    stroke-dashoffset: -64;
+  }
+}
+
+@keyframes llenar {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--esp-2));
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}

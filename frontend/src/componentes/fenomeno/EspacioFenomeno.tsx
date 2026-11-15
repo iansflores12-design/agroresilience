@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Zona } from '../../datos/zonas'
+import { ExplicacionFenomeno } from './ExplicacionFenomeno'
 import estilos from './EspacioFenomeno.module.css'
 
 export interface PropsFenomeno {
@@ -8,12 +9,7 @@ export interface PropsFenomeno {
   cultivoId: string | null
 }
 
-/**
- * PLACEHOLDER(fenomeno): para integrar la explicacion grafica real, reemplazar el contenido de
- * `.lienzo` (el <div> con la proporcion reservada) por el componente definitivo, que recibe
- * `zona` y `cultivoId`. Conservar la <section data-placeholder="fenomeno"> y su titulo, y hacer
- * que el componente llene el 100 % del lienzo: la proporcion es 16:9 (4:3 en ventana compacta).
- */
+/** La explicación gráfica de los fenómenos del clima, en la pantalla de la zona. */
 export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
   const idTitulo = useId()
   const { t } = useTranslation()
@@ -28,9 +24,7 @@ export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
       <h2 id={idTitulo} className="tipo-titulo">
         {t('fenomeno.titulo')}
       </h2>
-      <div className={estilos.lienzo}>
-        <p className="tipo-nota">{t('fenomeno.reservado')}</p>
-      </div>
+      <ExplicacionFenomeno />
     </section>
   )
 }

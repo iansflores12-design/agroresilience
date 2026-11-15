@@ -269,6 +269,8 @@ const en: Recursos = {
     cuidado: 'Be careful: {{riesgo}}',
   },
   gemini: {
+    fotoSinTexto: 'What do you see in this photo of my crop?',
+    instruccionFoto: 'The farmer sent a photo. Identify the crop if possible and look for signs of drought or water stress, pests, diseases or nutrient deficiency. Say how confident you are, what to check in the field and what to do first. If the photo does not show a crop or is unclear, say so and ask for another one.',
     instrucciones: `You are the AgroResilience farming assistant for producers in Honduras.
 Write in plain English, with short sentences, for people who find reading hard.
 Rules:
@@ -612,8 +614,19 @@ What is still unknown.
   },
   fenomeno: {
     titulo: 'Why does this happen?',
-    reservado: 'Reserved space: the visual explanation of a phenomenon will go here',
+    elegir: 'Choose a phenomenon',
+    repetir: 'Play again',
+    pausar: 'Pause',
+    seguir: 'Resume',
+    paso: 'Step {{n}} of {{total}}',
+    anterior: 'Previous step',
+    siguiente: 'Next step',
+    nino: { nombre: 'El Niño and La Niña', pasos: ['The Pacific Ocean gets warmer (El Niño) or cooler (La Niña) than normal.', 'That shift moves winds and clouds: El Niño brings less rain to Central America; La Niña, more.', 'With El Niño, plant drought-tolerant varieties and store water; with La Niña, look after drainage.'] },
+    canicula: { nombre: 'Midsummer drought', pasos: ['In the middle of the rainy season come dry, hot weeks: the canícula.', 'The sun dries the soil and the plant loses more water than it draws from the ground.', 'Plant so flowering does not fall in the canícula and cover the soil with crop residue.'] },
+    lluvias: { nombre: 'Extreme rain', pasos: ['A lot of rain falls in a few hours, more than the soil can soak up.', 'Water runs over the top, washes away good soil and floods the roots.', 'Dig contour ditches and living barriers and never leave the soil bare.'] },
+    huracan: { nombre: 'Hurricanes', pasos: ['Over warm sea a swirl of clouds forms, spins and grows.', 'It arrives with winds that knock plants down and days of nonstop rain.', 'Follow COPECO alerts, harvest what you can beforehand and tie or stake what remains.'] },
   },
+
   chat: {
     errorRed: 'Check your connection and try again.',
     errorServidor: 'The server could not answer right now.',
@@ -635,6 +648,25 @@ What is still unknown.
     asistente: 'Assistant',
     escribiendo: 'The assistant is typing',
     mensaje: 'Message',
+    adjuntarFoto: 'Attach photo',
+    tomarFoto: 'Take photo',
+    quitarFoto: 'Remove photo',
+    fotoAdjunta: 'Crop photo you sent',
+    fotoVista: 'Photo ready to send',
+    fotoError: 'That image could not be read',
+    fotoErrorDetalle: 'Try another photo in JPG or PNG.',
+    pistaTeclas: 'Tab fills in a suggestion · Up arrow brings back your last message',
+    paraSeguir: 'Follow up',
+    seguir: {
+      simple: 'Explain it more simply',
+      estaSemana: 'What should I do this week?',
+      sinLluvia: 'What if it does not rain for two weeks?',
+      plagas: 'Which pests should I watch for in {{cultivo}}?',
+      costo: 'How much would it cost me?',
+      fotoTratamiento: 'How do I treat it without spending much?',
+      fotoEvitar: 'How do I keep it from happening again?',
+      fenomeno: 'How does El Niño affect me this year?',
+    },
     sugerencias: {
       humedadPara: 'How is the moisture in {{zona}} for {{cultivo}}?',
       masSeca: 'Is {{zona}} drier than normal?',
@@ -650,6 +682,7 @@ What is still unknown.
       leerMapa: 'How do I read the area map?',
     },
     respaldo: {
+      foto: 'The photo could not be analyzed right now; send it again in a moment.',
       intro: 'The assistant could not answer right now. Meanwhile, this is what your data says:',
       cierre: 'Ask again in a moment for a full answer.',
     },
@@ -750,10 +783,11 @@ What the second and third offer, and where they fall behind.
 What they pay: the price per quintal of the crops harvested in all three.
 What to check with their extension agent.
 220 words at most.`,
-    piezasVisuales: `Besides text, you can ask for two visual pieces, each on its own line and written exactly like this:
+    piezasVisuales: `Besides text, you can ask for three visual pieces, each on its own line and written exactly like this:
 [[mapa:ID]] shows the map of Honduras with how well that crop grows. ID is one of: maiz, frijol, sorgo, arroz, tomate, frijol-terciopelo.
+[[fenomeno:ID]] shows an animated explanation of a climate phenomenon. ID is one of: nino (El Niño and La Niña), canicula (midsummer drought), lluvias (extreme rain), huracan (hurricanes). Use it when they ask about those phenomena.
 [[animacion:Short title|Step one|Step two|Step three]] shows an animated, step-by-step explanation (2 to 5 short steps). A step may end in =NUMBER (0 to 100) to draw a bar, for example "Rain covering what corn needs=72"; use only numbers that are in the data.
-Use the map when they ask where a crop grows or ask to see the map. Use the animation when they ask for an animated, step-by-step explanation. If they do not ask, answer with text only. Do not use other tags and do not translate the words "mapa" and "animacion" inside the brackets.`,
+Use the map when they ask where a crop grows or ask to see the map. Use the animation when they ask for an animated, step-by-step explanation. If they do not ask, answer with text only. Do not use other tags and do not translate the words "mapa", "animacion" and "fenomeno" inside the brackets.`,
   },
   siembra: {
     titulo: 'Planting recommendation',

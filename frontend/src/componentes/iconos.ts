@@ -67,6 +67,17 @@ import TrendingDown from '@material-symbols/svg-400/rounded/trending_down.svg?re
 import Flag from '@material-symbols/svg-400/rounded/flag.svg?react'
 import Help from '@material-symbols/svg-400/rounded/help.svg?react'
 
+import PhotoCamera from '@material-symbols/svg-400/rounded/photo_camera.svg?react'
+import AddPhotoAlternate from '@material-symbols/svg-400/rounded/add_photo_alternate.svg?react'
+import Cyclone from '@material-symbols/svg-400/rounded/cyclone.svg?react'
+import Heat from '@material-symbols/svg-400/rounded/heat.svg?react'
+import Thunderstorm from '@material-symbols/svg-400/rounded/thunderstorm.svg?react'
+import Globe from '@material-symbols/svg-400/rounded/globe.svg?react'
+import Flood from '@material-symbols/svg-400/rounded/flood.svg?react'
+import Air from '@material-symbols/svg-400/rounded/air.svg?react'
+
+import PlayArrow from '@material-symbols/svg-400/rounded/play_arrow.svg?react'
+import Pause from '@material-symbols/svg-400/rounded/pause.svg?react'
 export const iconos = {
   grass: Grass,
   map: Map,
@@ -130,6 +141,16 @@ export const iconos = {
   trending_down: TrendingDown,
   flag: Flag,
   help: Help,
+  photo_camera: PhotoCamera,
+  add_photo_alternate: AddPhotoAlternate,
+  cyclone: Cyclone,
+  heat: Heat,
+  thunderstorm: Thunderstorm,
+  globe: Globe,
+  flood: Flood,
+  air: Air,
+  pause: Pause,
+  play_arrow: PlayArrow,
 } as const
 
 export type NombreIcono = keyof typeof iconos

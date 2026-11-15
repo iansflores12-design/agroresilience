@@ -6,6 +6,8 @@ export interface MensajeChat {
   rol: 'usuario' | 'asistente'
   texto: string
   fecha: string
+  /** Foto que adjuntó el productor (data URL JPEG, ~1024 px). */
+  imagen?: string
 }
 
 /** Un chat guardado. El título sale de la primera pregunta hasta que el productor le pone uno. */

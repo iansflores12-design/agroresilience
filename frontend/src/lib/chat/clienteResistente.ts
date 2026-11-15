@@ -23,9 +23,10 @@ export function resumirContexto(c: ContextoChat): string {
 }
 
 /** Respuesta armada en el navegador cuando la API no contesta, para que el chat nunca quede sin respuesta. */
-export function respuestaLocal(c: ContextoChat): string {
+export function respuestaLocal(c: ContextoChat, conFoto = false): string {
   const t = traductor(c.idioma)
-  return `${t('chat.respaldo.intro')}\n${resumirContexto(c)}\n${t('chat.respaldo.cierre')}`
+  const foto = conFoto ? `\n${t('chat.respaldo.foto')}` : ''
+  return `${t('chat.respaldo.intro')}\n${resumirContexto(c)}${foto}\n${t('chat.respaldo.cierre')}`
 }
 
 export interface OpcionesResistente {
@@ -76,7 +77,7 @@ export function crearClienteResistente(base: ClienteChat, { esperasMs = [800, 25
           signal?.removeEventListener('abort', alCancelar)
         }
       }
-      return { texto: respuestaLocal(contexto), respaldo: true }
+      return { texto: respuestaLocal(contexto, Boolean(mensajes[mensajes.length - 1]?.imagen)), respaldo: true }
     },
   }
 }

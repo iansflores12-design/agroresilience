@@ -14,7 +14,8 @@ import { avisar } from '../../lib/avisos'
 import { armarContexto, crearClienteChat, ErrorChat, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import estilos from './Chat.module.css'
 import { ContenidoMensaje, MensajeEscribiendose } from './Enriquecido'
-import { armarSugerencias } from './sugerencias'
+import { armarSeguimiento, armarSugerencias } from './sugerencias'
+import { comprimirImagen } from '../../lib/chat/imagen'
 
 const VISTAS: ContextoChat['vista'][] = ['cultivos', 'mapa', 'zona']
 
@@ -57,6 +58,9 @@ export default function Chat({ cliente }: PropsChat) {
   const estadoZona = zona ? t(`zona.estado.${claveEstadoHumedad(zona)}`).toLowerCase() : ''
 
   const [texto, setTexto] = useState('')
+  const [foto, fijarFoto] = useState<string | null>(null)
+  const entradaGaleria = useRef<HTMLInputElement>(null)
+  const entradaCamara = useRef<HTMLInputElement>(null)
   const [esperando, setEsperando] = useState(false)
   const campo = useRef<HTMLTextAreaElement>(null)
   const fin = useRef<HTMLDivElement>(null)
@@ -94,7 +98,7 @@ export default function Chat({ cliente }: PropsChat) {
   useEffect(() => {
     const el = fin.current
     if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'end' })
-  }, [mensajes.length, esperando])
+  }, [mensajes.length, esperando, foto])
 
   const ejecutar = useCallback(
     async (lista: MensajeChat[], alReintentar: () => void) => {
@@ -134,11 +138,33 @@ export default function Chat({ cliente }: PropsChat) {
     void ejecutar(lista, reintentar)
   }, [ejecutar])
 
-  function enviar(contenido: string) {
+  const preguntas = useMemo(() => mensajes.filter((m) => m.rol === 'usuario'), [mensajes])
+  const ultimo = mensajes[mensajes.length - 1]
+  const seguimiento = useMemo(
+    () => (ultimo?.rol === 'asistente' ? armarSeguimiento(contexto, preguntas[preguntas.length - 1] ?? null, preguntas.map((p) => p.texto)) : []),
+    [ultimo, contexto, preguntas],
+  )
+  // Lo que Tab va llenando: las sugerencias de inicio o las de seguimiento.
+  const propuestas = mensajes.length === 0 ? sugerencias : seguimiento
+
+  async function alElegirFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!archivo) return
+    try {
+      fijarFoto(await comprimirImagen(archivo))
+      campo.current?.focus()
+    } catch {
+      avisar.error({ titulo: t('chat.fotoError'), descripcion: t('chat.fotoErrorDetalle') })
+    }
+  }
+
+  function enviar(contenido: string, imagen: string | null = null) {
     const limpio = contenido.trim()
-    if (!limpio || abortar.current) return
-    const nuevo = agregar({ rol: 'usuario', texto: limpio })
+    if ((!limpio && !imagen) || abortar.current) return
+    const nuevo = agregar({ rol: 'usuario', texto: limpio, ...(imagen ? { imagen } : {}) })
     setTexto('')
+    fijarFoto(null)
     campo.current?.focus()
     void ejecutar([...mensajesActuales.current, nuevo], reintentar)
   }
@@ -151,10 +177,35 @@ export default function Chat({ cliente }: PropsChat) {
   }
 
   function alTeclear(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key !== 'Enter' || e.shiftKey) return
     if (e.nativeEvent.isComposing || e.keyCode === 229) return
+    // Flecha arriba con el campo vacío: vuelve a la última pregunta para corregirla o repetirla.
+    if (e.key === 'ArrowUp' && texto === '' && preguntas.length) {
+      const previa = preguntas[preguntas.length - 1].texto
+      if (!previa) return
+      e.preventDefault()
+      setTexto(previa)
+      requestAnimationFrame(() => campo.current?.setSelectionRange(previa.length, previa.length))
+      return
+    }
+    // Tab llena una sugerencia: con el campo vacío la primera; si ya hay una, la siguiente; si lo
+    // escrito es el comienzo de una, la completa. En otro caso Tab sigue moviendo el foco.
+    if (e.key === 'Tab' && !e.shiftKey && propuestas.length) {
+      const escrito = texto.trim().toLocaleLowerCase()
+      const actual = propuestas.findIndex((p) => p.toLocaleLowerCase() === escrito)
+      const siguiente =
+        escrito === ''
+          ? propuestas[0]
+          : actual >= 0
+            ? propuestas[actual + 1]
+            : propuestas.find((p) => p.toLocaleLowerCase().startsWith(escrito))
+      if (!siguiente) return
+      e.preventDefault()
+      setTexto(siguiente)
+      return
+    }
+    if (e.key !== 'Enter' || e.shiftKey) return
     e.preventDefault()
-    enviar(texto)
+    enviar(texto, foto)
   }
 
   // Gesto para volver: deslizar hacia la derecha desde el borde izquierdo de la pantalla.
@@ -250,7 +301,10 @@ export default function Chat({ cliente }: PropsChat) {
             >
               {m.rol === 'asistente' && <span className={estilos.etiqueta}>{t('chat.asistente')}</span>}
               {m.rol === 'usuario' ? (
-                <p className={`${estilos.burbuja} ${estilos.burbujaUsuario}`}>{m.texto}</p>
+                <div className={`${estilos.burbuja} ${estilos.burbujaUsuario}`}>
+                  {m.imagen && <img className={estilos.fotoMensaje} src={m.imagen} alt={t('chat.fotoAdjunta')} />}
+                  {m.texto && <p>{m.texto}</p>}
+                </div>
               ) : (
                 <div className={`${estilos.burbuja} ${estilos.burbujaAsistente}`}>
                   {m.id === recienId ? (
@@ -275,13 +329,37 @@ export default function Chat({ cliente }: PropsChat) {
               </div>
             </div>
           )}
+          {!esperando && seguimiento.length > 0 && (
+            <div className={estilos.seguimiento} role="group" aria-label={t('chat.paraSeguir')}>
+              <span className={estilos.etiqueta}>{t('chat.paraSeguir')}</span>
+              <div className={estilos.chipsSeguir}>
+                {seguimiento.map((s) => (
+                  <Chip key={s} onClick={() => enviar(s)}>
+                    {s}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
           <div ref={fin} className={estilos.fin} />
         </div>
       </section>
 
       <div className={`plano-superior ${estilos.redactor}`}>
         <div className={estilos.redactorInterior}>
+          {foto && (
+            <div className={estilos.vistaFoto}>
+              <img src={foto} alt={t('chat.fotoVista')} />
+              <BotonIcono icono="close" etiqueta={t('chat.quitarFoto')} variante="tonal" onClick={() => fijarFoto(null)} />
+            </div>
+          )}
+          <input ref={entradaGaleria} type="file" accept="image/*" hidden onChange={alElegirFoto} data-testid="entrada-foto" />
+          <input ref={entradaCamara} type="file" accept="image/*" capture="environment" hidden onChange={alElegirFoto} />
           <div className={estilos.campoFila}>
+            <BotonIcono icono="add_photo_alternate" etiqueta={t('chat.adjuntarFoto')} onClick={() => entradaGaleria.current?.click()} />
+            <span className={estilos.soloTactil}>
+              <BotonIcono icono="photo_camera" etiqueta={t('chat.tomarFoto')} onClick={() => entradaCamara.current?.click()} />
+            </span>
             <textarea
               ref={campo}
               className={estilos.campo}
@@ -295,11 +373,14 @@ export default function Chat({ cliente }: PropsChat) {
             {esperando ? (
               <BotonIcono icono="stop" etiqueta={t('comun.detener')} variante="relleno" onClick={detener} />
             ) : (
-              <Boton icono="send" disabled={texto.trim() === ''} onClick={() => enviar(texto)}>
-                {t('comun.enviar')}
+              <Boton icono="send" disabled={texto.trim() === '' && !foto} onClick={() => enviar(texto, foto)} className={estilos.enviar}>
+                <span className={estilos.textoEnviar}>{t('comun.enviar')}</span>
               </Boton>
             )}
           </div>
+          <p className={estilos.pista} aria-hidden="true">
+            {t('chat.pistaTeclas')}
+          </p>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { NivelAptitud } from '../../componentes/mapa/NivelAptitud'
 import { aptitud, departamentoDeZona, tieneAptitud } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
 import { cajaHonduras } from '../../datos/zonas'
+import { ExplicacionFenomeno, esFenomeno, type Fenomeno } from '../../componentes/fenomeno/ExplicacionFenomeno'
 import estilos from './Enriquecido.module.css'
 
 export interface PasoAnimacion {
@@ -18,12 +19,15 @@ export type Trozo =
   | { tipo: 'texto'; texto: string }
   | { tipo: 'mapa'; cultivoId: string }
   | { tipo: 'animacion'; titulo: string; pasos: PasoAnimacion[] }
+  | { tipo: 'fenomeno'; fenomeno: Fenomeno }
 
-const ETIQUETA = /\[\[(mapa|animacion):([^\]]*)\]\]/g
+const ETIQUETA = /\[\[(mapa|animacion|fenomeno):([^\]]*)\]\]/g
 const MAX_PASOS = 6
 
 /**
  * Parte la respuesta del asistente en texto y piezas visuales. El asistente puede pedir:
+ *   [[fenomeno:nino]]                                 la explicación animada de un fenómeno del clima
+ *                                                     (nino, canicula, lluvias, huracan)
  *   [[mapa:maiz]]                                     el mapa de Honduras para ese cultivo
  *   [[animacion:Título|Paso uno|Lluvia prevista=72]]  una explicación animada, paso a paso;
  *                                                     "=72" dibuja una barra hasta 72 de 100
@@ -40,6 +44,10 @@ export function partirMensaje(texto: string): Trozo[] {
     agregarTexto(texto.slice(desde, m.index))
     desde = m.index + m[0].length
     const cuerpo = m[2].trim()
+    if (m[1] === 'fenomeno') {
+      if (esFenomeno(cuerpo)) trozos.push({ tipo: 'fenomeno', fenomeno: cuerpo })
+      continue
+    }
     if (m[1] === 'mapa') {
       if (tieneAptitud(cuerpo) && buscarCultivo(cuerpo)) trozos.push({ tipo: 'mapa', cultivoId: cuerpo })
       continue
@@ -173,6 +181,7 @@ export function ContenidoMensaje({ texto, zonaId }: { texto: string; zonaId: str
     <>
       {trozos.map((t, i) => {
         if (t.tipo === 'texto') return <p key={i} className={estilos.texto}>{t.texto}</p>
+        if (t.tipo === 'fenomeno') return <div key={i} className={estilos.figura}><ExplicacionFenomeno inicial={t.fenomeno} fijo /></div>
         if (t.tipo === 'mapa') return <MapaChat key={i} cultivoId={t.cultivoId} zonaId={zonaId} />
         return <Animacion key={i} titulo={t.titulo} pasos={t.pasos} />
       })}

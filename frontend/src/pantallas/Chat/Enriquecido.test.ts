@@ -27,3 +27,12 @@ describe('partirMensaje', () => {
     ])
   })
 })
+
+describe('partirMensaje con fenomenos', () => {
+  it('reconoce [[fenomeno:ID]] y descarta los desconocidos', () => {
+    expect(partirMensaje('Mire:\n[[fenomeno:nino]]\n[[fenomeno:volcan]]')).toEqual([
+      { tipo: 'texto', texto: 'Mire:' },
+      { tipo: 'fenomeno', fenomeno: 'nino' },
+    ])
+  })
+})

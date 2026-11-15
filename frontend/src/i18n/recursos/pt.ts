@@ -269,6 +269,8 @@ const pt: Recursos = {
     cuidado: 'Tenha cuidado: {{riesgo}}',
   },
   gemini: {
+    fotoSinTexto: 'O que você vê nesta foto da minha lavoura?',
+    instruccionFoto: 'O produtor enviou uma foto. Identifique a cultura se possível e procure sinais de seca ou estresse hídrico, pragas, doenças ou falta de nutrientes. Diga quão seguro você está, o que verificar no campo e o que fazer primeiro. Se a foto não mostrar uma lavoura ou não estiver nítida, diga isso e peça outra.',
     instrucciones: `Você é o assistente agrícola do AgroResilience para produtores de Honduras.
 Escreva em português simples, com frases curtas, para pessoas que leem com esforço. Trate o produtor por "você".
 Regras:
@@ -611,8 +613,19 @@ No máximo 250 palavras.`,
   },
   fenomeno: {
     titulo: 'Por que isso acontece?',
-    reservado: 'Espaço reservado: aqui ficará a explicação gráfica de um fenômeno',
+    elegir: 'Escolha um fenômeno',
+    repetir: 'Ver de novo',
+    pausar: 'Pausar',
+    seguir: 'Continuar',
+    paso: 'Passo {{n}} de {{total}}',
+    anterior: 'Passo anterior',
+    siguiente: 'Próximo passo',
+    nino: { nombre: 'El Niño e La Niña', pasos: ['O oceano Pacífico esquenta (El Niño) ou esfria (La Niña) mais que o normal.', 'Essa mudança move os ventos e as nuvens: com El Niño chove menos na América Central; com La Niña, mais.', 'Com El Niño, plante variedades que aguentam a seca e guarde água; com La Niña, cuide da drenagem.'] },
+    canicula: { nombre: 'Veranico e seca', pasos: ['No meio da estação chuvosa chegam semanas secas e quentes: o veranico.', 'O sol seca a terra e a planta perde mais água do que tira do solo.', 'Plante para que a floração não caia no veranico e cubra o solo com palhada.'] },
+    lluvias: { nombre: 'Chuvas extremas', pasos: ['Muita chuva cai em poucas horas, mais do que a terra consegue absorver.', 'A água escorre por cima, leva a terra boa e encharca as raízes.', 'Faça valas e barreiras vivas em curvas de nível e não deixe o solo descoberto.'] },
+    huracan: { nombre: 'Furacões', pasos: ['Sobre o mar quente se forma um redemoinho de nuvens que gira e cresce.', 'Chega com ventos que derrubam as plantas e dias de chuva sem parar.', 'Acompanhe os alertas da COPECO, colha o que puder antes e amarre ou escore o que ficar.'] },
   },
+
   chat: {
     errorRed: 'Verifique sua conexão e tente de novo.',
     errorServidor: 'O servidor não conseguiu responder neste momento.',
@@ -634,6 +647,25 @@ No máximo 250 palavras.`,
     asistente: 'Assistente',
     escribiendo: 'O assistente está escrevendo',
     mensaje: 'Mensagem',
+    adjuntarFoto: 'Anexar foto',
+    tomarFoto: 'Tirar foto',
+    quitarFoto: 'Remover foto',
+    fotoAdjunta: 'Foto da lavoura enviada por você',
+    fotoVista: 'Foto pronta para enviar',
+    fotoError: 'Não foi possível ler essa imagem',
+    fotoErrorDetalle: 'Tente outra foto em JPG ou PNG.',
+    pistaTeclas: 'Tab completa uma sugestão · Seta para cima recupera sua última mensagem',
+    paraSeguir: 'Para continuar',
+    seguir: {
+      simple: 'Explique de forma mais simples',
+      estaSemana: 'O que faço esta semana?',
+      sinLluvia: 'E se não chover em duas semanas?',
+      plagas: 'Quais pragas devo vigiar em {{cultivo}}?',
+      costo: 'Quanto me custaria fazer isso?',
+      fotoTratamiento: 'Como trato isso sem gastar muito?',
+      fotoEvitar: 'Como evito que se repita?',
+      fenomeno: 'Como o El Niño me afeta este ano?',
+    },
     sugerencias: {
       humedadPara: 'Como está a umidade em {{zona}} para {{cultivo}}?',
       masSeca: '{{zona}} está mais seca que o normal?',
@@ -649,6 +681,7 @@ No máximo 250 palavras.`,
       leerMapa: 'Como leio o mapa de zonas?',
     },
     respaldo: {
+      foto: 'Não foi possível analisar a foto agora; envie-a de novo em um momento.',
       intro: 'O assistente não conseguiu responder agora. Enquanto isso, isto é o que dizem os seus dados:',
       cierre: 'Pergunte de novo em instantes para uma resposta completa.',
     },
@@ -749,10 +782,11 @@ O que oferecem a segunda e a terceira, e em que ficam atrás.
 O que pagam: o preço por quintal das culturas que se colhem nas três.
 O que verificar com o seu técnico.
 No máximo 220 palavras.`,
-    piezasVisuales: `Além do texto, você pode pedir duas peças visuais, cada uma em uma linha própria e escrita exatamente assim:
+    piezasVisuales: `Além do texto, você pode pedir três peças visuais, cada uma em uma linha própria e escrita exatamente assim:
 [[mapa:ID]] mostra o mapa de Honduras com quão bem essa cultura se dá. ID é um de: maiz, frijol, sorgo, arroz, tomate, frijol-terciopelo.
+[[fenomeno:ID]] mostra uma explicação animada de um fenômeno do clima. ID é um de: nino (El Niño e La Niña), canicula (veranico ou seca), lluvias (chuvas extremas), huracan (furacões). Use quando perguntarem sobre esses fenômenos.
 [[animacion:Título curto|Passo um|Passo dois|Passo três]] mostra uma explicação animada, passo a passo (de 2 a 5 passos curtos). Um passo pode terminar em =NÚMERO (de 0 a 100) para desenhar uma barra, por exemplo "Chuva que cobre o que o milho pede=72"; use só números que estejam nos dados.
-Use o mapa quando perguntarem onde uma cultura se dá ou pedirem para ver o mapa. Use a animação quando pedirem uma explicação animada, com efeitos ou passo a passo. Se não pedirem, responda só com texto. Não use outras etiquetas e não traduza as palavras "mapa" e "animacion" dentro dos colchetes.`,
+Use o mapa quando perguntarem onde uma cultura se dá ou pedirem para ver o mapa. Use a animação quando pedirem uma explicação animada, com efeitos ou passo a passo. Se não pedirem, responda só com texto. Não use outras etiquetas e não traduza as palavras "mapa", "animacion" e "fenomeno" dentro dos colchetes.`,
   },
   siembra: {
     titulo: 'Recomendação de plantio',

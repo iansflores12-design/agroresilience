@@ -187,3 +187,53 @@ describe('pantalla Chat', () => {
     expect(screen.getByText('guardada')).toBeInTheDocument()
   })
 })
+
+describe('redactor: teclas y seguimiento', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    vi.clearAllMocks()
+  })
+
+  it('Tab llena una sugerencia y flecha arriba recupera la ultima pregunta', async () => {
+    const u = userEvent.setup()
+    montar(clienteDe('Riegue en la mañana.'))
+    const campo = screen.getByRole('textbox', { name: 'Mensaje' })
+    await u.click(campo)
+    await u.keyboard('{Tab}')
+    const primera = (campo as HTMLTextAreaElement).value
+    expect(primera).not.toBe('')
+    await u.keyboard('{Tab}')
+    expect((campo as HTMLTextAreaElement).value).not.toBe(primera)
+    await u.clear(campo)
+    await u.type(campo, 'mi pregunta{Enter}')
+    await waitFor(() => expect(registro().getByText('Riegue en la mañana.')).toBeInTheDocument())
+    await u.click(campo)
+    await u.keyboard('{ArrowUp}')
+    expect((campo as HTMLTextAreaElement).value).toBe('mi pregunta')
+  })
+
+  it('despues de una respuesta ofrece preguntas para seguir', async () => {
+    const u = userEvent.setup()
+    const cliente = clienteDe('Listo.')
+    montar(cliente)
+    await u.type(screen.getByRole('textbox', { name: 'Mensaje' }), 'hola{Enter}')
+    const grupo = await screen.findByRole('group', { name: 'Para seguir' })
+    await u.click(within(grupo).getByRole('button', { name: '¿Qué hago esta semana?' }))
+    await waitFor(() => expect(cliente.enviar).toHaveBeenCalledTimes(2))
+  })
+
+  it('manda la foto adjunta con el mensaje', async () => {
+    const u = userEvent.setup()
+    const cliente = clienteDe('Es frijol sano.')
+    const imagen = await import('../../lib/chat/imagen')
+    vi.spyOn(imagen, 'comprimirImagen').mockResolvedValue('data:image/jpeg;base64,QUJD')
+    montar(cliente)
+    await u.upload(screen.getByTestId('entrada-foto'), new File(['x'], 'hoja.jpg', { type: 'image/jpeg' }))
+    expect(await screen.findByRole('img', { name: 'Foto lista para enviar' })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Enviar' }))
+    await waitFor(() => expect(cliente.enviar).toHaveBeenCalled())
+    const { mensajes } = cliente.enviar.mock.calls[0][0]
+    expect(mensajes[0].imagen).toBe('data:image/jpeg;base64,QUJD')
+    expect(registro().getByRole('img', { name: 'Foto del cultivo enviada por usted' })).toBeInTheDocument()
+  })
+})
