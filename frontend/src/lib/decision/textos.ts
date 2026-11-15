@@ -146,6 +146,15 @@ export function datosParaGemini(d: Decision, id: string): string {
     t('gemini.terreno', { nombre: t(`terrenos.${e.terreno}.nombre`), descripcion: t(`terrenos.${e.terreno}.descripcion`) }),
     t('gemini.cultivoActual', { cultivo: t(`cultivos.${e.cultivoId}.nombre`), temporada: t(`temporadas.${e.temporada}.nombre`), meses: t(`temporadas.${e.temporada}.texto`) }),
     t('gemini.objetivos', { lista: e.objetivos.length ? e.objetivos.map((o) => t(`objetivos.${o}.nombre`)).join(', ') : t('gemini.noEligio') }),
+    ...(e.cosechas?.length
+      ? [
+          t('gemini.cosechas', {
+            lista: e.cosechas
+              .map((c) => t('gemini.cosechaItem', { cultivo: t(`cultivos.${c.cultivoId}.nombre`), temporada: t(`temporadas.${c.temporada}.nombre`), anio: c.anio, resultado: t(`rotacion.cosechas.${c.resultado}`) }))
+              .join('; '),
+          }),
+        ]
+      : []),
     '',
     t('gemini.ranking'),
     ...d.rotaciones.map(
@@ -166,12 +175,18 @@ export function datosParaGemini(d: Decision, id: string): string {
 
 /** Instrucciones de sistema para Gemini en el idioma de la consulta. */
 export function instruccionesGemini(idioma?: string | null): string {
-  return traductor(idioma)('gemini.instrucciones')
+  const t = traductor(idioma)
+  return `${t('gemini.instrucciones')}\n${t('gemini.reglasHistorial')}`
 }
 
-/** Lo que se le pide a Gemini segun la consulta: una rotacion o las tres mejores. */
-export function pedidoPara(id: string, idioma?: string | null): string {
-  return traductor(idioma)(id === TOP3 ? 'geminiTop3.pedido' : 'gemini.pedidoAnalisis')
+/**
+ * Lo que se le pide a Gemini segun la consulta: una rotacion o las tres mejores. Con historial del
+ * departamento se agrega el paso de la prediccion con años parecidos.
+ */
+export function pedidoPara(id: string, idioma?: string | null, conHistorial = false): string {
+  const t = traductor(idioma)
+  const base = t(id === TOP3 ? 'geminiTop3.pedido' : 'gemini.pedidoAnalisis')
+  return conHistorial ? `${base}\n${t('gemini.pedidoHistorial')}` : base
 }
 
 /** Versiones en español, como antes de la traduccion. */

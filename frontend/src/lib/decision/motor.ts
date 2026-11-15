@@ -3,6 +3,8 @@
 // (precios.ts) entran como dato y mueven la parte de venta; Gemini (el modelo de lenguaje) solo
 // explica estos numeros, no los cambia.
 
+import { PESO_REPORTE, VALOR_RESULTADO, leerCosechas } from './cosechas.js'
+import type { HistoricoDepartamento, Resumen } from './historico.js'
 import type { TFunction } from 'i18next'
 import { esIdioma, LOCALE, normalizarIdioma } from '../../i18n/idiomas.js'
 import { lista as listaT, mayuscula, traductor } from '../../i18n/traductor.js'
@@ -34,6 +36,7 @@ import type {
   PasoPlan,
   PuntoKharis,
   Razon,
+  ReporteCosecha,
   RotacionDecidida,
   SenalKharis,
   Temporada,
@@ -420,6 +423,57 @@ export interface MetaKharis {
   distanciaKm?: number
   /** Precios de la region (api/_precios.ts). Sin ellos la venta usa solo la referencia nacional. */
   precios?: PreciosRegion | null
+  /** Historico del departamento (public/historico). Con el, los años parecidos suben o bajan el puntaje. */
+  historico?: HistoricoDepartamento | null
+}
+
+/* ---------- Historial: años con la misma fase de El Niño ---------- */
+
+/** Tope de puntos que el historial puede restar o sumar a una rotacion. */
+const HISTORIAL_MIN = -12
+const HISTORIAL_MAX = 6
+
+interface PasoHistorial {
+  paso: PasoCalculado
+  fase: 'nino' | 'neutro' | 'nina' | 'todo'
+  /** Años parecidos del historial; null si el departamento no tiene historial de ese cultivo. */
+  r: Resumen | null
+  /** Cosechas del productor de ese cultivo en esa temporada. */
+  propias: ReporteCosecha[]
+  /** 0 a 100: buen año cuenta 1, regular 0.5, fracaso 0. */
+  seguridad: number
+  puntos: number
+}
+
+/** Sin historial, lo que se supone antes de oir al productor: seguridad neutra con el peso de 5 años. */
+const PREVIO_SIN_HISTORIAL = { seguridad: 60, n: 5 }
+
+/**
+ * Lo que dicen los años parecidos y las cosechas del productor de cada paso. Del historial usa los años con
+ * la fase actual de El Niño (con menos de 5, todos) y solo cultivos sin riego. Cada cosecha reportada pesa
+ * como PESO_REPORTE años simulados. 60 de seguridad es neutro; cada 10 puntos mueven 1.2 del puntaje.
+ */
+function historialDe(h: HistoricoDepartamento | null | undefined, pasos: PasoCalculado[], cosechas: ReporteCosecha[] = []): PasoHistorial[] {
+  const lista: PasoHistorial[] = []
+  for (const paso of pasos) {
+    if (!paso.cultivoId || paso.continua) continue
+    const propias = cosechas.filter((x) => x.cultivoId === paso.cultivoId && x.temporada === paso.temporada)
+    const c = h?.temporadas[paso.temporada]?.cultivos[paso.cultivoId]
+    let fase: PasoHistorial['fase'] = 'todo'
+    let r: Resumen | null = null
+    if (h && c && !c.solo_con_riego) {
+      const deFase = c[h.enso_actual.fase]
+      fase = deFase && deFase.n >= 5 ? h.enso_actual.fase : 'todo'
+      r = fase === 'todo' ? c.todo : deFase!
+      if (!r.n) r = null
+    }
+    if (!r && !propias.length) continue
+    const previo = r ? { seguridad: (100 * (r.buenos + 0.5 * (r.n - r.buenos - r.fracasos))) / r.n, n: r.n } : PREVIO_SIN_HISTORIAL
+    const pesoPropio = PESO_REPORTE * propias.length
+    const seguridad = (previo.seguridad * previo.n + PESO_REPORTE * propias.reduce((s, x) => s + VALOR_RESULTADO[x.resultado], 0)) / (previo.n + pesoPropio)
+    lista.push({ paso, fase, r, propias, seguridad, puntos: (seguridad - 60) * 0.12 })
+  }
+  return lista
 }
 
 export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKharis): Decision {
@@ -444,7 +498,9 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     let puntaje = claves.reduce((s, k) => s + w[k] * valores[k], 0)
     const inviable = pasos.some((x) => x.cultivoId && CULTIVOS[x.cultivoId].cosecha && (x.agua ?? 100) < 30)
     if (inviable) puntaje = Math.min(puntaje, 58)
-    return { cand, pasos, valores, puntaje: redondo(puntaje), inviable }
+    const historial = historialDe(meta.historico, pasos, e.cosechas)
+    const ajuste = historial.length ? redondo(limitar(historial.reduce((s, x) => s + x.puntos, 0), HISTORIAL_MIN, HISTORIAL_MAX)) : 0
+    return { cand, pasos, valores, puntaje: redondo(limitar(puntaje + ajuste)), inviable, historial, ajuste }
   })
 
   const actual = calculadas.find((x) => x.cand.actual)!
@@ -475,6 +531,40 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
       if (texto && !razones.some((r) => r.texto === texto)) razones.push({ tipo: a.k, texto })
       if (razones.length >= 4) break
     }
+    // Historial y cosechas propias: el paso que mas mueve el puntaje explica el ajuste.
+    const cuenta = (y: PasoHistorial, r: ReporteCosecha['resultado']) => y.propias.filter((z) => z.resultado === r).length
+    const datosH = (y: PasoHistorial) => ({
+      depto: meta.historico?.departamento ?? '',
+      fase: t(`motor.historial.fases.${y.fase}`),
+      temporada: minus(nombreTemporada(t, y.paso.temporada)),
+      el: el(t, y.paso.cultivoId as string),
+      cultivo: nombre(t, y.paso.cultivoId as string),
+      n: y.r?.n ?? 0,
+      buenos: y.r?.buenos ?? 0,
+      fracasos: y.r?.fracasos ?? 0,
+      mediana: y.r?.mediana ?? 0,
+      periodo: meta.historico?.periodo ?? '',
+      puntos: Math.abs(redondo(y.puntos)),
+      k: y.propias.length,
+      count: y.propias.length,
+      buenas: cuenta(y, 'buena'),
+      regulares: cuenta(y, 'regular'),
+      malas: cuenta(y, 'mala'),
+    })
+    // Lo que usted reporto va primero; despues, el paso del historial que mas mueve el puntaje.
+    const conPropias = [...x.historial].filter((y) => y.propias.length).sort((a, b) => b.propias.length - a.propias.length)[0]
+    const razonesH: Razon[] = []
+    if (conPropias) {
+      const valor = conPropias.propias.reduce((z, c) => z + VALOR_RESULTADO[c.resultado], 0) / conPropias.propias.length
+      razonesH.push({ tipo: 'historial', texto: t(`motor.historial.propia.${valor < 50 ? 'mal' : 'bien'}`, datosH(conPropias)) })
+    }
+    if (x.ajuste !== 0) {
+      const clave = [...x.historial].sort((a, b) => (x.ajuste < 0 ? a.puntos - b.puntos : b.puntos - a.puntos))[0]
+      if (clave.r && clave !== conPropias && redondo(clave.puntos) !== 0) razonesH.push({ tipo: 'historial', texto: t(`motor.historial.${x.ajuste < 0 ? 'mal' : 'bien'}`, datosH(clave)) })
+    }
+    razones.splice(Math.min(razones.length, 1), 0, ...razonesH)
+    const riesgosH = x.historial.filter((y) => y.r && y.r.fracasos / y.r.n >= 0.3).map((y) => t('motor.historial.riesgo', datosH(y)))
+    const usadas = x.historial.reduce((s, y) => s + y.propias.length, 0)
     const cumplidos = e.objetivos.filter((o) => x.valores[OBJETIVOS[o].factor] >= 70).map((o) => minus(t(`objetivos.${o}.nombre`)))
     if (cumplidos.length) razones.push({ tipo: 'objetivos', texto: t('motor.razones.objetivos', { lista: cumplidos.join(', ') }) })
 
@@ -482,10 +572,11 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     const nuevos = usados.filter((id) => id !== e.cultivoId)
     const textos = (id: string, clave: 'beneficios' | 'riesgos' | 'falta') => listaT(t, `cultivos.${id}.${clave}`)
     const beneficios = (x.cand.actual ? textos(e.cultivoId, 'beneficios') : nuevos.flatMap((id) => textos(id, 'beneficios'))).slice(0, 4)
-    const riesgos = [...riesgosDe(t, x.pasos, e), ...usados.flatMap((id) => textos(id, 'riesgos'))]
+    const riesgos = [...riesgosH, ...riesgosDe(t, x.pasos, e), ...usados.flatMap((id) => textos(id, 'riesgos'))]
     // Si ya se hallo el precio de la region, deja de ser algo que falta saber (cada "falta" de precio va primero).
     const faltan = usados.flatMap((id) => textos(id, 'falta').filter((_, i) => !(meta.precios?.cultivos[id] && esFaltaPrecio(id, i))))
-    const faltaSaber = [...new Set([...faltan, t('motor.faltaPasado')])]
+    // Con cosechas reportadas, lo que paso en su parcela ya no falta.
+    const faltaSaber = [...new Set([...faltan, ...(usadas ? [] : [t('motor.faltaPasado')])])]
     const confianza: Confianza = x.inviable || usados.some((id) => CULTIVOS[id].riego) ? 'baja' : 'media'
 
     return {
@@ -508,7 +599,11 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
         ...(parcela ? evidenciaParcela(t, LOCALE[normalizarIdioma(e.idioma)], parcela) : []),
         ...evidenciaDe(t, p, e, x.pasos),
         ...evidenciaPrecios(t, x.pasos, meta.precios),
+        ...x.historial.filter((y) => y.r).map((y) => ({ texto: t('motor.historial.evidencia', datosH(y)), fuente: t('motor.historial.fuente') })),
+        ...x.historial.filter((y) => y.propias.length).map((y) => ({ texto: t('motor.historial.propia.evidencia', datosH(y)), fuente: t('motor.historial.propia.fuente') })),
       ],
+      ...(x.historial.length ? { ajusteHistorial: x.ajuste } : {}),
+      ...(usadas ? { cosechasUsadas: usadas } : {}),
     }
   })
 
@@ -556,6 +651,8 @@ export function validarEntrada(x: unknown): EntradaDecision | null {
     objetivos,
   }
   if (esIdioma(d.idioma)) salida.idioma = d.idioma
+  const cosechas = leerCosechas(d.cosechas, (id) => id in CULTIVOS)
+  if (cosechas.length) salida.cosechas = cosechas
   const pc = d.parcela as { lat?: unknown; lon?: unknown } | undefined
   if (pc && typeof pc === 'object') {
     const lat = Number(pc.lat)

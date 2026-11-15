@@ -18,6 +18,12 @@ const es = {
     idioma: 'Idioma',
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
+  verificacion: {
+    titulo: 'Un momento',
+    texto: 'Comprobamos que es una persona antes de abrir AgroResilience.',
+    validando: 'Verificando…',
+    error: 'No se pudo verificar. Revise su conexión e inténtelo de nuevo.',
+  },
   nav: {
     reordenarAyuda: 'Arrastre para cambiar el orden, o use Alt y las flechas.',
     movido: '{{destino}}: posición {{n}} de {{total}}',
@@ -318,6 +324,22 @@ const es = {
       igualCorto: 'no cambia',
       avisoBusqueda: 'El agua de cada cultivo sale de FAO-56. Los precios de {{region}} se buscaron en la web y se comparan con la referencia de SIMPAH 2026: confírmelos en su mercado. El forraje y el frijol terciopelo son aproximados.',
     },
+    historial: {
+      mal: 'En {{depto}}, en años de {{fase}}, {{el}} de {{temporada}} fracasó {{fracasos}} de {{n}} veces: −{{puntos}} en el puntaje.',
+      bien: 'En {{depto}}, en años de {{fase}}, {{el}} de {{temporada}} salió bien {{buenos}} de {{n}} veces: +{{puntos}} en el puntaje.',
+      riesgo: 'En años de {{fase}} {{el}} de {{temporada}} ha fracasado {{fracasos}} de {{n}} veces en {{depto}}.',
+      evidencia: '{{cultivo}} en {{temporada}}, {{depto}}, años de {{fase}} ({{periodo}}): buen año {{buenos}} de {{n}}, fracaso {{fracasos}} de {{n}}, rendimiento típico {{mediana}} % del potencial.',
+      fuente: 'Simulación con clima de NASA POWER y ERA5, FAO-56 y FAO-33; fase de El Niño de NOAA',
+      propia: {
+        mal_one: 'Usted reportó una cosecha mala de {{el}} en {{temporada}}: eso baja el puntaje de este plan.',
+        mal_other: 'Usted reportó {{count}} cosechas de {{el}} en {{temporada}} ({{malas}} malas): eso baja el puntaje de este plan.',
+        bien_one: 'Usted reportó una cosecha de {{el}} en {{temporada}} que no salió mala: eso sostiene el puntaje de este plan.',
+        bien_other: 'Usted reportó {{count}} cosechas de {{el}} en {{temporada}} ({{buenas}} buenas): eso sostiene el puntaje de este plan.',
+        evidencia: '{{cultivo}} en {{temporada}}, en su parcela: {{buenas}} buenas, {{regulares}} regulares y {{malas}} malas de {{k}} cosechas reportadas. Cada una pesa como 3 años simulados.',
+        fuente: 'Lo que usted reportó en esta app',
+      },
+      fases: { nino: 'El Niño', neutro: 'clima neutral', nina: 'La Niña', todo: 'todo tipo' },
+    },
     faltaPasado: 'Cómo le fue en su parcela en años pasados',
     puntoParcela: 'su parcela, cerca de {{lugar}}',
     avisos: [
@@ -368,6 +390,18 @@ Beneficios para la tierra y para su bolsillo, con el precio por quintal de cada 
 Riesgos y qué revisar con su técnico.
 Lo que falta saber.
 Máximo 250 palabras.`,
+    reglasHistorial: `Historial del departamento (cuando viene en los datos):
+- Es el desempeño de cada cultivo simulado año por año desde 1981 con la lluvia y el calor reales del departamento. Sirve para predecir con años parecidos, no para cambiar el ranking.
+- Predice así, en este orden: 1) toma la fase actual de El Niño o La Niña que viene en los datos; 2) mira los años con esa misma fase; 3) compara con todos los años y con los últimos 10; 4) si las tres cosas apuntan igual, dilo con seguridad; si no, di cuál pesa más y por qué.
+- Habla en "de cada 10 años": convierte "buen año 4 de 11" en "unos 4 de cada 10 años". Solo esa cuenta: no inventes porcentajes ni promedios nuevos.
+- Si el primero del ranking falla en 3 o más de cada 10 años parecidos, avísalo claro y di qué opción del ranking aguanta mejor esos años.
+- Si un cultivo es "solo con riego", sin riego no lo recomiendes, aunque su historial se vea bien.
+- Si menos de 5 años sirven para comparar, dilo: la predicción es débil.
+- Los cultivos de exportación (café, palma, banano, caña, melón, chile, tabaco, cacao) muestran lo que más mueve la economía del país; menciónalos solo si son de la zona del productor o si se lo preguntan, y recuerda que piden inversión, comprador y años para producir (los permanentes).
+- Es una simulación del clima, no la cosecha medida: no prometas rendimientos.`,
+    pedidoHistorial: `Agrega una parte "Lo que dicen los años parecidos": cómo le fue a cada cultivo de la rotación en años con la misma fase de El Niño o La Niña en su departamento, cuántos de cada 10 salieron buenos y cuántos fracasaron, y el peor año. Cierra con una frase de qué tan segura es la predicción.`,
+    cosechas: 'Cosechas que el productor reportó en su parcela (dato real, pesa más que la simulación): {{lista}}.',
+    cosechaItem: '{{cultivo}} en {{temporada}} {{anio}}: {{resultado}}',
     limiteChat: 'Responde en 80 palabras o menos.',
     datosConsulta: 'Datos de la consulta:',
     lugar: 'Lugar: {{lugar}} (punto Kharis {{punto}}, modelo {{modelo}}, datos observados hasta {{fecha}}).',
@@ -460,6 +494,21 @@ Máximo 250 palabras.`,
     oElija: 'O elija el lugar más cercano:',
   },
   rotacion: {
+    cosechas: {
+      titulo: '¿Cómo le fue?',
+      apoyo: 'Diga cómo salió su cosecha. El plan se corrige con lo que pasó en su parcela.',
+      anio: 'Año de la cosecha',
+      fila: '{{cultivo}} en {{temporada}}',
+      buena: 'Buena',
+      regular: 'Regular',
+      mala: 'Mala',
+      usadas_one: 'Este plan ya usa {{count}} cosecha suya.',
+      usadas_other: 'Este plan ya usa {{count}} cosechas suyas.',
+      ajuste: 'Con sus cosechas y los años parecidos: {{signo}}{{n}} puntos.',
+      guardadas: 'Sus cosechas guardadas',
+      item: '{{cultivo}}, {{temporada}} {{anio}}: {{resultado}}',
+      borrar: 'Borrar {{cultivo}} {{temporada}} {{anio}}',
+    },
     baseComparar: 'Es lo que hace hoy. Sirve de base para comparar.',
     masQueHoy: '{{n}} puntos más que lo que hace hoy',
     menosQueHoy: '{{n}} puntos menos que lo que hace hoy',

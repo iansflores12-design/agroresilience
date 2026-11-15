@@ -19,6 +19,18 @@ export interface EntradaDecision {
   parcela?: { lat: number; lon: number }
   /** Idioma de los textos de la decision y de Gemini. Por defecto, español. */
   idioma?: Idioma
+  /** Cosechas que el productor reporto en este lugar. Corrigen el puntaje (retroalimentacion). */
+  cosechas?: ReporteCosecha[]
+}
+
+export type ResultadoCosecha = 'buena' | 'regular' | 'mala'
+
+/** Como le fue al productor con un cultivo en una temporada y un año. */
+export interface ReporteCosecha {
+  cultivoId: string
+  temporada: Temporada
+  anio: number
+  resultado: ResultadoCosecha
 }
 
 /** Ajuste a escala de parcela (kharis.escala_fina.v1). */
@@ -62,7 +74,7 @@ export interface Factor {
 
 /** Una razon del puntaje. `tipo` dice de que parte sale (para su icono). */
 export interface Razon {
-  tipo: ClaveFactor | 'comparacion' | 'objetivos' | 'actual'
+  tipo: ClaveFactor | 'comparacion' | 'objetivos' | 'actual' | 'historial'
   texto: string
 }
 
@@ -105,6 +117,10 @@ export interface RotacionDecidida {
   riesgos: string[]
   faltaSaber: string[]
   evidencia: Evidencia[]
+  /** Puntos que el historial del departamento (años con la misma fase de El Niño) sumo o resto al puntaje. */
+  ajusteHistorial?: number
+  /** Cuantas cosechas reportadas por el productor entraron en ese ajuste. */
+  cosechasUsadas?: number
 }
 
 export interface Decision {

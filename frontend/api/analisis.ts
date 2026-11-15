@@ -12,7 +12,7 @@ import { LUGARES } from '../src/lib/decision/parametros.js'
 import { TOP3, buscarRotacion, datosParaGemini, instruccionesGemini, pedidoPara } from '../src/lib/decision/textos.js'
 import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiEnVivo, hayClave } from './_gemini.js'
-import { decisionPara, json, leerCuerpo } from './_comun.js'
+import { decisionPara, historicoPara, json, leerCuerpo } from './_comun.js'
 
 export async function POST(request: Request): Promise<Response> {
   const cuerpo = await leerCuerpo(request)
@@ -51,9 +51,15 @@ export async function POST(request: Request): Promise<Response> {
           return
         }
         enviar({ tipo: 'paso', id: 'gemini', texto: t(rotacionId === TOP3 ? 'geminiTop3.paso' : 'gemini.pasoGemini') })
+        const historia = await historicoPara(decision, request.url)
         const pedido = {
           sistema: instruccionesGemini(entrada.idioma),
-          mensajes: [{ rol: 'user' as const, texto: `${datosParaGemini(decision, rotacionId)}\n\n${pedidoPara(rotacionId, entrada.idioma)}` }],
+          mensajes: [
+            {
+              rol: 'user' as const,
+              texto: `${datosParaGemini(decision, rotacionId)}${historia ? `\n\n${historia}` : ''}\n\n${pedidoPara(rotacionId, entrada.idioma, Boolean(historia))}`,
+            },
+          ],
           signal: request.signal,
         }
         for await (const delta of geminiEnVivo(pedido)) enviar({ tipo: 'texto', delta })

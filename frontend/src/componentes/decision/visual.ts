@@ -16,6 +16,7 @@ export function iconoRazon(r: Razon, diferencia: number): NombreIcono {
   if (r.tipo === 'comparacion') return diferencia >= 0 ? 'trending_up' : 'trending_down'
   if (r.tipo === 'objetivos') return 'flag'
   if (r.tipo === 'actual') return 'schedule'
+  if (r.tipo === 'historial') return 'calendar_month'
   return ICONO_FACTOR[r.tipo]
 }
 

@@ -45,7 +45,9 @@ export function claveAnalisis(entrada: EntradaDecision, rotacionId: string, fech
   const parcela = entrada.parcela ? `${entrada.parcela.lat},${entrada.parcela.lon}` : ''
   // En español la clave queda como antes, para no perder los analisis ya guardados.
   const idioma = entrada.idioma && entrada.idioma !== 'es' ? [entrada.idioma] : []
-  return [entrada.zonaId, parcela, entrada.terreno, entrada.cultivoId, entrada.temporada, objetivos, rotacionId, fechaBase, ...idioma].join('|')
+  // Con cosechas reportadas el puntaje cambia: el analisis guardado de antes ya no sirve.
+  const cosechas = entrada.cosechas?.length ? [entrada.cosechas.map((c) => `${c.cultivoId}.${c.temporada}.${c.anio}.${c.resultado}`).sort().join(',')] : []
+  return [entrada.zonaId, parcela, entrada.terreno, entrada.cultivoId, entrada.temporada, objetivos, rotacionId, fechaBase, ...idioma, ...cosechas].join('|')
 }
 
 export function analisisGuardado(clave: string): string | null {

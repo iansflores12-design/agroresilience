@@ -4,8 +4,9 @@ import type { Idioma } from '../i18n/idiomas'
 import { buscarDepartamento, departamentoDeZona } from '../datos/aptitud'
 import { zonaDeDepartamento } from '../datos/lugarDepartamento'
 import { dentroDeHonduras } from '../lib/decision/escala'
-import { OBJETIVOS } from '../lib/decision/parametros'
-import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
+import { claveCosecha, leerCosechas, MAX_COSECHAS } from '../lib/decision/cosechas'
+import { CULTIVOS, OBJETIVOS } from '../lib/decision/parametros'
+import type { EntradaDecision, Objetivo, ReporteCosecha, Temporada, Terreno } from '../lib/decision/tipos'
 import { configurarSonido } from '../lib/sonido'
 
 export interface EstadoApp {
@@ -23,7 +24,11 @@ export interface EstadoApp {
   objetivos: Objetivo[]
   /** Ubicacion de la parcela (GPS), redondeada a ~100 m. Null = se usa el lugar elegido. */
   parcela: { lat: number; lon: number } | null
+  /** Cosechas que el productor reporto, cada una con el lugar donde fue. Corrigen el plan de ese lugar. */
+  cosechas: CosechaGuardada[]
 }
+
+export type CosechaGuardada = ReporteCosecha & { zonaId: string }
 
 export interface Perfil {
   zonaId: string
@@ -52,6 +57,9 @@ interface AccionesEstadoApp {
   /** Cambia solo los datos dados (cultivo y semanas, o lugar y ubicacion) sin pedir el perfil completo. */
   actualizarPerfil(p: Partial<Perfil>): void
   alternarObjetivo(o: Objetivo): void
+  /** Guarda como le fue con un cultivo en el lugar actual; el mismo resultado otra vez lo quita. */
+  reportarCosecha(r: ReporteCosecha): void
+  borrarCosecha(r: CosechaGuardada): void
 }
 
 export const CLAVE_ESTADO = 'agroresilience.estado.v1'
@@ -66,12 +74,26 @@ const porDefecto: EstadoApp = {
   temporada: null,
   objetivos: [],
   parcela: null,
+  cosechas: [],
 }
 
 function leerParcela(x: unknown): { lat: number; lon: number } | null {
   if (typeof x !== 'object' || x === null) return null
   const { lat, lon } = x as { lat?: unknown; lon?: unknown }
   return typeof lat === 'number' && typeof lon === 'number' && dentroDeHonduras(lat, lon) ? { lat, lon } : null
+}
+
+const esCultivo = (id: string) => id in CULTIVOS
+
+/** Reportes guardados, validados lugar por lugar. */
+function leerCosechasGuardadas(x: unknown): CosechaGuardada[] {
+  if (!Array.isArray(x)) return []
+  const porZona = new Map<string, unknown[]>()
+  for (const d of x) {
+    const zona = (d as { zonaId?: unknown } | null)?.zonaId
+    if (typeof zona === 'string') porZona.set(zona, [...(porZona.get(zona) ?? []), d])
+  }
+  return [...porZona].flatMap(([zonaId, lista]) => leerCosechas(lista, esCultivo).map((r) => ({ ...r, zonaId })))
 }
 
 const TERRENOS: Terreno[] = ['plano', 'elevado', 'bajo', 'ondulado']
@@ -103,6 +125,7 @@ function leerEstadoGuardado(): EstadoApp {
         ? d.objetivos.filter((o): o is Objetivo => typeof o === 'string' && o in OBJETIVOS)
         : [],
       parcela: leerParcela(d.parcela),
+      cosechas: leerCosechasGuardadas(d.cosechas),
     }
   } catch {
     return porDefecto
@@ -171,9 +194,27 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
     }))
   }, [])
 
+  const reportarCosecha = useCallback((r: ReporteCosecha) => {
+    setEstado((e) => {
+      if (!e.zonaId) return e
+      const zonaId = e.zonaId
+      const misma = (x: CosechaGuardada) => x.zonaId === zonaId && claveCosecha(x) === claveCosecha(r)
+      const previa = e.cosechas.find(misma)
+      const resto = e.cosechas.filter((x) => !misma(x))
+      if (previa?.resultado === r.resultado) return { ...e, cosechas: resto }
+      const deZona = resto.filter((x) => x.zonaId === zonaId)
+      // Tope por lugar: sale la mas vieja.
+      const viejas = deZona.length >= MAX_COSECHAS ? [...deZona].sort((a, b) => a.anio - b.anio).slice(0, deZona.length - MAX_COSECHAS + 1) : []
+      return { ...e, cosechas: [...resto.filter((x) => !viejas.includes(x)), { ...r, zonaId }] }
+    })
+  }, [])
+  const borrarCosecha = useCallback((r: CosechaGuardada) => {
+    setEstado((e) => ({ ...e, cosechas: e.cosechas.filter((x) => !(x.zonaId === r.zonaId && claveCosecha(x) === claveCosecha(r))) }))
+  }, [])
+
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo }),
-    [estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo],
+    () => ({ ...estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo, reportarCosecha, borrarCosecha }),
+    [estado, elegirCultivo, elegirZona, elegirDepartamento, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo, reportarCosecha, borrarCosecha],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
@@ -187,9 +228,14 @@ export function useEstadoApp() {
 /** Entrada completa para Gemini Decision, o null si falta contestar algo. Con `idioma`, los textos salen en ese idioma. */
 export function entradaDe(e: EstadoApp, idioma?: Idioma): EntradaDecision | null {
   if (!e.zonaId || !e.cultivoId || !e.terreno || !e.temporada) return null
+  const cosechas = (e.cosechas ?? [])
+    .filter((x) => x.zonaId === e.zonaId)
+    .map(({ cultivoId, temporada, anio, resultado }) => ({ cultivoId, temporada, anio, resultado }))
+    .sort((a, b) => b.anio - a.anio || a.cultivoId.localeCompare(b.cultivoId) || a.temporada.localeCompare(b.temporada))
   return {
     zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos,
     ...(e.parcela ? { parcela: e.parcela } : {}),
     ...(idioma ? { idioma } : {}),
+    ...(cosechas.length ? { cosechas } : {}),
   }
 }

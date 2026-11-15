@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/*.ts": { "maxDuration": 60, "includeFiles": "public/kharis/**" }
+    "api/*.ts": { "maxDuration": 60, "includeFiles": "public/{kharis,historico}/**" }
   },
   "headers": [
     { "source": "/kharis/indice.json", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }] },

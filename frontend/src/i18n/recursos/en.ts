@@ -21,6 +21,12 @@ const en: Recursos = {
     idioma: 'Language',
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
+  verificacion: {
+    titulo: 'One moment',
+    texto: 'We are checking that you are a person before opening AgroResilience.',
+    validando: 'Verifying…',
+    error: 'Verification failed. Check your connection and try again.',
+  },
   nav: {
     reordenarAyuda: 'Drag to change the order, or use Alt and the arrow keys.',
     movido: '{{destino}}: position {{n}} of {{total}}',
@@ -321,6 +327,22 @@ const en: Recursos = {
       igualCorto: 'no change',
       avisoBusqueda: 'The water each crop needs comes from FAO-56. Prices for {{region}} were searched on the web and compared with the SIMPAH 2026 reference: confirm them at your market. Forage and velvet bean are approximate.',
     },
+    historial: {
+      mal: 'In {{depto}}, in {{fase}} years, {{temporada}} {{el}} failed {{fracasos}} out of {{n}} times: −{{puntos}} on the score.',
+      bien: 'In {{depto}}, in {{fase}} years, {{temporada}} {{el}} did well {{buenos}} out of {{n}} times: +{{puntos}} on the score.',
+      riesgo: 'In {{fase}} years, {{temporada}} {{el}} has failed {{fracasos}} out of {{n}} times in {{depto}}.',
+      evidencia: '{{cultivo}} in {{temporada}}, {{depto}}, {{fase}} years ({{periodo}}): good year {{buenos}} of {{n}}, failure {{fracasos}} of {{n}}, typical yield {{mediana}} % of potential.',
+      fuente: 'Simulation with NASA POWER and ERA5 climate, FAO-56 and FAO-33; El Niño phase from NOAA',
+      propia: {
+        mal_one: 'You reported one bad harvest of {{temporada}} {{el}}: that lowers the score of this plan.',
+        mal_other: 'You reported {{count}} harvests of {{temporada}} {{el}} ({{malas}} bad): that lowers the score of this plan.',
+        bien_one: 'You reported one harvest of {{temporada}} {{el}} that was not bad: that supports the score of this plan.',
+        bien_other: 'You reported {{count}} harvests of {{temporada}} {{el}} ({{buenas}} good): that supports the score of this plan.',
+        evidencia: '{{cultivo}} in {{temporada}}, on your plot: {{buenas}} good, {{regulares}} fair and {{malas}} bad out of {{k}} reported harvests. Each one weighs like 3 simulated years.',
+        fuente: 'What you reported in this app',
+      },
+      fases: { nino: 'El Niño', neutro: 'neutral', nina: 'La Niña', todo: 'all kinds of' },
+    },
     faltaPasado: 'How your plot did in past years',
     puntoParcela: 'your plot, near {{lugar}}',
     avisos: [
@@ -372,6 +394,18 @@ Benefits for the soil and for their pocket, with the price per quintal of each c
 Risks and what to check with their extension agent.
 What is still unknown.
 250 words at most.`,
+    reglasHistorial: `Department history (when it comes in the data; it is written in Spanish, answer in English):
+- It is each crop's performance simulated year by year since 1981 with the department's real rain and heat. Use it to predict from similar years, not to change the ranking.
+- Predict in this order: 1) take the current El Niño or La Niña phase given in the data; 2) look at the years with that same phase; 3) compare with all years and with the last 10; 4) if all three agree, say so with confidence; if not, say which weighs more and why.
+- Speak in "out of 10 years": turn "buen año 4 de 11" into "about 4 out of 10 years". Only that conversion: do not invent new percentages or averages.
+- If the top-ranked option fails in 3 or more out of 10 similar years, warn clearly and say which ranked option holds up better in those years.
+- If a crop is "solo con riego" (irrigation only), do not recommend it without irrigation, even if its history looks good.
+- If fewer than 5 years are available to compare, say the prediction is weak.
+- Export crops (coffee, oil palm, banana, sugarcane, melon, sweet pepper, tobacco, cocoa) show what moves the country's economy most; mention them only if they belong to the farmer's area or the farmer asks, and remember they need investment, a buyer and, for perennials, years to produce.
+- It is a climate simulation, not the measured harvest: do not promise yields.`,
+    pedidoHistorial: `Add a part "What similar years say": how each crop in the rotation did in years with the same El Niño or La Niña phase in the department, how many out of 10 were good and how many failed, and the worst year. End with one sentence on how reliable the prediction is.`,
+    cosechas: 'Harvests the farmer reported on the plot (real data, weighs more than the simulation): {{lista}}.',
+    cosechaItem: '{{cultivo}} in {{temporada}} {{anio}}: {{resultado}}',
     limiteChat: 'Answer in 80 words or fewer.',
     datosConsulta: 'Query data:',
     lugar: 'Place: {{lugar}} (Kharis point {{punto}}, model {{modelo}}, observed data up to {{fecha}}).',
@@ -464,6 +498,21 @@ What is still unknown.
     oElija: 'Or choose the nearest place:',
   },
   rotacion: {
+    cosechas: {
+      titulo: 'How did it go?',
+      apoyo: 'Tell us how your harvest turned out. The plan is corrected with what happened on your plot.',
+      anio: 'Harvest year',
+      fila: '{{cultivo}} in {{temporada}}',
+      buena: 'Good',
+      regular: 'Fair',
+      mala: 'Bad',
+      usadas_one: 'This plan already uses {{count}} harvest of yours.',
+      usadas_other: 'This plan already uses {{count}} harvests of yours.',
+      ajuste: 'With your harvests and similar years: {{signo}}{{n}} points.',
+      guardadas: 'Your saved harvests',
+      item: '{{cultivo}}, {{temporada}} {{anio}}: {{resultado}}',
+      borrar: 'Delete {{cultivo}} {{temporada}} {{anio}}',
+    },
     baseComparar: 'This is what you do today. It is the baseline for comparing.',
     masQueHoy: '{{n}} points more than what you do today',
     menosQueHoy: '{{n}} points less than what you do today',

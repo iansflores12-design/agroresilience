@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useIdioma } from '../../i18n'
 import { useParams } from 'react-router-dom'
 import { BotonIcono } from '../../componentes/BotonIcono'
+import { Chip } from '../../componentes/Chip'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import { RatingRotacion } from '../../componentes/decision/RatingRotacion'
@@ -12,6 +13,7 @@ import { entradaDe, useEstadoApp } from '../../estado/EstadoApp'
 import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
+import { RESULTADOS } from '../../lib/decision/cosechas'
 import { buscarRotacion, fechaEnPalabras, respuestaRapida, resumenRapido } from '../../lib/decision/textos'
 import type { Decision, PasoPlan, RotacionDecidida } from '../../lib/decision/tipos'
 import { ChatSeguimiento } from './ChatSeguimiento'
@@ -216,6 +218,70 @@ function Detalles({ r }: { r: RotacionDecidida }) {
   )
 }
 
+/* ---------- Retroalimentacion: como le fue ---------- */
+
+function ComoLeFue({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
+  const estado = useEstadoApp()
+  const esteAnio = new Date().getFullYear()
+  const [anio, fijarAnio] = useState(esteAnio - 1)
+  const pasos = r.pasos.filter((p) => p.cultivoId && !p.continua)
+  const mias = estado.cosechas.filter((c) => c.zonaId === estado.zonaId).sort((a, b) => b.anio - a.anio)
+  const nombres = (c: { cultivoId: string; temporada: string }) => ({ cultivo: t(`cultivos.${c.cultivoId}.nombre`), temporada: t(`temporadas.${c.temporada}.nombre`) })
+  const ajuste = r.ajusteHistorial ?? 0
+  return (
+    <section className={estilos.tarjeta} aria-labelledby="titulo-cosechas">
+      <h2 id="titulo-cosechas" className={estilos.tituloTarjeta}>
+        {t('rotacion.cosechas.titulo')}
+      </h2>
+      <p className={estilos.apoyoTarjeta}>{t('rotacion.cosechas.apoyo')}</p>
+      <div className={estilos.cosechaChips} role="group" aria-label={t('rotacion.cosechas.anio')}>
+        {[esteAnio, esteAnio - 1, esteAnio - 2, esteAnio - 3].map((a) => (
+          <Chip key={a} variante="filtro" seleccionado={a === anio} onClick={() => fijarAnio(a)}>
+            {a}
+          </Chip>
+        ))}
+      </div>
+      {pasos.map((p) => {
+        const actual = mias.find((c) => c.cultivoId === p.cultivoId && c.temporada === p.temporada && c.anio === anio)
+        const etiqueta = t('rotacion.cosechas.fila', { cultivo: p.nombre, temporada: t(`temporadas.${p.temporada}.nombre`).toLowerCase() })
+        return (
+          <div key={`${p.cultivoId}-${p.temporada}`} className={estilos.cosechaFila}>
+            <span className={estilos.cosechaNombre}>{etiqueta}</span>
+            <div className={estilos.cosechaChips} role="group" aria-label={`${etiqueta} ${anio}`}>
+              {RESULTADOS.map((res) => (
+                <Chip
+                  key={res}
+                  variante="filtro"
+                  seleccionado={actual?.resultado === res}
+                  onClick={() => estado.reportarCosecha({ cultivoId: p.cultivoId as string, temporada: p.temporada, anio, resultado: res })}
+                >
+                  {t(`rotacion.cosechas.${res}`)}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+      {r.cosechasUsadas ? (
+        <p className={estilos.apoyoTarjeta} role="status">
+          {t('rotacion.cosechas.usadas', { count: r.cosechasUsadas })} {t('rotacion.cosechas.ajuste', { signo: ajuste > 0 ? '+' : ajuste < 0 ? '−' : '', n: Math.abs(ajuste) })}
+        </p>
+      ) : null}
+      {mias.length > 0 && (
+        <ul className={estilos.cosechaLista} aria-label={t('rotacion.cosechas.guardadas')}>
+          {mias.map((c) => (
+            <li key={`${c.cultivoId}-${c.temporada}-${c.anio}`} className={estilos.cosechaItem}>
+              <span>{t('rotacion.cosechas.item', { ...nombres(c), anio: c.anio, resultado: t(`rotacion.cosechas.${c.resultado}`).toLowerCase() })}</span>
+              <BotonIcono icono="close" etiqueta={t('rotacion.cosechas.borrar', { ...nombres(c), anio: c.anio })} onClick={() => estado.borrarCosecha(c)} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 /* ---------- De donde salen los datos ---------- */
 
 function Fuentes({ r, d }: { r: RotacionDecidida; d: Decision }) {
@@ -280,6 +346,7 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
         <Calendario r={r} />
         <Partes r={r} />
         <Detalles r={r} />
+        <ComoLeFue r={r} />
       </div>
       <Fuentes r={r} d={d} />
       <PanelAnalisis analisis={analisis} resumen={resumen}>
@@ -302,6 +369,13 @@ export default function Rotacion() {
   }, [id])
 
   const rotacion = decision.estado === 'listo' ? buscarRotacion(decision.decision, id) : null
+  // Al reportar una cosecha la decision se recalcula: mientras llega, se deja la anterior en pantalla.
+  const [ultima, fijarUltima] = useState<{ d: Decision; r: RotacionDecidida } | null>(null)
+  const lista = decision.estado === 'listo' && rotacion ? decision.decision : null
+  useEffect(() => {
+    if (lista && rotacion) fijarUltima({ d: lista, r: rotacion })
+  }, [lista, rotacion])
+  const mostrada = lista && rotacion ? { d: lista, r: rotacion } : decision.estado === 'calculando' && ultima?.r.id === id ? ultima : null
 
   return (
     <div className="pantalla">
@@ -313,7 +387,7 @@ export default function Rotacion() {
         {decision.estado === 'sin_datos' && (
           <p className={estilos.estado}>{t('rotacion.primeroConteste')}</p>
         )}
-        {decision.estado === 'calculando' && (
+        {decision.estado === 'calculando' && !mostrada && (
           <p className={estilos.estado} role="status">
             {t('comun.calculando')}
           </p>
@@ -322,7 +396,7 @@ export default function Rotacion() {
         {decision.estado === 'listo' && !rotacion && (
           <p className={estilos.estado}>{t('rotacion.yaNoEsta')}</p>
         )}
-        {decision.estado === 'listo' && rotacion && <Contenido key={rotacion.id} d={decision.decision} r={rotacion} />}
+        {mostrada && <Contenido key={mostrada.r.id} d={mostrada.d} r={mostrada.r} />}
       </article>
     </div>
   )

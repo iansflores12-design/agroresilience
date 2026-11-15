@@ -7,7 +7,7 @@ import { datosParaGemini, instruccionesGemini } from '../src/lib/decision/textos
 import { normalizarIdioma, type Idioma } from '../src/i18n/idiomas.js'
 import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
-import { decisionPara, json, leerCuerpo } from './_comun.js'
+import { decisionPara, historicoPara, json, leerCuerpo } from './_comun.js'
 
 const MAX_MENSAJES = 20
 // Lo que el chat sabe dibujar ademas de texto (ver src/pantallas/Chat/Enriquecido.tsx): `geminiTop3.piezasVisuales`.
@@ -81,7 +81,9 @@ export async function POST(request: Request): Promise<Response> {
   if (entrada && !entrada.idioma) entrada.idioma = idioma
   if (entrada && typeof consulta?.rotacionId === 'string') {
     try {
-      datos = datosParaGemini(await decisionPara(entrada, request.url), consulta.rotacionId)
+      const decision = await decisionPara(entrada, request.url)
+      const historia = await historicoPara(decision, request.url)
+      datos = datosParaGemini(decision, consulta.rotacionId) + (historia ? `\n\n${historia}` : '')
     } catch {
       // Sin Kharis se responde con el contexto general.
     }
