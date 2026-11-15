@@ -67,6 +67,15 @@ def es_numero(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
 
 
+def a_numero(texto):
+    """Texto -> float finito, o None si no es un numero."""
+    try:
+        v = float(str(texto).strip())
+    except ValueError:
+        return None
+    return v if math.isfinite(v) else None
+
+
 def fecha_compacta_ok(s):
     if not isinstance(s, str) or not re.fullmatch(r"\d{8}", s):
         return False
@@ -313,13 +322,16 @@ def leer_grace(ruta):
     return con_ok(df, len(df)), errores
 
 
-def leer_imerg(ruta):
+IMERG_VARS = ["precipitation", "randomError", "precipitation_cnt_cond", "MWprecipitation"]
+IMERG_LATE_VARS = ["precipitation", "randomError", "MWprecipitation"]  # Late no trae precipitation_cnt_cond
+
+
+def leer_imerg(ruta, var=IMERG_VARS):
     nombre = Path(ruta).name
     m = re.search(r"3IMERG\.(\d{8})", nombre)
     if not m or not fecha_compacta_ok(m.group(1)):
         return con_ok(vacio(), 0), [(0, f"el nombre no trae una fecha 3IMERG.AAAAMMDD valida: {nombre}")]
     fecha = pd.Timestamp(m.group(1)).strftime("%Y-%m-%d")
-    var = ["precipitation", "randomError", "precipitation_cnt_cond", "MWprecipitation"]
     try:
         d = nc.Dataset(ruta)
     except Exception as e:
@@ -493,11 +505,297 @@ def combinar_meteomatics(dfs, estatico=False):
     return df.sort_values(by=["punto", "marca_utc"], key=lambda s: s.map(ORDEN) if s.name == "punto" else s)
 
 
+# ------------------------------------------------------------------ fuentes agregadas el 2026-11-14
+GLDAS_VARS = ["SoilMoi0_10cm_inst", "SoilMoi10_40cm_inst", "SoilMoi40_100cm_inst", "SoilMoi100_200cm_inst",
+              "RootMoist_inst", "SoilTMP0_10cm_inst", "SoilTMP10_40cm_inst", "SoilTMP40_100cm_inst",
+              "SoilTMP100_200cm_inst", "CanopInt_inst", "AvgSurfT_inst", "Tair_f_inst", "Qair_f_inst", "Wind_f_inst",
+              "Psurf_f_inst", "SWdown_f_tavg", "LWdown_f_tavg", "Swnet_tavg", "Lwnet_tavg", "Qle_tavg", "Qh_tavg",
+              "Qg_tavg", "Evap_tavg", "ESoil_tavg", "ECanop_tavg", "Tveg_tavg", "PotEvap_tavg", "Rainf_tavg",
+              "Rainf_f_tavg", "Snowf_tavg", "Qs_acc", "Qsb_acc", "Qsm_acc", "Albedo_inst", "SWE_inst",
+              "SnowDepth_inst"]
+
+
+def leer_gldas(ruta):
+    """GLDAS Noah 0.25 mensual (recorte). Registro = punto. Relleno -9999 -> vacio. Sin conversion de unidades."""
+    nombre = Path(ruta).name
+    m = re.search(r"\.A(\d{4})(\d{2})\.", nombre)
+    if not m or not 1 <= int(m.group(2)) <= 12:
+        return con_ok(vacio(), 0), [(0, f"el nombre no trae un mes .AAAAMM. valido: {nombre}")]
+    fecha = f"{m.group(1)}-{m.group(2)}-01"
+    try:
+        d = nc.Dataset(ruta)
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"NetCDF ilegible: {e}")]
+    try:
+        d.set_auto_mask(False)
+        var = [v for v in GLDAS_VARS if v in d.variables]
+        if "lat" not in d.variables or "lon" not in d.variables or not var:
+            return con_ok(vacio(), 0), [(0, "faltan lat, lon o todas las variables GLDAS")]
+        lat, lon = d["lat"][:].astype("f8"), d["lon"][:].astype("f8")
+        arr = {v: np.where(d[v][0] < -9000, np.nan, d[v][0]).astype("f8") for v in var}
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"NetCDF ilegible o con forma inesperada: {e}")]
+    finally:
+        d.close()
+    filas, errores = [], []
+    for n, p in enumerate(PUNTOS, 1):
+        i, j = cercano(lat, p["lat"]), cercano(lon, p["lon"])
+        if abs(lat[i] - p["lat"]) > TOL_MALLA or abs(lon[j] - p["lon"]) > TOL_MALLA:
+            errores.append((n, f"{p['id']}: punto fuera de la malla del archivo"))
+            continue
+        fila = {"punto": p["id"], "fecha": fecha, "celda_lat": round(float(lat[i]), 3),
+                "celda_lon": round(float(lon[j]), 3)}
+        fila.update({v: arr[v][i, j] for v in var})
+        filas.append(fila)
+    return con_ok(pd.DataFrame(filas), len(filas)), errores
+
+
+def leer_era5(ruta):
+    """ERA5 diario servido por Open-Meteo. El punto es el nombre del archivo (id de zonas.json)."""
+    pid = Path(ruta).stem
+    if pid not in PUNTO:
+        return con_ok(vacio(), 0), [(0, f"el archivo no corresponde a un punto de zonas.json: {pid}")]
+    try:
+        d = leer_json(ruta)
+        dia = d["daily"]
+        fechas = dia["time"]
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"JSON sin bloque daily.time: {e}")]
+    var = [k for k in dia if k != "time"]
+    filas, errores = [], []
+    for n, f in enumerate(fechas):
+        if not isinstance(f, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", f):
+            errores.append((n + 1, f"fecha invalida: {f!r}"))
+            continue
+        fila = {"punto": pid, "fecha": f, "celda_lat": d.get("latitude"), "celda_lon": d.get("longitude")}
+        for v in var:
+            x = dia[v][n] if n < len(dia[v]) else None
+            if x is not None and not es_numero(x):
+                errores.append((n + 1, f"{v}: valor no numerico {x!r}"))
+                x = None
+            fila[v] = x
+        filas.append(fila)
+    return con_ok(pd.DataFrame(filas), len(filas)), errores
+
+
+def lzw_tiff(datos):
+    """Decodificador LZW de TIFF (MSB primero, cambio anticipado de ancho). Puro Python."""
+    salida, tabla = bytearray(), None
+    pos, nbits, previo = 0, 9, None
+    total = len(datos) * 8
+    while pos + nbits <= total:
+        b = pos >> 3
+        trozo = int.from_bytes(datos[b:b + 3].ljust(3, b"\0"), "big")
+        codigo = (trozo >> (24 - (pos & 7) - nbits)) & ((1 << nbits) - 1)
+        pos += nbits
+        if codigo == 256:
+            tabla = [bytes([i]) for i in range(256)] + [b"", b""]
+            nbits, previo = 9, None
+            continue
+        if codigo == 257:
+            break
+        if previo is None:
+            ent = tabla[codigo]
+        elif codigo < len(tabla):
+            ent = tabla[codigo]
+            tabla.append(previo + ent[:1])
+        else:
+            ent = previo + previo[:1]
+            tabla.append(ent)
+        salida += ent
+        previo = ent
+        if len(tabla) + 1 >= (1 << nbits) and nbits < 12:
+            nbits += 1
+    return bytes(salida)
+
+
+def valor_tiff(tif, lat, lon):
+    """Valor del pixel que contiene (lat, lon) en un GeoTIFF norte-arriba. Lee solo el bloque necesario."""
+    import zlib
+    p = tif.pages[0]
+    sx, sy = p.tags[33550].value[:2]
+    x0, y0 = p.tags[33922].value[3:5]
+    alto, ancho = p.shape[:2]
+    col, fila = int((lon - x0) // sx), int((y0 - lat) // sy)
+    if not (0 <= col < ancho and 0 <= fila < alto):
+        return None, None, None
+    if p.is_tiled:
+        th, tw = p.tilelength, p.tilewidth
+        seg = (fila // th) * (-(-ancho // tw)) + col // tw
+        forma, f_in, c_in = (th, tw), fila % th, col % tw
+    else:
+        rps = p.rowsperstrip
+        seg = fila // rps
+        forma, f_in, c_in = (min(rps, alto - seg * rps), ancho), fila % rps, col
+    tif.filehandle.seek(p.dataoffsets[seg])
+    crudo = tif.filehandle.read(p.databytecounts[seg])
+    comp = int(p.compression)
+    datos = lzw_tiff(crudo) if comp == 5 else zlib.decompress(crudo) if comp in (8, 32946) else crudo if comp == 1 else None
+    if datos is None:
+        raise ValueError(f"compresion TIFF no soportada: {comp}")
+    dt = np.dtype(p.dtype).newbyteorder(tif.byteorder)
+    n = forma[0] * forma[1]
+    a = np.frombuffer(datos[:n * dt.itemsize], dtype=dt).reshape(forma)
+    pred = p.tags[317].value if 317 in p.tags else 1
+    if pred == 2:
+        a = np.cumsum(a, axis=1, dtype=a.dtype)
+    elif pred != 1:
+        raise ValueError(f"predictor TIFF no soportado: {pred}")
+    v = a[f_in, c_in].item()
+    nodata = p.tags[42113].value if 42113 in p.tags else None
+    if nodata is not None and a_numero(nodata) is not None and float(v) == a_numero(nodata):
+        v = None
+    return v, y0 - (fila + 0.5) * sy, x0 + (col + 0.5) * sx
+
+
+def leer_gaez(ruta):
+    """FAO GAEZ v4, GeoTIFF global. Registro = punto. Formato largo: punto, capa, celda, valor (sin convertir)."""
+    import tifffile
+    capa = Path(ruta).stem
+    try:
+        tif = tifffile.TiffFile(ruta)
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"GeoTIFF ilegible: {e}")]
+    filas, errores = [], []
+    with tif:
+        for n, p in enumerate(PUNTOS, 1):
+            try:
+                v, clat, clon = valor_tiff(tif, p["lat"], p["lon"])
+            except Exception as e:
+                errores.append((n, f"{p['id']}: {e}"))
+                continue
+            if clat is None:
+                errores.append((n, f"{p['id']}: punto fuera del raster"))
+                continue
+            filas.append({"punto": p["id"], "capa": capa, "celda_lat": round(clat, 4), "celda_lon": round(clon, 4),
+                          "valor": v})
+    return con_ok(pd.DataFrame(filas), len(filas)), errores
+
+
+def leer_srtm(ruta):
+    """SRTMGL1 (hoja de 1 grado, .hgt.zip). Registro = punto dentro de la hoja.
+    Elevacion del pixel; pendiente y orientacion con el metodo de Horn (ventana 3x3, ~30 m)."""
+    import zipfile
+    nombre = Path(ruta).name
+    m = re.match(r"([NS])(\d{2})([EW])(\d{3})", nombre)
+    if not m:
+        return con_ok(vacio(), 0), [(0, f"nombre de hoja SRTM invalido: {nombre}")]
+    lat0 = int(m.group(2)) * (1 if m.group(1) == "N" else -1)
+    lon0 = int(m.group(4)) * (1 if m.group(3) == "E" else -1)
+    dentro = [p for p in PUNTOS if lat0 <= p["lat"] < lat0 + 1 and lon0 <= p["lon"] < lon0 + 1]
+    if not dentro:
+        return con_ok(vacio(), 0), []
+    try:
+        with zipfile.ZipFile(ruta) as z:
+            hgt = [i for i in z.namelist() if i.lower().endswith(".hgt")][0]
+            a = np.frombuffer(z.read(hgt), dtype=">i2")
+        lado = int(round(math.sqrt(a.size)))
+        a = a.reshape(lado, lado).astype("f8")
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"hoja SRTM ilegible: {e}")]
+    a[a == -32768] = np.nan
+    paso = 1 / (lado - 1)
+    filas, errores = [], []
+    for p in dentro:
+        f, c = int(round((lat0 + 1 - p["lat"]) / paso)), int(round((p["lon"] - lon0) / paso))
+        fila = {"punto": p["id"], "celda_lat": round(lat0 + 1 - f * paso, 5), "celda_lon": round(lon0 + c * paso, 5),
+                "elevacion_m": a[f, c], "pendiente_grados": np.nan, "orientacion_grados": np.nan}
+        if 1 <= f < lado - 1 and 1 <= c < lado - 1:
+            w = a[f - 1:f + 2, c - 1:c + 2]
+            if not np.isnan(w).any():
+                dy = paso * 111320.0
+                dx = dy * math.cos(math.radians(p["lat"]))
+                dzdx = ((w[0, 2] + 2 * w[1, 2] + w[2, 2]) - (w[0, 0] + 2 * w[1, 0] + w[2, 0])) / (8 * dx)
+                dzdy = ((w[2, 0] + 2 * w[2, 1] + w[2, 2]) - (w[0, 0] + 2 * w[0, 1] + w[0, 2])) / (8 * dy)
+                fila["pendiente_grados"] = round(math.degrees(math.atan(math.hypot(dzdx, dzdy))), 2)
+                # orientacion: 0 = norte, 90 = este (direccion hacia donde baja el terreno)
+                fila["orientacion_grados"] = round((math.degrees(math.atan2(-dzdx, dzdy)) + 360) % 360, 1)
+        else:
+            errores.append((1, f"{p['id']}: en el borde de la hoja, sin pendiente"))
+        filas.append(fila)
+    return con_ok(pd.DataFrame(filas), len(filas)), errores
+
+
+APPEEARS_PRODUCTOS = {"SPL4SMGP-008": "spl4smgp", "MOD13Q1-061": "mod13q1_pt",
+                      "HLSS30-020": "hlss30", "HLSL30-020": "hlsl30"}
+# tipo -> (prefijo de columna en el CSV de AppEEARS, capas pedidas -> nombre corto)
+APPEEARS_CAPAS = {
+    "spl4smgp": ("SPL4SMGP_008_", {"Geophysical_Data_sm_rootzone": "sm_rootzone",
+                                   "Geophysical_Data_sm_surface": "sm_surface"}),
+    "mod13q1_pt": ("MOD13Q1_061_", {"_250m_16_days_NDVI": "NDVI", "_250m_16_days_EVI": "EVI",
+                                    "_250m_16_days_pixel_reliability": "pixel_reliability"}),
+    "hlss30": ("HLSS30_020_", {b: b for b in ("B04", "B08", "B8A", "B11", "Fmask")}),
+    "hlsl30": ("HLSL30_020_", {b: b for b in ("B04", "B05", "B06", "Fmask")}),
+}
+
+
+def es_relleno(capa, v):
+    """Valores de relleno de cada producto (ya escalados por AppEEARS) -> vacio."""
+    if v <= -9999 or (capa in ("NDVI", "EVI") and abs(v + 0.3) < 1e-9):
+        return True
+    if capa == "pixel_reliability" and v == -1:
+        return True
+    if capa == "Fmask" and v == 255:
+        return True
+    return capa.startswith("B") and abs(v + 0.9999) < 1e-9
+
+
+def leer_appeears(ruta, tipo):
+    """CSV de una tarea de puntos de AppEEARS. Registro = fila (punto, fecha). Se guardan solo las capas pedidas,
+    con nombre corto, sin las columnas de calidad decodificadas que agrega AppEEARS. ID = id de zonas.json."""
+    prefijo, capas = APPEEARS_CAPAS[tipo]
+    try:
+        df = pd.read_csv(ruta, dtype=str, keep_default_na=False)
+    except Exception as e:
+        return con_ok(vacio(), 0), [(0, f"CSV ilegible: {e}")]
+    falta = [c for c in ("ID", "Date") if c not in df.columns]
+    cols = {prefijo + k: v for k, v in capas.items() if prefijo + k in df.columns}
+    if falta or not cols:
+        return con_ok(vacio(), 0), [(0, f"columnas faltantes: {', '.join(falta) or 'ninguna capa pedida'}")]
+    filas, errores = [], []
+    for n, r in enumerate(df.to_dict("records"), 1):
+        pid, fecha = r["ID"], r["Date"]
+        if pid not in PUNTO:
+            errores.append((n, f"ID que no esta en zonas.json: {pid!r}"))
+            continue
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?", fecha):
+            errores.append((n, f"fecha invalida: {fecha!r}"))
+            continue
+        fila = {"punto": pid, "fecha": fecha.replace(" ", "T")}
+        for col, corto in cols.items():
+            x = r[col].strip()
+            v = a_numero(x)
+            if x == "":
+                fila[corto] = None
+            elif v is None:
+                errores.append((n, f"{corto}: valor no numerico {x!r}"))
+                fila[corto] = None
+            else:
+                fila[corto] = None if es_relleno(corto, v) else v
+        filas.append(fila)
+    return con_ok(pd.DataFrame(filas), len(filas)), errores
+
+
 # ------------------------------------------------------------------ deteccion de tipo
 def detectar_tipo(ruta):
-    """Devuelve power, oni, ibtracs, soilgrids, meteo_hist, meteo_pron, meteo_est, imerg, smap, grace o None."""
+    """Devuelve power, oni, ibtracs, soilgrids, meteo_hist, meteo_pron, meteo_est, imerg, imerg_late, smap,
+    grace, gldas, era5, gaez, srtm, spl4smgp, mod13q1_pt, hlss30, hlsl30 o None."""
     ruta = Path(ruta)
     n = ruta.name
+    if fnmatch(n, "3B-DAY-L.*3IMERG*_HND.nc4"):
+        return "imerg_late"
+    if fnmatch(n, "GLDAS_NOAH025_M.A*_HND.nc4"):
+        return "gldas"
+    if fnmatch(n, "*.SRTMGL1.hgt.zip"):
+        return "srtm"
+    if ruta.suffix.lower() == ".tif" and ruta.parent.name.lower() in ("gaez", "gaez_recorte"):
+        return "gaez"
+    if n.endswith("-results.csv"):
+        for clave, tipo in APPEEARS_PRODUCTOS.items():
+            if clave in n:
+                return tipo
+    if ruta.suffix.lower() == ".json" and ruta.parent.name.lower() == "era5":
+        return "era5"
     if fnmatch(n, "*3IMERG*_HND.nc4"):
         return "imerg"
     if fnmatch(n, "SMAP_L3_SM_P_E_*_HND.nc4"):
@@ -674,7 +972,19 @@ def listar_archivos(carpeta):
 LECTORES = {"power": leer_power, "oni": leer_oni, "ibtracs": leer_ibtracs, "soilgrids": leer_soilgrids,
             "grace": leer_grace, "imerg": leer_imerg, "smap": leer_smap,
             "meteo_hist": leer_meteomatics, "meteo_pron": leer_meteomatics,
-            "meteo_est": lambda r: leer_meteomatics(r, estatico=True)}
+            "meteo_est": lambda r: leer_meteomatics(r, estatico=True),
+            "imerg_late": lambda r: leer_imerg(r, IMERG_LATE_VARS), "gldas": leer_gldas, "era5": leer_era5,
+            "gaez": leer_gaez, "srtm": leer_srtm,
+            "spl4smgp": lambda r: leer_appeears(r, "spl4smgp"), "mod13q1_pt": lambda r: leer_appeears(r, "mod13q1_pt"),
+            "hlss30": lambda r: leer_appeears(r, "hlss30"), "hlsl30": lambda r: leer_appeears(r, "hlsl30")}
+# tipo -> (archivo de salida, claves)
+SALIDAS_NUEVAS = {"imerg_late": ("imerg_late_series.csv", ["punto", "fecha"]),
+                  "gldas": ("gldas_series.csv", ["punto", "fecha"]),
+                  "era5": ("era5_series.csv", ["punto", "fecha"]),
+                  "spl4smgp": ("smap_l4_series.csv", ["punto", "fecha"]),
+                  "mod13q1_pt": ("mod13q1_puntos.csv", ["punto", "fecha"]),
+                  "hlss30": ("hls_s30_puntos.csv", ["punto", "fecha"]),
+                  "hlsl30": ("hls_l30_puntos.csv", ["punto", "fecha"])}
 
 
 def ejecutar(archivos, salida, base_nombres=None, log=print):
@@ -771,6 +1081,14 @@ def ejecutar(archivos, salida, base_nombres=None, log=print):
     if "meteo_est" in acum:
         df = combinar_meteomatics(acum["meteo_est"], estatico=True)
         fus(salida / "meteomatics_estaticos.csv", df, ["punto"], ord_punto(None), modo="celda")
+    for tipo, (dest, claves) in SALIDAS_NUEVAS.items():
+        if tipo in acum:
+            fus(salida / dest, pd.concat(acum[tipo], ignore_index=True), claves, ord_punto("fecha"))
+    if "gaez" in acum:
+        fus(salida / "gaez_por_punto.csv", pd.concat(acum["gaez"], ignore_index=True), ["punto", "capa"],
+            ord_punto("capa"))
+    if "srtm" in acum:
+        fus(salida / "srtm_por_punto.csv", pd.concat(acum["srtm"], ignore_index=True), ["punto"], ord_punto(None))
 
     for d, clave, motivo in avisos_fus:
         log(f"AVISO {d}: {motivo}")

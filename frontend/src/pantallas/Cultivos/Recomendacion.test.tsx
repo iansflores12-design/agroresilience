@@ -41,6 +41,8 @@ describe('Recomendacion en la portada', () => {
     window.localStorage.clear()
     window.sessionStorage.clear()
     vi.clearAllMocks()
+    // Modo demo por defecto aunque .env.local defina VITE_API_URL; las pruebas con API la fijan aparte.
+    vi.stubEnv('VITE_API_URL', '')
   })
   afterEach(() => {
     vi.unstubAllEnvs()

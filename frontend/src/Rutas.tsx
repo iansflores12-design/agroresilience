@@ -3,6 +3,7 @@ import { Estructura } from './componentes/Estructura'
 import Chat from './pantallas/Chat'
 import Cultivos from './pantallas/Cultivos'
 import Mapa from './pantallas/Mapa'
+import Siembra from './pantallas/Siembra'
 import Zona from './pantallas/Zona'
 
 /** Las cuatro rutas de DISENO.md, seccion 3, dentro del armazon. */
@@ -13,6 +14,7 @@ export function Rutas() {
         <Route index element={<Cultivos />} />
         <Route path="mapa" element={<Mapa />} />
         <Route path="zona" element={<Zona />} />
+        <Route path="siembra" element={<Siembra />} />
         <Route path="chat" element={<Chat />} />
         <Route path="*" element={<Cultivos />} />
       </Route>

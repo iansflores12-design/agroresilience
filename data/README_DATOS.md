@@ -69,6 +69,22 @@ Recursos oficiales útiles que **no** estaban en el plan (propuestos, pendientes
 | ECOSTRESS ECO_L3T_JET v003 | NASA LP DAAC | Bajado, 75 gránulos, 1,050 archivos, 0 fallos | 2.75 GB | 2025-12-21 a 2026-10-21; teselas 16PDA y 16PDB (Comayagua), 16PDV (Choluteca) | Teselas completas, sin recortar. 14 capas GeoTIFF por gránulo (ETdaily, ETuncertainty, cloud, water y modelos PT-JPL, STIC, BESS, PM). Sin versión procesada. |
 | HLSL30 v2.0 | NASA LP DAAC | Solo consultado, no bajado (24.6 GB); ver Pendientes | | | |
 
+Agregados el 2026-11-14 (scripts 13 a 18). Los de 13 a 17 los bajó otra sesión; aquí se documentan.
+
+| Conjunto | Fuente | Estado (2026-11-14) | Tamaño | Cobertura | Notas |
+| --- | --- | --- | --- | --- | --- |
+| POWER en malla 0.5 grados | NASA | Bajado, 641 archivos, 3 fallos | 100 MB | 1981 a 2026, 14 parámetros por año | `13_power_malla.py`. Los 3 fallos son `ALLSKY_SFC_SW_DWN` de 1981 a 1983, que no existe en origen. Para mapas; sin tabla por punto. |
+| MOD13A3 v061 (NDVI/EVI 1 km mensual) | NASA LP DAAC | Bajado, 642 archivos HDF4 | 4.5 GB | 2000 a 2026-10, teselas h09v07 y h10v07 | `14_ndvi_srtm.py`. Para mapas; sin procesar (HDF4 necesita librerías nativas). |
+| VNP13A3 v002 (VIIRS) | NASA LP DAAC | Bajado, 356 archivos, 2 fallos | 3.5 GB | 2012 a 2026 | `14_ndvi_srtm.py`. No está en la lista de variables del equipo. |
+| SRTMGL1 v003 | NASA LP DAAC | Bajado, 34 hojas | 281 MB | Toda la caja | `14_ndvi_srtm.py`. Procesado a `srtm_por_punto.csv`. |
+| GLDAS Noah 0.25 mensual v2.1 | NASA GES DISC | Bajado, **recorte**, 319 archivos | 90 MB | 2000-01 a 2026-07 | `15_gldas_imerg_late.py`. Procesado a `gldas_series.csv`. |
+| IMERG Late diario V07 | NASA GES DISC | Bajado, **recorte**, 409 archivos | 23 MB | 2025-10-01 a 2026-11-13 | `15_gldas_imerg_late.py`. Provisional. Procesado a `imerg_late_series.csv`. |
+| SoilGrids v2.0 raster | ISRIC (no NASA) | Bajado, 61 GeoTIFF | 161 MB | Toda la caja, 250 m | `16_soilgrids_raster.py`. Para mapas; los puntos ya están en `suelo_por_punto.csv`. |
+| MOD13Q1 v061 NDVI 250 m (área) | NASA LP DAAC (AppEEARS) | Bajado, 1,844 archivos, 15 fallos por DNS (reintentados) | 8.3 GB | 2000-02 a 2026-11 | `17_appeears_ndvi.py`. NDVI y confiabilidad, sin EVI. Para mapas. |
+| FAO GAEZ v4 | FAO (no NASA) | Bajado, 58 GeoTIFF globales y 19 recortes | 255 MB | Clima de referencia 1981-2010; LGP anual 2006-2010 | `18_faltantes.py gaez` y `gaez_recorte`. Aptitud, clase y rendimiento alcanzable de maíz, frijol, sorgo, café y yuca (secano, insumos alto y bajo); LGP; limitaciones del suelo SQ0-SQ7; AEZ. Ver PROCESAMIENTO.md. |
+| ERA5 diario (vía Open-Meteo) | ECMWF (no NASA) | Bajado, 11 puntos | 4.8 MB | 2006-01-01 a 2026-11-07 | `18_faltantes.py era5`. Temperatura, lluvia y humedad del suelo en 4 capas (equivale a swvl1-4). **No es la descarga oficial del CDS**: esa requiere cuenta. |
+| AppEEARS por punto | NASA LP DAAC / NSIDC | Ver abajo | | | `18_faltantes.py enviar` y `bajar`. SMAP L4 (sm_rootzone), MOD13Q1 NDVI+EVI, HLS S30 (Sentinel-2) y HLS L30 (Landsat). Solo los 11 puntos, para no llenar el disco. |
+
 ## Cambios respecto al plan y fallos
 
 - **POWER, prueba de parámetros (2026-11-13):** solicitud de prueba en Comayagua, 2024-01-01 a 2024-01-03, comunidad AG. Los 10 parámetros pedidos son válidos sin cambios. Se suman 4 que también existen en AG: `EVPTRNS` (flujo de energía de evapotranspiración, MJ/m^2/día), `EVLAND` (evaporación del suelo, mm/día), `WS10M` y `WS10M_MAX` (viento a 10 m, m/s). Total 14 parámetros, bajo el límite de 20.
@@ -164,7 +180,23 @@ SMAP usa la malla guardada en `config/smap_malla.json`; se regenera con `.venv/b
   | HLSL30 v2.0 | Choluteca | 86 | 9.02 GB | 2025-11-14 a 2026-11-01 | T16PDV |
 
   Cada gránulo trae 14 archivos (ECOSTRESS) o 15 (HLS, una banda por archivo). Nubosidad HLS: mediana 54% en Comayagua (17 gránulos con menos de 30%) y 17% en Choluteca (57 con menos de 30%). Comayagua cae en el traslape de dos teselas, por eso sus gránulos vienen en pares de la misma fecha.
-- Recursos oficiales no bajados, a decidir: SRTM, MODIS/VIIRS NDVI, GLDAS, FAO GAEZ, ERA5, Sentinel-2.
+- Ya bajados (2026-11-14): SRTM, MODIS/VIIRS NDVI, GLDAS, FAO GAEZ, ERA5 (vía Open-Meteo) y Sentinel-2/Landsat como series HLS por punto. Siguen faltando:
+  - **ERA5 oficial del CDS** y **Sentinel-2 L2A de 10 m** de Copernicus: necesitan cuenta (CDS y Copernicus Data Space). Mientras tanto se usan ERA5 vía Open-Meteo y HLS S30 (30 m).
+  - **Landsat antes de 2013**: HLS empieza en 2013. Para 2006-2012 se usa MOD13Q1; Landsat 5/7 requiere cuenta USGS.
+  - **Mosaicos HLS y Sentinel-2 por parcela**: no caben en disco (quedan unos 14 GB). Hoy solo hay series en los 11 puntos.
+
+## Clasificación (últimos 20 y 10 años)
+
+`scripts/19_clasificar.py` toma las tablas de `processed/` y `salida/`, las ordena según la lista de variables del equipo y las deja en `clasificado/`. No calcula indicadores; solo filtra y etiqueta.
+
+```
+.venv/bin/python -I scripts/19_clasificar.py
+```
+
+- **Categorías:** `clasificado/clima/`, `suelo_agua/`, `vegetacion/` y `contexto/` (fuentes útiles que no están en la lista: ONI, IBTrACS, GRACE).
+- **Ventanas:** se descarta todo lo anterior a 2006. La columna `ventana` vale `2006-2015`, `2016-2025` o `2026`. La línea base de 20 años es `2006-2015` más `2016-2025`. La de 10 años es solo `2016-2025`. `2026` es el año que se compara contra ellas.
+- **Tablas sin fecha** (GAEZ, SRTM, SoilGrids): se copian enteras. GAEZ se parte en `suelo_agua/gaez_suelo.csv` (limitaciones del suelo, LGP, AEZ) y `vegetacion/gaez_cultivos.csv` (aptitud y rendimiento por cultivo).
+- **`clasificado/CATALOGO.csv`:** una fila por fuente con categoría, estado, variables, indicadores que alimenta (1 a 9), resolución, frecuencia, rango de fechas y filas por ventana. También lista lo que falta.
 - Términos de uso de Meteomatics sin revisar.
 - Puntos alternos de SoilGrids sin verificar como agrícolas.
 - PDF locales por guardar a mano.

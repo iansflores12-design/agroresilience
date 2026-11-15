@@ -91,6 +91,21 @@ Etiquetas usadas abajo:
 - **Salida:** `punto, latitud, longitud, dia_local, marca_utc` y los parámetros en el orden en que aparecen; filas por punto (orden de `zonas.json`) y por `marca_utc` **[explícita]**. `hist_*` → diario largo; `pronostico_*` → pronóstico; `estaticos.json` → una fila por punto **[explícita]**.
 - **Registro inválido [inferida]:** marca de tiempo que no es ISO `AAAA-MM-DDThh:mm:ssZ`, valor no numérico, o coordenadas que no coinciden con ningún punto.
 
+## Fuentes agregadas el 2026-11-14 (solo en `procesar_nuevo.py`)
+
+Estas fuentes no existían cuando se escribió `10_procesar.py`, así que todas sus reglas son **[nuevas]**. Siguen las reglas comunes: coordenadas de `zonas.json`, relleno a vacío, sin conversión de unidades y sin cálculos del motor. Se procesan pasando la carpeta de `raw/` como ruta, por ejemplo `scripts/procesar_nuevo.py raw/gldas`, y escriben en `salida/`.
+
+| Fuente | Entrada | Salida | Registro | Reglas |
+| --- | --- | --- | --- | --- |
+| IMERG Late V07 | `raw/imerg_late/3B-DAY-L.*_HND.nc4` | `imerg_late_series.csv` | punto por día | Igual que IMERG Final, pero sin `precipitation_cnt_cond`, que Late no trae. Es provisional. |
+| GLDAS Noah 2.1 mensual | `raw/gldas/GLDAS_NOAH025_M.A*_HND.nc4` | `gldas_series.csv` | punto por mes | Fecha `AAAA-MM-01` tomada del nombre. Celda de 0.25 grados más cercana, redondeada a 3 decimales. Relleno -9999 a vacío. Las 36 variables quedan en sus unidades originales (kg m-2, W m-2, K). |
+| ERA5 (vía Open-Meteo) | `raw/era5/<punto>.json` | `era5_series.csv` | punto por día | El punto es el nombre del archivo. `celda_lat` y `celda_lon` son la celda ERA5 que devolvió la API. El día es el de Honduras (la API agrega las horas en `America/Tegucigalpa`). |
+| FAO GAEZ v4 | `raw/gaez/*.tif` y `raw/gaez_recorte/*.tif` | `gaez_por_punto.csv` (largo: `punto, capa, celda_lat, celda_lon, valor`) | punto por capa | Pixel que contiene el punto, sin interpolar. Valor sin convertir (índice 0-10000, clase o kg/ha). El valor de `GDAL_NODATA` pasa a vacío. Los GeoTIFF con compresión LZW se leen con un decodificador propio que abre solo el bloque del punto. Los que traen LERC no se pueden leer sin librerías nativas, así que se usa su recorte sin compresión (ver abajo). |
+| SRTMGL1 | `raw/srtmgl1/*.SRTMGL1.hgt.zip` | `srtm_por_punto.csv` | punto dentro de la hoja | `elevacion_m` del pixel más cercano. Vacío -32768 a vacío. `pendiente_grados` y `orientacion_grados` con el método de Horn sobre la ventana 3x3 (pixel de 1 arcosegundo, unos 30 m). La orientación es hacia donde baja el terreno: 0 es norte y 90 es este. |
+| AppEEARS por punto | `raw/appeears_puntos/<producto>/*-results.csv` | `smap_l4_series.csv`, `mod13q1_puntos.csv`, `hls_s30_puntos.csv`, `hls_l30_puntos.csv` | punto por fecha | Ver la sección siguiente. |
+
+**Recortes de GAEZ (`raw/gaez_recorte/`).** Son 19 capas de recursos de tierra que FAO publica con LERC: limitaciones del suelo SQ0 a SQ7, aptitud de suelo y terreno, y zonas AEZ. Se piden al servicio de imágenes de FAO para la caja de `zonas.json` ampliada a múltiplos de 5 arcmin (-89.75, 12.75, -82.75, 16.75), sin compresión y con vecino más cercano. El paso del pixel es el mismo del archivo global, así que no hay remuestreo. Se comprobó con `sxHr_mze`: el recorte y el global con LZW dan el mismo valor en los 11 puntos. FAO no publica `SQ1_mze_v9aH` ni `SQ2_mze_v9aL` en el servicio, así que esas dos capas no tienen dato.
+
 ## Fuera de alcance
 
 - ECOSTRESS y HLS no tienen versión procesada.

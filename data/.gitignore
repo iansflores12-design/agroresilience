@@ -6,3 +6,5 @@ __pycache__/
 .venv/
 entrada/
 salida/
+clasificado/*
+!clasificado/CATALOGO.csv
