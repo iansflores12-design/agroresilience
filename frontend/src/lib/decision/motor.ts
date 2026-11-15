@@ -2,9 +2,11 @@
 // Es determinista: los mismos datos dan siempre los mismos puntajes. Gemini (el modelo de
 // lenguaje) solo explica estos numeros; no los cambia.
 
+import { ajustarAParcela, dentroDeHonduras } from './escala.js'
 import {
   CULTIVOS,
   LUGARES,
+  NOMBRES_PUNTOS,
   NOMBRE_FACTOR,
   OBJETIVOS,
   ORDEN_TEMPORADAS,
@@ -20,8 +22,10 @@ import type {
   Confianza,
   Decision,
   EntradaDecision,
+  EscalaFina,
   Evidencia,
   Factor,
+  InfoParcela,
   Objetivo,
   PasoPlan,
   PuntoKharis,
@@ -73,9 +77,8 @@ interface Ventana {
   anio: string
 }
 
-function ventana(p: PuntoKharis, t: Temporada, c: ParametrosCultivo, terreno: Terreno): Ventana {
+function ventana(p: PuntoKharis, t: Temporada, c: ParametrosCultivo, ajuste: number): Ventana {
   const dias = indicesTemporada(p, t).slice(0, c.cicloSemanas * 7)
-  const ajuste = TERRENOS[terreno].ajusteTemp
   let lluvia = 0
   let etc = 0
   let diasCalor = 0
@@ -189,14 +192,14 @@ function aguaDelPaso(p: PuntoKharis, t: Temporada, c: ParametrosCultivo, v: Vent
   return limitar(agua)
 }
 
-function calcularPasos(p: PuntoKharis, e: EntradaDecision, cand: Candidato): PasoCalculado[] {
+function calcularPasos(p: PuntoKharis, e: EntradaDecision, cand: Candidato, ajusteTemp: number): PasoCalculado[] {
   const temporadas = temporadasDesde(e.temporada)
   return cand.cultivos.map((id, i) => {
     const t = temporadas[i]
     if (!id) return { temporada: t, cultivoId: null, continua: false, v: null, agua: null, calor: null }
     const continua = i > 0 && cand.cultivos[i - 1] === id && id === 'frijol-terciopelo'
     const c = CULTIVOS[id]
-    const v = ventana(p, t, c, e.terreno)
+    const v = ventana(p, t, c, ajusteTemp)
     return {
       temporada: t,
       cultivoId: id,
@@ -359,14 +362,28 @@ function riesgosDe(pasos: PasoCalculado[], e: EntradaDecision): string[] {
 export interface MetaKharis {
   fechaBase: string
   modelo: string
+  /** Con parcela: malla de altura y coeficientes validados, y la distancia al punto de Kharis usado. */
+  escala?: EscalaFina | null
+  distanciaKm?: number
 }
 
-export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): Decision {
+export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKharis): Decision {
   const w = pesos(e.objetivos)
   const claves = Object.keys(PESOS_BASE) as ClaveFactor[]
 
+  // Escala de parcela: el punto se ajusta a la altura real de la parcela (solo lo validado).
+  let p = pKharis
+  let parcela: InfoParcela | undefined
+  if (e.parcela && meta.escala) {
+    const r = ajustarAParcela(pKharis, meta.escala, e.parcela, NOMBRES_PUNTOS[pKharis.punto] ?? pKharis.punto, meta.distanciaKm ?? 0)
+    p = r.punto
+    parcela = r.info
+  }
+  // Con la altura real ya no hace falta suponer el calor por el tipo de terreno.
+  const ajusteTemp = parcela && parcela.alturaM !== null ? 0 : TERRENOS[e.terreno].ajusteTemp
+
   const calculadas = candidatos(e.cultivoId).map((cand) => {
-    const pasos = calcularPasos(p, e, cand)
+    const pasos = calcularPasos(p, e, cand, ajusteTemp)
     const valores = factoresDe(p, e, pasos)
     let puntaje = claves.reduce((s, k) => s + w[k] * valores[k], 0)
     const inviable = pasos.some((x) => x.cultivoId && CULTIVOS[x.cultivoId].cosecha && (x.agua ?? 100) < 30)
@@ -428,7 +445,7 @@ export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): D
       beneficios,
       riesgos: [...new Set(riesgos)].slice(0, 5),
       faltaSaber: faltaSaber.slice(0, 4),
-      evidencia: evidenciaDe(p, e, x.pasos),
+      evidencia: [...(parcela ? evidenciaParcela(parcela) : []), ...evidenciaDe(p, e, x.pasos)],
     }
   })
 
@@ -438,10 +455,11 @@ export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): D
     entrada: e,
     punto: {
       id: p.punto,
-      nombre: lugar?.nombre ?? p.punto,
+      nombre: parcela ? `su parcela, cerca de ${parcela.puntoNombre}` : lugar?.nombre ?? p.punto,
       fechaBase: meta.fechaBase,
       modelo: meta.modelo,
       fraccionPronosticada: fraccionPronosticada(p),
+      ...(parcela ? { parcela } : {}),
     },
     rotaciones,
     mejorId: mejor.cand.id,
@@ -468,11 +486,42 @@ export function validarEntrada(x: unknown): EntradaDecision | null {
   const objetivos = Array.isArray(d.objetivos)
     ? [...new Set(d.objetivos.filter((o): o is Objetivo => typeof o === 'string' && o in OBJETIVOS))]
     : []
-  return {
+  const salida: EntradaDecision = {
     zonaId: d.zonaId,
     cultivoId: d.cultivoId,
     terreno: d.terreno as Terreno,
     temporada: d.temporada as Temporada,
     objetivos,
   }
+  const pc = d.parcela as { lat?: unknown; lon?: unknown } | undefined
+  if (pc && typeof pc === 'object') {
+    const lat = Number(pc.lat)
+    const lon = Number(pc.lon)
+    if (!dentroDeHonduras(lat, lon)) return null
+    // 3 decimales (~100 m): suficiente para la malla de 2 km y no guarda la ubicacion exacta.
+    salida.parcela = { lat: Math.round(lat * 1000) / 1000, lon: Math.round(lon * 1000) / 1000 }
+  }
+  return salida
+}
+
+/* ---------- Escala de parcela ---------- */
+
+function evidenciaParcela(i: InfoParcela): Evidencia[] {
+  const lista: Evidencia[] = [
+    {
+      texto: i.alturaM === null
+        ? `Se usa el punto de Kharis más cercano: ${i.puntoNombre}, a ${i.distanciaKm} km. No hay altura para su ubicación.`
+        : `Su parcela está a unos ${Math.round(i.alturaM).toLocaleString('es-HN')} m de altura; la zona de Kharis más cercana (${i.puntoNombre}, a ${i.distanciaKm} km) promedia ${i.alturaCeldaM.toLocaleString('es-HN')} m.`,
+      fuente: 'NASADEM (SRTM 30 m) promediado a 2 km; punto de Kharis más cercano',
+    },
+  ]
+  if (i.alturaM !== null && (i.cambioTmin !== 0 || i.cambioEt0Pct !== 0)) {
+    const grados = (x: number, f: string, c: string) => `${Math.abs(x).toLocaleString('es-HN')} °C más ${x <= 0 ? f : c}`
+    lista.push({
+      texto: `Por la altura, sus noches salen ${grados(i.cambioTmin, 'frescas', 'cálidas')} y el día en promedio ${grados(i.cambioTmedia, 'fresco', 'cálido')}. ` +
+        `La tierra pierde ${Math.abs(i.cambioEt0Pct)} % ${i.cambioEt0Pct <= 0 ? 'menos agua, así que el cultivo pide menos' : 'más agua'}.`,
+      fuente: 'Gradiente por altura validado dejando un punto fuera (mínima +51 %, media +41 %); máxima y lluvia sin ajuste',
+    })
+  }
+  return lista
 }

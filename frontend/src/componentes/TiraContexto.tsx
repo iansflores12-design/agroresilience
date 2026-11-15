@@ -7,9 +7,21 @@ import estilos from './TiraContexto.module.css'
 
 /** Dice en palabras completas el cultivo y el lugar elegidos. Cada chip lleva a donde se elige. */
 export function TiraContexto() {
-  const { cultivoId, zonaId, temporada } = useEstadoApp()
+  const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
+  if (zona && parcela) {
+    return (
+      <div className={estilos.tira} role="group" aria-label="Contexto elegido">
+        <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${cultivo.nombre}` : 'Sin cultivo. Elegir cultivo'}>
+          {cultivo ? (temporada ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}` : cultivo.nombre) : 'Elegir cultivo'}
+        </Chip>
+        <Chip to="/" icono="my_location" aria-label={`Su parcela, cerca de ${zona.nombre}`}>
+          Su parcela
+        </Chip>
+      </div>
+    )
+  }
   const textoCultivo = cultivo
     ? temporada
       ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}`

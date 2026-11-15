@@ -1,7 +1,9 @@
-// Lectura de las salidas web de Kharis (contrato kharis.web.v1, 04_GUIA_SITIO.md).
+// Lectura de las salidas web de Kharis (contrato kharis.web.v1, 04_GUIA_SITIO.md) y del ajuste a escala de
+// parcela (kharis.escala_fina.v1).
 
+import { puntoMasCercano } from './escala.js'
 import { LUGARES } from './parametros.js'
-import type { IndiceKharis, PuntoKharis } from './tipos.js'
+import type { EntradaDecision, EscalaFina, IndiceKharis, PuntoKharis } from './tipos.js'
 
 type Fetch = (url: string) => Promise<Response>
 
@@ -19,28 +21,48 @@ async function leerJson<T>(f: Fetch, url: string): Promise<T> {
   return (await r.json()) as T
 }
 
-const cacheIndice = new Map<string, Promise<IndiceKharis>>()
-const cachePuntos = new Map<string, Promise<PuntoKharis>>()
+const cache = new Map<string, Promise<unknown>>()
 
-/** Lee el indice y el punto de un lugar del sitio. `base` termina en "/kharis/". */
-export async function leerKharis(base: string, zonaId: string, f: Fetch = fetch): Promise<{ indice: IndiceKharis; punto: PuntoKharis }> {
-  const lugar = LUGARES[zonaId]
-  if (!lugar) throw new ErrorKharis('Lugar sin punto de Kharis: ' + zonaId)
-  let indice = cacheIndice.get(base)
-  if (!indice) {
-    indice = leerJson<IndiceKharis>(f, base + 'indice.json')
-    cacheIndice.set(base, indice)
-    indice.catch(() => cacheIndice.delete(base))
+function leerGuardado<T>(f: Fetch, url: string): Promise<T> {
+  let p = cache.get(url) as Promise<T> | undefined
+  if (!p) {
+    p = leerJson<T>(f, url)
+    cache.set(url, p)
+    p.catch(() => cache.delete(url))
   }
-  const i = await indice
-  const entrada = i.puntos.find((p) => p.punto === lugar.punto)
-  if (!entrada) throw new ErrorKharis('Kharis no tiene el punto ' + lugar.punto)
-  const clave = base + entrada.archivo
-  let punto = cachePuntos.get(clave)
-  if (!punto) {
-    punto = leerJson<PuntoKharis>(f, clave)
-    cachePuntos.set(clave, punto)
-    punto.catch(() => cachePuntos.delete(clave))
+  return p
+}
+
+export interface LecturaKharis {
+  indice: IndiceKharis
+  punto: PuntoKharis
+  /** Solo con parcela: malla de altura y coeficientes, y la distancia al punto usado. */
+  escala: EscalaFina | null
+  distanciaKm: number
+}
+
+/**
+ * Lee el indice y el punto de Kharis de una consulta. Con parcela se usa el mas cercano de los 30 puntos;
+ * sin ella, el punto del lugar del sitio. `base` termina en "/kharis/".
+ */
+export async function leerKharis(base: string, entrada: Pick<EntradaDecision, 'zonaId' | 'parcela'>, f: Fetch = fetch): Promise<LecturaKharis> {
+  const indice = await leerGuardado<IndiceKharis>(f, base + 'indice.json')
+  let archivo: string
+  let distancia = 0
+  if (entrada.parcela) {
+    const cerca = puntoMasCercano(indice, entrada.parcela)
+    archivo = cerca.entrada.archivo
+    distancia = cerca.distanciaKm
+  } else {
+    const lugar = LUGARES[entrada.zonaId]
+    if (!lugar) throw new ErrorKharis('Lugar sin punto de Kharis: ' + entrada.zonaId)
+    const e = indice.puntos.find((p) => p.punto === lugar.punto)
+    if (!e) throw new ErrorKharis('Kharis no tiene el punto ' + lugar.punto)
+    archivo = e.archivo
   }
-  return { indice: i, punto: await punto }
+  const [punto, escala] = await Promise.all([
+    leerGuardado<PuntoKharis>(f, base + archivo),
+    entrada.parcela ? leerGuardado<EscalaFina>(f, base + 'escala_fina.json').catch(() => null) : Promise.resolve(null),
+  ])
+  return { indice, punto, escala, distanciaKm: distancia }
 }

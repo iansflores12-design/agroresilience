@@ -1,5 +1,6 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { dentroDeHonduras } from '../lib/decision/escala'
 import { OBJETIVOS } from '../lib/decision/parametros'
 import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
 import { configurarSonido } from '../lib/sonido'
@@ -14,6 +15,8 @@ export interface EstadoApp {
   terreno: Terreno | null
   temporada: Temporada | null
   objetivos: Objetivo[]
+  /** Ubicacion de la parcela (GPS), redondeada a ~100 m. Null = se usa el lugar elegido. */
+  parcela: { lat: number; lon: number } | null
 }
 
 export interface Perfil {
@@ -21,6 +24,7 @@ export interface Perfil {
   terreno: Terreno
   cultivoId: string
   temporada: Temporada
+  parcela?: { lat: number; lon: number } | null
 }
 
 interface AccionesEstadoApp {
@@ -44,6 +48,13 @@ const porDefecto: EstadoApp = {
   terreno: null,
   temporada: null,
   objetivos: [],
+  parcela: null,
+}
+
+function leerParcela(x: unknown): { lat: number; lon: number } | null {
+  if (typeof x !== 'object' || x === null) return null
+  const { lat, lon } = x as { lat?: unknown; lon?: unknown }
+  return typeof lat === 'number' && typeof lon === 'number' && dentroDeHonduras(lat, lon) ? { lat, lon } : null
 }
 
 const TERRENOS: Terreno[] = ['plano', 'elevado', 'bajo', 'ondulado']
@@ -72,6 +83,7 @@ function leerEstadoGuardado(): EstadoApp {
       objetivos: Array.isArray(d.objetivos)
         ? d.objetivos.filter((o): o is Objetivo => typeof o === 'string' && o in OBJETIVOS)
         : [],
+      parcela: leerParcela(d.parcela),
     }
   } catch {
     return porDefecto
@@ -109,6 +121,7 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
     setEstado((e) => ({
       ...e,
       ...p,
+      parcela: p.parcela ?? null,
       edadSemanas: e.cultivoId === p.cultivoId ? e.edadSemanas : 0,
     }))
   }, [])
@@ -135,5 +148,8 @@ export function useEstadoApp() {
 /** Entrada completa para Gemini Decision, o null si falta contestar algo. */
 export function entradaDe(e: EstadoApp): EntradaDecision | null {
   if (!e.zonaId || !e.cultivoId || !e.terreno || !e.temporada) return null
-  return { zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos }
+  return {
+    zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos,
+    ...(e.parcela ? { parcela: e.parcela } : {}),
+  }
 }

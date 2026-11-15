@@ -110,6 +110,33 @@ Además, la prueba de "sin fuga" ahora cubre la mezcla y El Niño.
 - año por año, con la tolerancia de deriva;
 - lluvia por umbral y El Niño.
 
+## 5. Escala de parcela
+
+Kharis pronostica la celda de NASA POWER de cada uno de sus 30 puntos (0.5° × 0.625°, unos 55 km). Para llevarlo a la parcela:
+
+1. **Mallas** (`scripts/escala_fina.py`):
+   - altura de NASADEM (SRTM 30 m) promediada a 0.02° (~2 km) para toda Honduras;
+   - climatología mensual de GPM IMERG a 0.1° con 7,305 días de 2001–2020.
+2. **Modelo** (`kharis_engine/analizar_escala_fina.py`): temperatura de la parcela = la del punto + G[mes] × (altura de la parcela − altura media de la celda) + B[mes] × (diferencia de latitud). G y B salen de las 30 celdas con 1996–2020.
+3. **Validación dejando un punto fuera:** se predice la climatología de cada punto desde su vecino más cercano (a 39 km en promedio), con y sin el ajuste.
+
+| Variable | Error sin ajuste | Error con ajuste | Mejora | ¿Se usa? |
+|---|---|---|---|---|
+| Temperatura mínima | 1.31 °C | 0.63 °C | **+51 %** (−6.6 °C por km) | Sí |
+| Temperatura media | 0.89 °C | 0.53 °C | **+41 %** (−5.0 °C por km) | Sí |
+| Temperatura máxima | 0.67 °C | 0.70 °C | −3 % | No |
+| Lluvia (reparto con IMERG) | 0.47 mm/día | 0.49 mm/día | −5 % | No |
+
+En NASA POWER, la máxima casi no cambia con la altura. Para la lluvia no hay estaciones en el terreno con qué validar a 10 km, y contra NASA POWER el reparto con IMERG empeora. Por eso ninguna de las dos se ajusta.
+
+**En el sitio:** "Usar mi ubicación" en la primera pregunta. Con esa ubicación:
+- Gemini Decision usa el punto más cercano de los 30, no solo de los 11 lugares.
+- Ajusta la mínima y la media a la altura real.
+- Recalcula el agua que pierde la tierra (ET0, Hargreaves) con la temperatura media.
+- Ya no usa la suposición de calor por tipo de terreno.
+
+La ubicación se guarda con 3 decimales (unos 100 m). El archivo del sitio es `frontend/public/kharis/escala_fina.json` (192 KB) y solo se descarga si hay ubicación.
+
 ## Archivos nuevos
 
 | Archivo | Qué hace |
@@ -119,5 +146,8 @@ Además, la prueba de "sin fuga" ahora cubre la mezcla y El Niño.
 | `ajustar_mezcla.py` | Ajusta los pesos de la mezcla con un motor entrenado hasta 2016 |
 | `analizar_enso.py` | Validación cruzada de El Niño y prueba congelada |
 | `exportar_html_2021_2026.py` + `plantilla_2021_2026.html` | Página interactiva de la prueba |
+| `analizar_escala_fina.py` | Gradiente por altura y reparto de la lluvia, validados dejando un punto fuera; escribe `escala_fina.json` |
+| `../scripts/escala_fina.py` | Mallas de altura (NASADEM) y de lluvia (IMERG 2001–2020) |
+| `../frontend/src/lib/decision/escala.ts` | Ajuste a la parcela dentro de Gemini Decision |
 
 El respaldo del motor anterior está en `agroresilience/respaldos/kharis_engine_2026-11-15_antes_refuerzo/`.

@@ -145,6 +145,17 @@ export function ratingDePuntaje(p: number): 'alta' | 'buena' | 'intermedia' | 'b
 
 export const PALABRA_RATING = { alta: 'Alta', buena: 'Buena', intermedia: 'Intermedia', baja: 'Baja' } as const
 
+/** Nombres de los 30 puntos de Kharis (para la escala de parcela, que usa el mas cercano). */
+export const NOMBRES_PUNTOS: Record<string, string> = {
+  brus_laguna: 'Brus Laguna', catacamas: 'Catacamas', choluteca: 'Choluteca', comayagua: 'Comayagua', copan_ruinas: 'Copán Ruinas',
+  danli: 'Danlí', el_progreso: 'El Progreso', gracias: 'Gracias', juticalpa: 'Juticalpa', lago_yojoa: 'Lago de Yojoa',
+  la_ceiba: 'La Ceiba', la_esperanza: 'La Esperanza', la_paz: 'La Paz', marcala: 'Marcala', nacaome: 'Nacaome',
+  ocotepeque: 'Ocotepeque', olanchito: 'Olanchito', puerto_lempira: 'Puerto Lempira', roatan: 'Roatán',
+  san_marcos_colon: 'San Marcos de Colón', santa_barbara: 'Santa Bárbara', santa_rosa: 'Santa Rosa de Copán',
+  siguatepeque: 'Siguatepeque', sula: 'Valle de Sula', tegucigalpa: 'Tegucigalpa', tela: 'Tela', tocoa: 'Tocoa',
+  trujillo: 'Trujillo', yoro: 'Yoro', zamorano: 'Zamorano',
+}
+
 /** Lugares del sitio y su punto en Kharis (04_GUIA_SITIO.md, paso 4). */
 export const LUGARES: Record<string, { nombre: string; punto: string }> = {
   choluteca: { nombre: 'Choluteca', punto: 'choluteca' },

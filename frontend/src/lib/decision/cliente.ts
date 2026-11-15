@@ -13,8 +13,8 @@ function esDecision(x: unknown): x is Decision {
 
 /** Calcula la decision en el navegador con los mismos datos y el mismo codigo que el servidor. */
 export async function decidirLocal(entrada: EntradaDecision): Promise<Decision> {
-  const { indice, punto } = await leerKharis(new URL(KHARIS, window.location.href).href, entrada.zonaId)
-  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo })
+  const { indice, punto, escala, distanciaKm } = await leerKharis(new URL(KHARIS, window.location.href).href, entrada)
+  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm })
 }
 
 /**

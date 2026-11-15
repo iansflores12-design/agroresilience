@@ -5,6 +5,8 @@ import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import type { NombreIcono } from '../../componentes/iconos'
 import { SelectorCultivo } from '../../componentes/decision/SuCultivo'
+import { zonas } from '../../datos/zonas'
+import { dentroDeHonduras, distanciaKm } from '../../lib/decision/escala'
 import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
 import { CULTIVOS, LUGARES, ORDEN_TEMPORADAS, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
 import type { Temporada, Terreno } from '../../lib/decision/tipos'
@@ -80,24 +82,55 @@ export function Cuestionario({
 }) {
   const [paso, fijarPaso] = useState(0)
   const [respuestas, fijarRespuestas] = useState<Respuestas>(inicial)
+  const [gps, fijarGps] = useState<'listo' | 'buscando' | string>('listo')
   const titulo = useRef<HTMLHeadingElement>(null)
   const pregunta = PREGUNTAS[paso]
-  const elegida = respuestas[pregunta.clave]
+  const valor = respuestas[pregunta.clave]
+  const elegida = typeof valor === 'string' ? valor : null
+  const conGps = pregunta.clave === 'zonaId' && Boolean(respuestas.parcela)
 
   useEffect(() => {
     titulo.current?.focus()
   }, [paso])
 
-  function elegir(id: string) {
-    const nuevas = { ...respuestas, [pregunta.clave]: id }
+  function avanzar(nuevas: Respuestas) {
     fijarRespuestas(nuevas)
     confirmar()
     if (paso < PREGUNTAS.length - 1) {
       fijarPaso(paso + 1)
       return
     }
-    const { zonaId, terreno, cultivoId, temporada } = nuevas
-    if (zonaId && terreno && cultivoId && temporada) alTerminar({ zonaId, terreno, cultivoId, temporada })
+    const { zonaId, terreno, cultivoId, temporada, parcela } = nuevas
+    if (zonaId && terreno && cultivoId && temporada) alTerminar({ zonaId, terreno, cultivoId, temporada, parcela: parcela ?? null })
+  }
+
+  function elegir(id: string) {
+    // Elegir un lugar de la lista quita la ubicacion GPS: se usa el punto de ese lugar.
+    avanzar({ ...respuestas, [pregunta.clave]: id, ...(pregunta.clave === 'zonaId' ? { parcela: null } : {}) })
+  }
+
+  function usarUbicacion() {
+    if (!('geolocation' in navigator)) {
+      fijarGps('Este teléfono no da la ubicación. Elija su lugar en la lista.')
+      return
+    }
+    fijarGps('buscando')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = Math.round(pos.coords.latitude * 1000) / 1000
+        const lon = Math.round(pos.coords.longitude * 1000) / 1000
+        if (!dentroDeHonduras(lat, lon)) {
+          fijarGps('Su ubicación está fuera de Honduras. Elija su lugar en la lista.')
+          return
+        }
+        // El lugar del sitio mas cercano da el nombre y la tierra; el pronostico usa el punto de Kharis mas cercano.
+        const cerca = zonas.filter((z) => LUGARES[z.id]).reduce((a, b) => (distanciaKm({ lat, lon }, a) <= distanciaKm({ lat, lon }, b) ? a : b))
+        fijarGps('listo')
+        avanzar({ ...respuestas, zonaId: cerca.id, parcela: { lat, lon } })
+      },
+      () => fijarGps('No se pudo leer la ubicación. Revise el permiso o elija su lugar en la lista.'),
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 },
+    )
   }
 
   return (
@@ -118,12 +151,37 @@ export function Cuestionario({
       <h1 id="pregunta-cuestionario" ref={titulo} tabIndex={-1} className={estilos.pregunta}>
         {pregunta.titulo}
       </h1>
+      {pregunta.clave === 'zonaId' && (
+        <div className={estilos.gps}>
+          <Control
+            className={clases(estilos.opcion, conGps && estilos.opcionMarcada, 'capa-estado')}
+            aria-pressed={conGps}
+            onClick={usarUbicacion}
+            disabled={gps === 'buscando'}
+          >
+            <span className={estilos.iconoOpcion}>
+              <Icono nombre="my_location" tamano={28} />
+            </span>
+            <span className={estilos.textoOpcion}>
+              <span className={estilos.nombreOpcion}>{gps === 'buscando' ? 'Buscando su ubicación…' : 'Usar mi ubicación'}</span>
+              <span className="tipo-nota">Más preciso: ajusta el pronóstico a la altura de su parcela</span>
+            </span>
+            {conGps && <Icono nombre="check" tamano={22} />}
+          </Control>
+          {gps !== 'listo' && gps !== 'buscando' && (
+            <p className={estilos.ayuda} role="alert">
+              {gps}
+            </p>
+          )}
+          <p className="tipo-nota">O elija el lugar más cercano:</p>
+        </div>
+      )}
       {pregunta.clave === 'cultivoId' ? (
-        <SelectorCultivo elegido={elegida ?? null} alElegir={elegir} />
+        <SelectorCultivo elegido={elegida} alElegir={elegir} />
       ) : (
       <ul className={estilos.opciones}>
         {pregunta.opciones.map((o) => {
-          const marcada = o.id === elegida
+          const marcada = o.id === elegida && !conGps
           return (
             <li key={o.id}>
               <Control

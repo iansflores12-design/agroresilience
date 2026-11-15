@@ -292,7 +292,8 @@ cuatro pantallas (sección 1, regla 2).
 Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
 
 1. **Cuestionario, una pregunta por pantalla** (`Inicio/Cuestionario.tsx`), solo si faltan datos o
-   al tocar "Cambiar datos": lugar (11 lugares con punto de Kharis), terreno (plano, elevado, bajo,
+   al tocar "Cambiar datos": lugar ("Usar mi ubicación" arriba: escala de parcela, ver
+   `lib/decision/escala.ts`; o uno de los 11 lugares con punto de Kharis), terreno (plano, elevado, bajo,
    ondulado), cultivo y temporada de siembra (primera, postrera, verano). Al tocar una respuesta
    pasa a la siguiente.
 2. **"¿Qué quiere lograr?"**: siete objetivos que se marcan y desmarcan (ahorrar agua, mejorar la

@@ -11,10 +11,17 @@ import { confirmar } from '../../lib/sonido'
 import { entradaDe, useEstadoApp, type Perfil } from '../../estado/EstadoApp'
 import { useDecision } from '../../estado/useDecision'
 import { CULTIVOS, LUGARES, OBJETIVOS, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
-import type { Objetivo, RotacionDecidida } from '../../lib/decision/tipos'
+import type { InfoParcela, Objetivo, RotacionDecidida } from '../../lib/decision/tipos'
 import { fechaEnPalabras } from '../../lib/decision/textos'
 import { Cuestionario } from './Cuestionario'
 import estilos from './Inicio.module.css'
+
+/** "Su parcela · 1,240 m, cerca de Siguatepeque" */
+function textoParcela(p: InfoParcela | undefined): string {
+  if (!p) return 'Su parcela (ubicación)'
+  const altura = p.alturaM === null ? '' : ` · ${Math.round(p.alturaM).toLocaleString('es-HN')} m`
+  return `Su parcela${altura}, cerca de ${p.puntoNombre}`
+}
 
 function etiqueta(r: RotacionDecidida): string | null {
   if (r.mejor) return 'La mejor'
@@ -102,6 +109,7 @@ export default function Inicio() {
               terreno: estado.terreno ?? undefined,
               cultivoId: estado.cultivoId && CULTIVOS[estado.cultivoId] ? estado.cultivoId : undefined,
               temporada: estado.temporada ?? undefined,
+              parcela: estado.parcela,
             }}
             alCancelar={entrada ? () => fijarEditando(false) : undefined}
             alTerminar={(p: Perfil) => {
@@ -148,8 +156,8 @@ export default function Inicio() {
           </h2>
           <ul className={estilos.datosPerfil}>
             <li>
-              <Icono nombre="location_on" tamano={20} />
-              {LUGARES[entrada.zonaId].nombre}
+              <Icono nombre={entrada.parcela ? 'my_location' : 'location_on'} tamano={20} />
+              {entrada.parcela ? textoParcela(decision.estado === 'listo' ? decision.decision.punto.parcela : undefined) : LUGARES[entrada.zonaId].nombre}
             </li>
             <li>
               <Icono nombre={ICONO_TERRENO[entrada.terreno]} tamano={20} />

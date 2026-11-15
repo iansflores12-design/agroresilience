@@ -22,8 +22,8 @@ async function leerArchivo(url: string): Promise<Response> {
 
 export async function decisionPara(entrada: EntradaDecision, urlPeticion: string): Promise<Decision> {
   const base = new URL('/kharis/', urlPeticion).href
-  const { indice, punto } = await leerKharis(base, entrada.zonaId, leerArchivo)
-  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo })
+  const { indice, punto, escala, distanciaKm } = await leerKharis(base, entrada, leerArchivo)
+  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm })
 }
 
 export function json(dato: unknown, estado = 200): Response {

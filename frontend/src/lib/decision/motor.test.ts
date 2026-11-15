@@ -1,8 +1,11 @@
 import choluteca from '../../../public/kharis/choluteca.json'
 import laEsperanza from '../../../public/kharis/la_esperanza.json'
+import gracias from '../../../public/kharis/gracias.json'
+import escalaFina from '../../../public/kharis/escala_fina.json'
+import { ajustarAParcela, alturaEn } from './escala'
 import { decidir, validarEntrada } from './motor'
 import { resumenRapido, datosParaGemini } from './textos'
-import type { EntradaDecision, PuntoKharis } from './tipos'
+import type { EntradaDecision, EscalaFina, PuntoKharis } from './tipos'
 
 const meta = { fechaBase: '2026-11-10', modelo: 'v007' }
 const pCholuteca = choluteca as unknown as PuntoKharis
@@ -73,6 +76,41 @@ describe('textos', () => {
     const t = datosParaGemini(d, d.mejorId)
     expect(t).toContain('Ranking de Gemini Decision')
     expect(t).toContain('Evidencia del motor')
+  })
+})
+
+describe('escala de parcela', () => {
+  const escala = escalaFina as unknown as EscalaFina
+  const pGracias = gracias as unknown as PuntoKharis
+  // Ladera alta cerca de Gracias (Celaque): mucho mas alta que la celda del punto de Kharis.
+  const alta = { lat: 14.55, lon: -88.68 }
+
+  it('lee la altura de la malla y da null fuera de ella', () => {
+    expect(alturaEn(escala, alta.lat, alta.lon)).toBeGreaterThan(1200)
+    expect(alturaEn(escala, 10, -80)).toBeNull()
+  })
+
+  it('en una parcela alta las noches salen mas frescas y solo cambia lo validado', () => {
+    const r = ajustarAParcela(pGracias, escala, alta, 'Gracias', 5)
+    expect(r.info.cambioTmin).toBeLessThan(0)
+    expect(r.info.cambioTmedia).toBeLessThan(0)
+    expect(r.info.cambioEt0Pct).toBeLessThan(0)                                    // mas fresco: pierde menos agua
+    expect(r.punto.pronostico.T2M_MAX).toBe(pGracias.pronostico.T2M_MAX)        // la maxima no se toca
+    expect(r.punto.pronostico.PRECTOTCORR).toBe(pGracias.pronostico.PRECTOTCORR) // la lluvia tampoco
+    expect(escala.variables).toEqual(['T2M_MIN', 'T2M'])
+  })
+
+  it('la decision con parcela trae su informacion y la evidencia de la altura', () => {
+    const e: EntradaDecision = { ...base, zonaId: 'santa_rosa_copan', parcela: alta }
+    const d = decidir(e, pGracias, { ...meta, escala, distanciaKm: 5 })
+    expect(d.punto.parcela?.puntoId).toBe('gracias')
+    expect(d.punto.nombre).toContain('su parcela')
+    expect(d.rotaciones[0].evidencia[0].texto).toMatch(/de altura/)
+  })
+
+  it('valida y redondea la ubicacion de la parcela', () => {
+    expect(validarEntrada({ ...base, parcela: { lat: 14.123456, lon: -87.654321 } })?.parcela).toEqual({ lat: 14.123, lon: -87.654 })
+    expect(validarEntrada({ ...base, parcela: { lat: 40, lon: -3 } })).toBeNull()
   })
 })
 
