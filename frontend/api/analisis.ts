@@ -3,7 +3,7 @@
 //   { tipo: 'decision', decision }        resultado de Gemini Decision (llega en ~1 s)
 //   { tipo: 'texto', delta }              trozos del analisis de Gemini
 //   { tipo: 'fin' }                        Gemini termino
-//   { tipo: 'error', causa, mensaje? }     sin_clave | cuota | clave | servidor | red | kharis
+//   { tipo: 'error', causa, mensaje? }     sin_clave | cuota | clave | servidor | red | kharis | cortado
 // El limite de 6 s y el resumen rapido los maneja el navegador (src/lib/decision/useAnalisis.ts).
 
 import { validarEntrada } from '../src/lib/decision/motor.js'

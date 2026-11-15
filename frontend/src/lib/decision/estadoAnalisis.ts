@@ -94,6 +94,8 @@ export function textoCausa(c: CausaAnalisis | null): string {
       return 'No se pudo leer el pronóstico de su lugar.'
     case 'red':
       return 'Se cortó la conexión.'
+    case 'cortado':
+      return 'Gemini dejó el análisis a medias. Vuelva a intentar.'
     default:
       return 'Gemini no pudo responder esta vez.'
   }

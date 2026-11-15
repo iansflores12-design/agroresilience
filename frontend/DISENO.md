@@ -326,7 +326,9 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
   si falla, resumen rápido y "Reintentar". Cuota de 15 análisis al día por teléfono; un intento
   fallido no cuenta; los análisis hechos se guardan y no vuelven a gastar.
 - Variables del servidor: `GEMINI_API_KEY`, `GEMINI_MODELO` (por defecto `gemini-3.8-flash`),
-  `GEMINI_PENSAMIENTO` (opcional). Ver `.env.example`.
+  `GEMINI_PENSAMIENTO` (opcional, por defecto `minimal`). Ver `.env.example`. El razonamiento
+  del modelo cuenta contra el tope de tokens: si Gemini llega al tope, el servidor manda
+  `error` con causa `cortado` y la pantalla ofrece reintentar en vez de mostrar texto a medias.
 
 ### Cultivo (`/`): "¿Qué sembró?" (revisión 2, reemplazada)
 1. **Elegir cultivo, primero.** Rejilla de tarjetas grandes y tocables, una por cultivo

@@ -39,7 +39,7 @@ export async function pedirDecision(entrada: EntradaDecision, signal?: AbortSign
   return decidirLocal(entrada)
 }
 
-export type CausaAnalisis = 'sin_clave' | 'cuota' | 'clave' | 'servidor' | 'red' | 'kharis' | 'cuota_local'
+export type CausaAnalisis = 'sin_clave' | 'cuota' | 'clave' | 'servidor' | 'red' | 'kharis' | 'cuota_local' | 'cortado'
 
 export type EventoServidor =
   | { tipo: 'paso'; id: string; texto: string }

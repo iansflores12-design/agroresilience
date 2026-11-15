@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import type { EventoServidor } from '../lib/decision/cliente'
-import { LIMITE_MS, estadoInicial, transicion } from '../lib/decision/estadoAnalisis'
+import { LIMITE_MS, estadoInicial, textoCausa, transicion } from '../lib/decision/estadoAnalisis'
 import { CUOTA_DIARIA, usadosHoy } from '../lib/decision/memoria'
 import type { EntradaDecision } from '../lib/decision/tipos'
 import { useAnalisis } from './useAnalisis'
@@ -46,6 +46,13 @@ describe('transicion (linea de tiempo)', () => {
   it('falla: queda en fallo con su causa', () => {
     const e = transicion(transicion(estadoInicial, { tipo: 'limite' }), { tipo: 'error', causa: 'cuota' })
     expect(e).toMatchObject({ fase: 'fallo', causa: 'cuota' })
+  })
+
+  it('cortado: el texto a medias no queda como listo; pasa a fallo para reintentar', () => {
+    let e = transicion(estadoInicial, { tipo: 'texto', delta: 'Esta rotacion es la mejor,' })
+    e = transicion(e, { tipo: 'error', causa: 'cortado' })
+    expect(e).toMatchObject({ fase: 'fallo', causa: 'cortado' })
+    expect(textoCausa(e.causa)).toMatch(/a medias/)
   })
 
   it('fin sin texto cuenta como fallo', () => {

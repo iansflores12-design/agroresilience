@@ -53,7 +53,6 @@ export async function POST(request: Request): Promise<Response> {
       sistema: `${INSTRUCCIONES_GEMINI}\nResponde en 120 palabras o menos.\n\nDatos de la consulta:\n${datos}`,
       mensajes,
       signal: request.signal,
-      maxTokens: 700,
     })
     return json({ texto })
   } catch (e) {
