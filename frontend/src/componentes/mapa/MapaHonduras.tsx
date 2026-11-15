@@ -66,6 +66,7 @@ export function MapaHonduras({
   departamentoId = null,
   alSeleccionarDepartamento,
   escenario = 'normal',
+  enfocar = false,
   ref,
 }: PropsMapa) {
   const { t } = useTranslation()
@@ -206,6 +207,7 @@ export function MapaHonduras({
           : t('mapa.departamento', { nombre }),
       )
       if (seEligenDepartamentos) trazo.setAttribute('aria-pressed', String(id === departamentoId))
+      trazo.toggleAttribute('data-elegido', id === departamentoId)
       if (id === departamentoId) capa.bringToFront()
     })
 
@@ -240,5 +242,5 @@ export function MapaHonduras({
     [],
   )
 
-  return <div ref={raiz} className={estilos.raiz} />
+  return <div ref={raiz} className={estilos.raiz} data-enfoque={enfocar && departamentoId ? '' : undefined} />
 }

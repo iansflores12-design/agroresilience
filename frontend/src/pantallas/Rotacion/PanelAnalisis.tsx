@@ -34,7 +34,23 @@ function Pasos({ pasos }: { pasos: EstadoAnalisis['pasos'] }) {
  * Analisis a fondo de Gemini segun la linea de tiempo: pasos en vivo, texto en vivo o resumen
  * rapido, aviso cuando llega tarde y reintento si falla.
  */
-export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis & { reintentar: () => void }; resumen: string }) {
+export function PanelAnalisis({
+  analisis,
+  resumen,
+  titulo,
+  apoyo,
+  aviso,
+  espera,
+}: {
+  analisis: EstadoAnalisis & { reintentar: () => void }
+  resumen: string
+  /** Los textos opcionales tienen por defecto los del analisis de una rotacion, en el idioma actual. */
+  titulo?: string
+  apoyo?: string
+  /** Aviso que salta cuando el análisis llega después del resumen rápido. */
+  aviso?: { titulo: string; descripcion: string }
+  espera?: string
+}) {
   const { fase, pasos, texto, causa, llegoTarde, guardado, reintentar } = analisis
   const ancla = useRef<HTMLElement>(null)
   const { t } = useTranslation()
@@ -42,8 +58,8 @@ export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis 
   useEffect(() => {
     if (fase !== 'listo' || !llegoTarde) return
     avisar.exito({
-      titulo: t('analisis.listoTitulo'),
-      descripcion: t('analisis.listoDescripcion'),
+      titulo: aviso?.titulo ?? t('analisis.listoTitulo'),
+      descripcion: aviso?.descripcion ?? t('analisis.listoDescripcion'),
       accion: { texto: t('comun.ver'), alPulsar: () => ancla.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) },
     })
     // El aviso sale una vez, en el idioma del momento.
@@ -60,9 +76,9 @@ export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis 
         </span>
         <span className={estilos.textoElemento}>
           <h2 id="titulo-analisis" className={estilos.tituloTarjeta}>
-            {t('analisis.titulo')}
+            {titulo ?? t('analisis.titulo')}
           </h2>
-          <span className={estilos.apoyoElemento}>{t('analisis.explica')}</span>
+          <span className={estilos.apoyoElemento}>{apoyo ?? t('analisis.explica')}</span>
         </span>
         <span className={estilos.chipEstado}>
           {ocupado && fase !== 'resumen' ? <Girando /> : <Icono nombre={ICONO_FASE[fase]} tamano={18} />}
@@ -84,14 +100,18 @@ export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis 
           <p className={estilos.textoGemini}>{resumen}</p>
           <p className={estilos.nota} role="status">
             <Girando />
-            {t('analisis.sigue')}
+            {espera ?? t('analisis.sigue')}
           </p>
         </>
       )}
 
       {fase === 'listo' && <p className={estilos.textoGemini}>{texto}</p>}
 
-      {fase === 'fallo' && (
+      {/* Sin clave de Gemini en el servidor no hay nada que el productor pueda hacer: se queda
+          el resumen rápido, sin aviso ni reintento. */}
+      {fase === 'fallo' && causa === 'sin_clave' && <p className={estilos.textoGemini}>{resumen}</p>}
+
+      {fase === 'fallo' && causa !== 'sin_clave' && (
         <>
           <p className={estilos.textoGemini}>{resumen}</p>
           <div className={estilos.aviso} role="alert">

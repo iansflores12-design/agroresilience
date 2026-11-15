@@ -46,6 +46,17 @@
   stroke-width: 1.5px;
 }
 
+/* Enfoque: el pais entero sigue pintado, pero atenuado; el departamento elegido queda entero
+   y con trazo de tinta mas grueso. */
+.raiz[data-enfoque] path:not([data-elegido]) {
+  fill-opacity: 0.5;
+}
+
+.raiz[data-enfoque] path[data-elegido] {
+  stroke: var(--md-sys-color-on-surface);
+  stroke-width: 2.5px;
+}
+
 .raiz path:focus-visible {
   stroke: var(--md-sys-color-on-surface);
   stroke-width: 2.5px;

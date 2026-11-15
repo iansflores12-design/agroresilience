@@ -17,6 +17,8 @@ export interface PropsMapa {
   alSeleccionarDepartamento?(id: string): void
   /** Tipo de ano con el que se calcula el puntaje. Por defecto, normal. */
   escenario?: Escenario
+  /** Atenua el resto del pais para que la mirada caiga en el departamento marcado. */
+  enfocar?: boolean
   /** Para acercar, alejar o centrar el mapa desde los botones de la pantalla. */
   ref?: Ref<ControlMapa>
 }

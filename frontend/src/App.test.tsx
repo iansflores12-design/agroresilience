@@ -11,6 +11,6 @@ describe('App', () => {
     render(<App />)
     expect(screen.getAllByText('AgroResilience').length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { level: 1, name: '¿Dónde está su parcela?' })).toBeInTheDocument()
-    expect(screen.getByText('Pregunta 1 de 4')).toBeInTheDocument()
+    expect(screen.getByText('Pregunta 1 de 5')).toBeInTheDocument()
   })
 })

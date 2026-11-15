@@ -1,22 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useIdioma, useLocale } from '../../i18n'
+import { lista as listaT } from '../../i18n/traductor'
 import { Boton } from '../../componentes/Boton'
+import { Chip } from '../../componentes/Chip'
 import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
+import { DondeSeDa } from '../../componentes/decision/DondeSeDa'
 import { RatingRotacion } from '../../componentes/decision/RatingRotacion'
-import { EdadCultivo, SelectorCultivo } from '../../componentes/decision/SuCultivo'
-import { ICONO_CULTIVO, ICONO_OBJETIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
-import { buscarCultivo } from '../../datos/cultivos'
+import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
+import { buscarCultivo, cultivos } from '../../datos/cultivos'
 import { confirmar } from '../../lib/sonido'
 import { entradaDe, useEstadoApp, type Perfil } from '../../estado/EstadoApp'
+import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
-import { CULTIVOS, LUGARES, OBJETIVOS } from '../../lib/decision/parametros'
-import type { InfoParcela, Objetivo, RotacionDecidida } from '../../lib/decision/tipos'
-import { fechaEnPalabras } from '../../lib/decision/textos'
-import { Cuestionario } from './Cuestionario'
+import { armarContexto } from '../../lib/chat'
+import { analisisGuardado, claveAnalisis } from '../../lib/decision/memoria'
+import { CULTIVOS, LUGARES } from '../../lib/decision/parametros'
+import type { Decision, EntradaDecision, InfoParcela, RotacionDecidida } from '../../lib/decision/tipos'
+import { TOP3, fechaEnPalabras, respuestaRapida, resumenRapido, tresMejores } from '../../lib/decision/textos'
+import { ChatSeguimiento } from '../Rotacion/ChatSeguimiento'
+import { PanelAnalisis } from '../Rotacion/PanelAnalisis'
+import { Cuestionario, type ClavePregunta } from './Cuestionario'
 import estilos from './Inicio.module.css'
 
 /** "Su parcela · 1,240 m, cerca de Siguatepeque" */
@@ -26,13 +33,98 @@ function textoParcela(t: TFunction, locale: string, p: InfoParcela | undefined):
   return t('inicio.parcela', { altura, lugar: p.puntoNombre })
 }
 
+/** "Ahorrar agua", "Ahorrar agua y 2 más" o "Sin objetivos". */
+function textoObjetivos(t: TFunction, e: EntradaDecision): string {
+  const [primero, ...resto] = e.objetivos
+  if (!primero) return t('plan.sinObjetivos')
+  const nombre = t(`objetivos.${primero}.nombre`)
+  return resto.length ? t('plan.objetivoYMas', { nombre, n: resto.length }) : nombre
+}
+
+/**
+ * Las respuestas del cuestionario, en una línea de chips. Cada chip dice el dato en palabras
+ * completas y, al tocarlo, abre solo su pregunta para cambiarlo.
+ */
+function SusRespuestas({
+  entrada,
+  semanas,
+  parcela,
+  alCambiar,
+}: {
+  entrada: EntradaDecision
+  semanas: number
+  parcela: InfoParcela | undefined
+  alCambiar: (clave: ClavePregunta) => void
+}) {
+  const { t } = useTranslation()
+  const locale = useLocale()
+  const lugar = entrada.parcela ? textoParcela(t, locale, parcela) : LUGARES[entrada.zonaId].nombre
+  const cultivo = t('plan.cultivoSemanas', {
+    cultivo: t(`cultivos.${entrada.cultivoId}.nombre`),
+    semanas: semanas === 1 ? t('plan.unaSemana') : t('plan.semanas', { n: semanas }),
+  })
+  const terreno = t('inicio.terreno', { terreno: t(`terrenos.${entrada.terreno}.nombre`).toLowerCase() })
+  const siembra = t('inicio.siembraDe', { temporada: t(`temporadas.${entrada.temporada}.nombre`).toLowerCase() })
+  const objetivos = textoObjetivos(t, entrada)
+  const cambiar = (dato: string) => t('plan.cambiar', { dato })
+  return (
+    <div className={estilos.respuestas} role="group" aria-labelledby="titulo-respuestas">
+      <p id="titulo-respuestas" className="tipo-nota">
+        {t('plan.susRespuestas')}
+      </p>
+      <div className={estilos.chipsRespuestas}>
+        <Chip icono={entrada.parcela ? 'my_location' : 'location_on'} aria-label={cambiar(t('plan.lugar', { lugar }))} onClick={() => alCambiar('zonaId')}>
+          {lugar}
+        </Chip>
+        <Chip icono={ICONO_TERRENO[entrada.terreno]} aria-label={cambiar(terreno)} onClick={() => alCambiar('terreno')}>
+          {terreno}
+        </Chip>
+        <Chip icono={ICONO_CULTIVO[entrada.cultivoId] ?? 'grass'} aria-label={cambiar(t('plan.cultivo', { cultivo }))} onClick={() => alCambiar('cultivoId')}>
+          {cultivo}
+        </Chip>
+        <Chip icono={ICONO_TEMPORADA[entrada.temporada]} aria-label={cambiar(siembra)} onClick={() => alCambiar('temporada')}>
+          {siembra}
+        </Chip>
+        <Chip icono="flag" aria-label={cambiar(t('plan.quiereLograr', { objetivos }))} onClick={() => alCambiar('objetivos')}>
+          {objetivos}
+        </Chip>
+      </div>
+    </div>
+  )
+}
+
+/** El cultivo, como etiquetas con icono que se deslizan de lado. Al tocar una cambian el mapa y las rotaciones. */
+function EtiquetasCultivo({ elegido, alElegir }: { elegido: string; alElegir: (id: string) => void }) {
+  const { t } = useTranslation()
+  return (
+    <div className={estilos.etiquetas} role="group" aria-label={t('plan.suCultivo')}>
+      {cultivos.map((c) => (
+        <Chip
+          key={c.id}
+          variante="filtro"
+          icono={ICONO_CULTIVO[c.id] ?? 'grass'}
+          seleccionado={c.id === elegido}
+          onClick={() => alElegir(c.id)}
+        >
+          {t(`cultivos.${c.id}.nombre`)}
+        </Chip>
+      ))}
+    </div>
+  )
+}
+
 function etiqueta(t: TFunction, r: RotacionDecidida): string | null {
   if (r.mejor) return t('inicio.laMejor')
   if (r.actual) return t('comun.loQueHaceHoy')
   return null
 }
 
-/** Tarjeta pequena: icono del cultivo, nombre, puntaje y rating. Al tocarla se abre su detalle. */
+/** "Maíz y después frijol. 86 de 100, alta. La mejor. Ver por qué" */
+function ariaRotacion(t: TFunction, r: RotacionDecidida, marca: string | null): string {
+  return t('inicio.tarjetaAria', { nombre: r.nombre, puntaje: r.puntaje, rating: t(`rating.${r.rating}`).toLowerCase(), marca: marca ? ` ${marca}.` : '' })
+}
+
+/** Una de las tres mejores: icono del cultivo, nombre, puntaje y rating. Al tocarla se abre su detalle. */
 function TarjetaRotacion({ r }: { r: RotacionDecidida }) {
   const { t } = useTranslation()
   const marca = etiqueta(t, r)
@@ -41,7 +133,7 @@ function TarjetaRotacion({ r }: { r: RotacionDecidida }) {
       <Control
         to={`/rotacion/${r.id}`}
         className={clases(estilos.tarjeta, r.mejor && estilos.tarjetaMejor, 'capa-estado')}
-        aria-label={t('inicio.tarjetaAria', { nombre: r.nombre, puntaje: r.puntaje, rating: t(`rating.${r.rating}`).toLowerCase(), marca: marca ? ` ${marca}.` : '' })}
+        aria-label={ariaRotacion(t, r, marca)}
       >
         <span className={estilos.tarjetaArriba}>
           <span className={estilos.iconoRotacion}>
@@ -67,63 +159,147 @@ function TarjetaRotacion({ r }: { r: RotacionDecidida }) {
   )
 }
 
-function Objetivos({ elegidos, alternar }: { elegidos: Objetivo[]; alternar: (o: Objetivo) => void }) {
+/** Una de las demás opciones: un cuadrado con icono, nombre y porcentaje. */
+function CuadroRotacion({ r }: { r: RotacionDecidida }) {
   const { t } = useTranslation()
   return (
-    <ul className={estilos.objetivos} aria-label={t('inicio.objetivos')}>
-      {(Object.keys(OBJETIVOS) as Objetivo[]).map((o) => {
-        const marcado = elegidos.includes(o)
-        return (
-          <li key={o}>
-            <Control
-              className={clases(estilos.objetivo, marcado && estilos.objetivoMarcado, 'capa-estado')}
-              aria-pressed={marcado}
-              onClick={() => alternar(o)}
-            >
-              <span className={estilos.iconoObjetivo}>
-                <Icono nombre={marcado ? 'check' : ICONO_OBJETIVO[o]} tamano={24} />
-              </span>
-              <span className={estilos.textoOpcion}>
-                <span className={estilos.nombreOpcion}>{t(`objetivos.${o}.nombre`)}</span>
-                <span className="tipo-nota">{t(`objetivos.${o}.descripcion`)}</span>
-              </span>
-            </Control>
-          </li>
-        )
-      })}
-    </ul>
+    <li>
+      <Control
+        to={`/rotacion/${r.id}`}
+        className={clases(estilos.cuadro, 'capa-estado')}
+        aria-label={ariaRotacion(t, r, r.actual ? t('comun.loQueHaceHoy') : null)}
+      >
+        <span className={estilos.iconoCuadro}>
+          <Icono nombre={ICONO_CULTIVO[r.cultivoIcono] ?? 'grass'} tamano={24} />
+        </span>
+        <span className={estilos.nombreCuadro}>{r.nombre}</span>
+        {r.actual && <span className="tipo-nota">{t('comun.loQueHaceHoy')}</span>}
+        <span className={estilos.puntajeCuadro}>
+          {r.puntaje}
+          <span>%</span>
+        </span>
+      </Control>
+    </li>
+  )
+}
+
+/** Espera antes de llamar a Gemini: si el productor sigue cambiando objetivos, no se gasta una consulta por toque. */
+const ESPERA_MS = 1200
+
+/**
+ * Gemini explica por qué estas tres quedaron arriba con el clima de la zona, con la misma línea
+ * de tiempo del análisis de una rotación: pasos en vivo, texto en vivo o resumen rápido a los
+ * 6 s, aviso si llega tarde, reintento si falla y, al terminar, chat de seguimiento.
+ */
+function PorQueTop3({ d }: { d: Decision }) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
+  const estado = useEstadoApp()
+  const clave = claveAnalisis(d.entrada, TOP3, d.punto.fechaBase)
+  // Un análisis ya guardado se muestra de una vez; uno nuevo espera a que la consulta se asiente.
+  const [asentada, fijarAsentada] = useState(() => analisisGuardado(clave) !== null)
+  useEffect(() => {
+    if (asentada) return
+    const espera = window.setTimeout(() => fijarAsentada(true), ESPERA_MS)
+    return () => window.clearTimeout(espera)
+  }, [asentada])
+
+  const analisis = useAnalisis(asentada ? d.entrada : null, TOP3, asentada ? d.punto.fechaBase : null)
+  const contexto = useMemo(
+    () => ({
+      ...armarContexto({ vista: 'cultivos', cultivoId: estado.cultivoId, edadSemanas: estado.edadSemanas, zonaId: estado.zonaId, idioma }),
+      consulta: { entrada: d.entrada, rotacionId: TOP3 },
+    }),
+    [estado.cultivoId, estado.edadSemanas, estado.zonaId, d.entrada, idioma],
+  )
+
+  return (
+    <div className={estilos.porQue}>
+      <PanelAnalisis
+        analisis={analisis}
+        resumen={resumenRapido(d, TOP3)}
+        titulo={t('plan.top3Titulo')}
+        apoyo={t('plan.top3Apoyo', { lugar: d.punto.nombre })}
+        aviso={{ titulo: t('plan.top3AvisoTitulo'), descripcion: t('plan.top3AvisoDescripcion') }}
+        espera={t('plan.top3Espera')}
+      />
+      {analisis.fase === 'listo' && (
+        <ChatSeguimiento
+          contexto={contexto}
+          titulo={t('plan.top3Chat')}
+          sugerencias={listaT(t, 'plan.top3Preguntas')}
+          respaldo={(pregunta) => respuestaRapida(d, TOP3, pregunta)}
+        />
+      )}
+    </div>
+  )
+}
+
+function Rotaciones({ d }: { d: Decision }) {
+  const { t } = useTranslation()
+  const tres = tresMejores(d)
+  const otras = d.rotaciones.slice(tres.length)
+  return (
+    <>
+      <section className={estilos.seccion} aria-labelledby="titulo-mejores">
+        <h2 id="titulo-mejores" className="tipo-titulo">
+          {t('plan.tresMejores')}
+        </h2>
+        <ol className={estilos.podio} aria-labelledby="titulo-mejores">
+          {tres.map((r) => (
+            <TarjetaRotacion key={r.id} r={r} />
+          ))}
+        </ol>
+      </section>
+      {otras.length > 0 && (
+        <section className={estilos.seccion} aria-labelledby="titulo-otras">
+          <h2 id="titulo-otras" className="tipo-titulo">
+            {t('plan.masOpciones')}
+          </h2>
+          <ul className={estilos.cuadros} aria-labelledby="titulo-otras">
+            {otras.map((r) => (
+              <CuadroRotacion key={r.id} r={r} />
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
   )
 }
 
 export default function Inicio() {
   const { t } = useTranslation()
   const idioma = useIdioma()
-  const locale = useLocale()
   const estado = useEstadoApp()
-  const { fijarPerfil, alternarObjetivo, objetivos, elegirCultivo, edadSemanas, fijarEdad } = estado
+  const { fijarPerfil, objetivos, edadSemanas, elegirCultivo } = estado
   const entrada = entradaDe(estado, idioma)
   const cultivo = buscarCultivo(entrada?.cultivoId ?? null)
-  const [editando, fijarEditando] = useState(false)
+  // 'todo' = el cuestionario completo; una clave = solo esa pregunta, abierta desde un chip.
+  const [editando, fijarEditando] = useState<ClavePregunta | 'todo' | null>(null)
   const [intento, fijarIntento] = useState(0)
   const decision = useDecision(editando ? null : entrada, intento)
 
   if (!entrada || editando) {
+    const cultivoValido = estado.cultivoId && CULTIVOS[estado.cultivoId] ? estado.cultivoId : undefined
     return (
       <div className="pantalla">
         <div className={estilos.medio}>
           <Cuestionario
+            key={editando ?? 'nuevo'}
+            soloPaso={entrada && editando && editando !== 'todo' ? editando : undefined}
             inicial={{
               zonaId: estado.zonaId && LUGARES[estado.zonaId] ? estado.zonaId : undefined,
               terreno: estado.terreno ?? undefined,
-              cultivoId: estado.cultivoId && CULTIVOS[estado.cultivoId] ? estado.cultivoId : undefined,
+              cultivoId: cultivoValido,
               temporada: estado.temporada ?? undefined,
               parcela: estado.parcela,
-              edadSemanas: estado.edadSemanas,
+              edadSemanas: cultivoValido ? edadSemanas : 0,
+              objetivos,
             }}
-            alCancelar={entrada ? () => fijarEditando(false) : undefined}
+            alCancelar={entrada ? () => fijarEditando(null) : undefined}
             alTerminar={(p: Perfil) => {
               fijarPerfil(p)
-              fijarEditando(false)
+              fijarEditando(null)
             }}
           />
         </div>
@@ -131,22 +307,13 @@ export default function Inicio() {
     )
   }
 
+  const d = decision.estado === 'listo' ? decision.decision : null
   return (
     <div className="pantalla">
-      <div className={estilos.medio}>
-        <section className={estilos.seccion} aria-labelledby="titulo-objetivos">
-          <h1 id="titulo-objetivos" className={estilos.pregunta}>
-            {t('inicio.queQuiere')}
-          </h1>
-          <p className={estilos.ayuda}>{t('inicio.toqueVarios')}</p>
-          <Objetivos elegidos={objetivos} alternar={alternarObjetivo} />
-        </section>
-
-        <section className={estilos.seccion} aria-labelledby="titulo-cultivo">
-          <h2 id="titulo-cultivo" className="tipo-titulo">
-            {t('inicio.queSembro')}
-          </h2>
-          <SelectorCultivo
+      <div className={estilos.medio} aria-busy={decision.estado === 'calculando'}>
+        <header className={estilos.seccion}>
+          <h1 className={estilos.pregunta}>{t('plan.queSembrarDespues')}</h1>
+          <EtiquetasCultivo
             elegido={entrada.cultivoId}
             alElegir={(id) => {
               if (id === entrada.cultivoId) return
@@ -154,75 +321,40 @@ export default function Inicio() {
               confirmar()
             }}
           />
-        </section>
+        </header>
 
-        {cultivo && <EdadCultivo cultivo={cultivo} semanas={edadSemanas} alCambiar={fijarEdad} />}
+        {cultivo && <DondeSeDa key={`${cultivo.id}-${entrada.zonaId}`} cultivo={cultivo} zonaId={entrada.zonaId} />}
 
-        <section className={estilos.perfil} aria-labelledby="titulo-perfil">
-          <h2 id="titulo-perfil" className="solo-lectores">
-            {t('inicio.suParcela')}
-          </h2>
-          <ul className={estilos.datosPerfil}>
-            <li>
-              <Icono nombre={entrada.parcela ? 'my_location' : 'location_on'} tamano={20} />
-              {entrada.parcela ? textoParcela(t, locale, decision.estado === 'listo' ? decision.decision.punto.parcela : undefined) : LUGARES[entrada.zonaId].nombre}
-            </li>
-            <li>
-              <Icono nombre={ICONO_TERRENO[entrada.terreno]} tamano={20} />
-              {t('inicio.terreno', { terreno: t(`terrenos.${entrada.terreno}.nombre`).toLowerCase() })}
-            </li>
-            <li>
-              <Icono nombre={ICONO_TEMPORADA[entrada.temporada]} tamano={20} />
-              {t('inicio.siembraDe', { temporada: t(`temporadas.${entrada.temporada}.nombre`).toLowerCase() })}
-            </li>
-          </ul>
-          <Boton variante="tonal" icono="edit" onClick={() => fijarEditando(true)}>
-            {t('inicio.cambiarDatos')}
-          </Boton>
-        </section>
+        {decision.estado === 'calculando' && (
+          <section className={estilos.seccion}>
+            <p className={estilos.ayuda} role="status">
+              {t('comun.calculando')}
+            </p>
+            <ul className={estilos.podio} aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <li key={i} className={estilos.esqueleto} />
+              ))}
+            </ul>
+          </section>
+        )}
+        {decision.estado === 'error' && (
+          <div className={estilos.error} role="alert">
+            <p>{t('comun.errorPronostico')}</p>
+            <Boton variante="tonal" icono="refresh" onClick={() => fijarIntento((i) => i + 1)}>
+              {t('comun.reintentar')}
+            </Boton>
+          </div>
+        )}
+        {d && <Rotaciones d={d} />}
 
-        <section className={estilos.seccion} aria-labelledby="titulo-recomendados" aria-busy={decision.estado === 'calculando'}>
-          <h2 id="titulo-recomendados" className="tipo-titulo">
-            {t('inicio.recomendadas')}
-          </h2>
-          {decision.estado === 'calculando' && (
-            <>
-              <p className={estilos.ayuda} role="status">
-                {t('comun.calculando')}
-              </p>
-              <ul className={estilos.tarjetas} aria-hidden="true">
-                {[0, 1, 2].map((i) => (
-                  <li key={i} className={estilos.esqueleto} />
-                ))}
-              </ul>
-            </>
-          )}
-          {decision.estado === 'error' && (
-            <div className={estilos.error} role="alert">
-              <p>{t('comun.errorPronostico')}</p>
-              <Boton
-                variante="tonal"
-                icono="refresh"
-                onClick={() => fijarIntento((i) => i + 1)}
-              >
-                {t('comun.reintentar')}
-              </Boton>
-            </div>
-          )}
-          {decision.estado === 'listo' && (
-            <>
-              <p className={estilos.ayuda}>
-                {t('inicio.deLaMejor', { fecha: fechaEnPalabras(decision.decision.punto.fechaBase, idioma) })}
-              </p>
-              <ul className={estilos.tarjetas}>
-                {decision.decision.rotaciones.map((r) => (
-                  <TarjetaRotacion key={r.id} r={r} />
-                ))}
-              </ul>
-              <p className="tipo-nota">{t('comun.ayudaPensar')}</p>
-            </>
-          )}
-        </section>
+        {d && <PorQueTop3 key={claveAnalisis(d.entrada, TOP3, d.punto.fechaBase)} d={d} />}
+
+        <SusRespuestas entrada={entrada} semanas={edadSemanas} parcela={d?.punto.parcela} alCambiar={fijarEditando} />
+
+        <p className="tipo-nota">
+          {t('comun.ayudaPensar')}
+          {d && t('plan.pronostico', { fecha: fechaEnPalabras(d.punto.fechaBase, idioma) })}
+        </p>
       </div>
     </div>
   )

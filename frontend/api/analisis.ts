@@ -1,4 +1,5 @@
 // POST /api/analisis  { entrada, rotacionId }  ->  NDJSON en vivo, una linea por evento:
+// (`rotacionId` puede ser 'top3': Gemini explica las tres mejores juntas con el clima de la zona.)
 //   { tipo: 'paso', id, texto }          lo que se esta haciendo (pasos en vivo)
 //   { tipo: 'decision', decision }        resultado de Gemini Decision (llega en ~1 s)
 //   { tipo: 'texto', delta }              trozos del analisis de Gemini
@@ -8,7 +9,7 @@
 
 import { validarEntrada } from '../src/lib/decision/motor.js'
 import { LUGARES } from '../src/lib/decision/parametros.js'
-import { buscarRotacion, datosParaGemini, instruccionesGemini, pedidoAnalisis } from '../src/lib/decision/textos.js'
+import { TOP3, buscarRotacion, datosParaGemini, instruccionesGemini, pedidoPara } from '../src/lib/decision/textos.js'
 import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiEnVivo, hayClave } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
@@ -41,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
         }
         enviar({ tipo: 'paso', id: 'decision', texto: t('gemini.pasoDecision') })
         enviar({ tipo: 'decision', decision })
-        if (!buscarRotacion(decision, rotacionId)) {
+        if (rotacionId !== TOP3 && !buscarRotacion(decision, rotacionId)) {
           enviar({ tipo: 'error', causa: 'servidor', mensaje: t('gemini.rotacionDesconocida') })
           return
         }
@@ -49,16 +50,18 @@ export async function POST(request: Request): Promise<Response> {
           enviar({ tipo: 'error', causa: 'sin_clave' })
           return
         }
-        enviar({ tipo: 'paso', id: 'gemini', texto: t('gemini.pasoGemini') })
+        enviar({ tipo: 'paso', id: 'gemini', texto: t(rotacionId === TOP3 ? 'geminiTop3.paso' : 'gemini.pasoGemini') })
         const pedido = {
           sistema: instruccionesGemini(entrada.idioma),
-          mensajes: [{ rol: 'user' as const, texto: `${datosParaGemini(decision, rotacionId)}\n\n${pedidoAnalisis(entrada.idioma)}` }],
+          mensajes: [{ rol: 'user' as const, texto: `${datosParaGemini(decision, rotacionId)}\n\n${pedidoPara(rotacionId, entrada.idioma)}` }],
           signal: request.signal,
         }
         for await (const delta of geminiEnVivo(pedido)) enviar({ tipo: 'texto', delta })
         enviar({ tipo: 'fin' })
       } catch (e) {
         const causa = e instanceof ErrorGemini ? e.causa : 'servidor'
+        // El motivo queda en el registro del servidor (nunca lleva la clave); al navegador solo va la causa.
+        if (causa !== 'cancelado') console.error(`[analisis] ${causa}: ${e instanceof Error ? e.message : String(e)}`)
         if (causa !== 'cancelado') enviar({ tipo: 'error', causa })
       } finally {
         try {

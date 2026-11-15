@@ -12,7 +12,7 @@ import { entradaDe, useEstadoApp } from '../../estado/EstadoApp'
 import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
-import { buscarRotacion, fechaEnPalabras, resumenRapido } from '../../lib/decision/textos'
+import { buscarRotacion, fechaEnPalabras, respuestaRapida, resumenRapido } from '../../lib/decision/textos'
 import type { Decision, PasoPlan, RotacionDecidida } from '../../lib/decision/tipos'
 import { ChatSeguimiento } from './ChatSeguimiento'
 import { AnilloPuntaje, BarraLineal, Pestanas } from './Indicadores'
@@ -283,7 +283,7 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
       </div>
       <Fuentes r={r} d={d} />
       <PanelAnalisis analisis={analisis} resumen={resumen} />
-      {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} />}
+      {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} respaldo={(pregunta) => respuestaRapida(d, r.id, pregunta)} />}
     </>
   )
 }

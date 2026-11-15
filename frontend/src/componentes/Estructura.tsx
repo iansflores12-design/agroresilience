@@ -38,7 +38,12 @@ export function Estructura() {
   }, [pathname])
 
   return (
-    <div className={estilos.armazon} data-contraido={contraido || undefined}>
+    <div
+      className={estilos.armazon}
+      data-contraido={contraido || undefined}
+      // Con un chat abierto, el chat toma la pantalla (ver Estructura.module.css).
+      data-inmersivo={/^\/chat\/.+/.test(pathname) || undefined}
+    >
       <a className={estilos.salto} href="#contenido">
         {t('app.saltar')}
       </a>

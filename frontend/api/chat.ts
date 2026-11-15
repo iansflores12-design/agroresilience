@@ -10,6 +10,7 @@ import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
 
 const MAX_MENSAJES = 20
+// Lo que el chat sabe dibujar ademas de texto (ver src/pantallas/Chat/Enriquecido.tsx): `geminiTop3.piezasVisuales`.
 const MAX_LARGO = 2000
 
 function contextoGeneral(c: Record<string, unknown>, idioma: Idioma): string {
@@ -60,14 +61,15 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const texto = await geminiTexto({
-      sistema: `${instruccionesGemini(idioma)}\n${t('gemini.limiteChat')}\n\n${t('gemini.datosConsulta')}\n${datos}`,
+      sistema: `${instruccionesGemini(idioma)}\n${t('gemini.limiteChat')}\n${t('geminiTop3.piezasVisuales')}\n\n${t('gemini.datosConsulta')}\n${datos}`,
       mensajes,
       signal: request.signal,
-      maxTokens: 700,
+      maxTokens: 3000,
     })
     return json({ texto })
   } catch (e) {
     const causa = e instanceof ErrorGemini ? e.causa : 'servidor'
+    console.error(`[chat] ${causa}: ${e instanceof Error ? e.message : String(e)}`)
     return json({ error: causa }, causa === 'cuota' ? 429 : causa === 'sin_clave' ? 503 : 502)
   }
 }

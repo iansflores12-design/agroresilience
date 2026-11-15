@@ -26,3 +26,6 @@ kharis_engine/*
 !kharis_engine/plantilla_2021_2026.html
 !kharis_engine/requirements.txt
 kharis_engine.zip
+
+# Enlace local de Vercel
+.vercel

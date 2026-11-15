@@ -1,18 +1,19 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type TouchEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useIdioma } from '../../i18n'
 import { Boton } from '../../componentes/Boton'
 import { BotonIcono } from '../../componentes/BotonIcono'
 import { Chip } from '../../componentes/Chip'
 import { buscarZona, humedadPorcentaje } from '../../datos/zonas'
 import { claveEstadoHumedad } from '../Zona/formato'
-import { useConversacion, type MensajeChat } from '../../estado/Conversacion'
+import { TITULO_NUEVO, useConversacion, type MensajeChat } from '../../estado/Conversacion'
 import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
 import { armarContexto, crearClienteChat, ErrorChat, esModoDemo, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import estilos from './Chat.module.css'
+import { ContenidoMensaje, MensajeEscribiendose } from './Enriquecido'
 import { armarSugerencias } from './sugerencias'
 
 const CLAVE_AVISO_DEMO = 'agroresilience.chat.demo.avisado'
@@ -53,7 +54,12 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   const idioma = useIdioma()
   const tActual = useRef(t)
   const { cultivoId, zonaId, edadSemanas } = useEstadoApp()
-  const { mensajes, agregar, reemplazar, borrar } = useConversacion()
+  const { id } = useParams()
+  const navegar = useNavigate()
+  const { chat, mensajes, agregar, reemplazar, borrar, fijar } = useConversacion(id)
+  const toque = useRef<{ x: number; y: number } | null>(null)
+  // La respuesta que acaba de llegar se muestra escribiéndose; las anteriores, completas.
+  const [recienId, fijarRecienId] = useState<string | null>(null)
 
   const desde = params.get('desde')
   const vista = VISTAS.find((v) => v === desde) ?? 'chat'
@@ -122,7 +128,7 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
           signal: controlador.signal,
         })
         if (controlador.signal.aborted) return
-        agregar({ rol: 'asistente', texto: r.texto })
+        fijarRecienId(agregar({ rol: 'asistente', texto: r.texto }).id)
       } catch (e) {
         if (controlador.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
         avisar.error({
@@ -171,8 +177,22 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
     enviar(texto)
   }
 
+  // Gesto para volver: deslizar hacia la derecha desde el borde izquierdo de la pantalla.
+  function alTocar(e: TouchEvent) {
+    const dedo = e.touches[0]
+    toque.current = dedo.clientX <= 28 ? { x: dedo.clientX, y: dedo.clientY } : null
+  }
+  function alSoltar(e: TouchEvent) {
+    const inicio = toque.current
+    toque.current = null
+    if (!inicio) return
+    const dedo = e.changedTouches[0]
+    if (dedo.clientX - inicio.x > 72 && Math.abs(dedo.clientY - inicio.y) < 56) navegar('/chat')
+  }
+
   function borrarConversacion() {
     const previos = mensajes
+    fijarRecienId(null)
     abortar.current?.abort()
     abortar.current = null
     setEsperando(false)
@@ -184,7 +204,19 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   }
 
   return (
-    <div className="pantalla">
+    <div className={`pantalla ${estilos.chat}`} onTouchStart={alTocar} onTouchEnd={alSoltar}>
+      <div className={estilos.barraChat}>
+        <BotonIcono icono="arrow_back" etiqueta={t('chats.volver')} to="/chat" />
+        <span className={estilos.tituloChat}>{!chat || chat.titulo === TITULO_NUEVO ? t('chats.nuevo') : chat.titulo}</span>
+        {chat && (
+          <BotonIcono
+            icono="keep"
+            variante={chat.fijado ? 'tonal' : 'estandar'}
+            etiqueta={chat.fijado ? t('chats.quitarFijado') : t('chats.fijarEste')}
+            onClick={() => fijar(chat.id, !chat.fijado)}
+          />
+        )}
+      </div>
       <section className={`plano-medio ${estilos.medio}`} aria-labelledby="chat-titulo">
         <h1 className={estilos.pregunta} id="chat-titulo">
           {t('chat.titulo')}
@@ -237,9 +269,17 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
               className={`${estilos.fila} ${m.rol === 'usuario' ? estilos.filaUsuario : estilos.filaAsistente}`}
             >
               {m.rol === 'asistente' && <span className={estilos.etiqueta}>{t('chat.asistente')}</span>}
-              <p className={`${estilos.burbuja} ${m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}`}>
-                {m.texto}
-              </p>
+              {m.rol === 'usuario' ? (
+                <p className={`${estilos.burbuja} ${estilos.burbujaUsuario}`}>{m.texto}</p>
+              ) : (
+                <div className={`${estilos.burbuja} ${estilos.burbujaAsistente}`}>
+                  {m.id === recienId ? (
+                    <MensajeEscribiendose texto={m.texto} zonaId={zonaId} />
+                  ) : (
+                    <ContenidoMensaje texto={m.texto} zonaId={zonaId} />
+                  )}
+                </div>
+              )}
             </div>
           ))}
           {esperando && (

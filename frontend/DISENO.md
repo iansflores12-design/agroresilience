@@ -291,20 +291,40 @@ cuatro pantallas (sección 1, regla 2).
 
 Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
 
-1. **Cuestionario, una pregunta por pantalla** (`Inicio/Cuestionario.tsx`), solo si faltan datos o
-   al tocar "Cambiar datos": lugar ("Usar mi ubicación" arriba: escala de parcela, ver
-   `lib/decision/escala.ts`; o uno de los 11 lugares con punto de Kharis), terreno (plano, elevado, bajo,
-   ondulado), cultivo y temporada de siembra (primera, postrera, verano). Al tocar una respuesta
-   pasa a la siguiente.
-2. **"¿Qué quiere lograr?"**: siete objetivos que se marcan y desmarcan (ahorrar agua, mejorar la
-   tierra, frenar la erosión, ganar más, comida para animales, abono natural, cortar plagas). Cada
-   objetivo triplica el peso de su parte del puntaje.
-2b. **"¿Qué sembró?" y "¿Hace cuánto sembró?"**: la rejilla de cultivos y el selector deslizable
-   de semanas de la revisión 2 vuelven tal cual (`componentes/decision/SuCultivo.tsx`). Cambiar el
-   cultivo vuelve a calcular el ranking. El cuestionario usa la misma rejilla.
-3. **Rotaciones recomendadas**: tarjetas pequeñas con icono del cultivo que agrega, nombre,
-   puntaje en porcentaje y rating (Alta 80+, Buena 65–79, Intermedia 50–64, Baja <50). Marca "La
-   mejor" y "Lo que hace hoy" (repetir el cultivo, siempre incluida para comparar).
+1. **Cuestionario previo, una pregunta por pantalla** (`Inicio/Cuestionario.tsx`), solo si faltan
+   datos. Es donde se elige todo, en cinco preguntas: lugar, terreno (plano, elevado, bajo,
+   ondulado), cultivo, temporada de siembra (primera, postrera, verano) y objetivos.
+   - Lugar: la ubicación se pide sola al llegar (el navegador o la app muestran su permiso; no hay
+     que tocar nada) y, si se concede, queda marcada "Usando su ubicación" con el lugar más cercano
+     (escala de parcela, ver `lib/decision/escala.ts`). También se puede escribir el lugar en la
+     barra de búsqueda (sin distinguir tildes) o elegir uno de los 11 lugares con punto de Kharis.
+   - Cultivo: al elegirlo no cambia de pregunta; se abre debajo "¿Hace cuánto sembró?" con el
+     selector deslizable de semanas (`componentes/decision/SuCultivo.tsx`) y se sigue con "Siguiente".
+   - Objetivos: siete que se marcan y desmarcan (ahorrar agua, mejorar la tierra, frenar la
+     erosión, ganar más, comida para animales, abono natural, cortar plagas). Cada objetivo
+     triplica el peso de su parte del puntaje. "Ver mis rotaciones" guarda el perfil.
+   - Lugar, terreno y temporada pasan solas a la siguiente pregunta al tocar una respuesta.
+2. **Plan: solo responde**, en este orden (revisión 4, 2026-11-15):
+   - "¿Qué sembrar después?" y el cultivo como etiquetas con icono que se deslizan de lado
+     (chips de filtro de M3). Tocar otra cambia el mapa y las rotaciones.
+   - **Mapa** "¿Dónde se da mejor el <cultivo>?" (`componentes/decision/DondeSeDa.tsx`): Honduras
+     entera pintada por puntaje de aptitud, con el enfoque en el departamento de la parcela (el
+     resto atenuado, `enfocar` en `PropsMapa`), su puntaje encima y en una sola línea debajo. Sin
+     leyenda ni textos de apoyo, para que el mapa y las rotaciones se vean de entrada. Tocar
+     otro departamento mueve el enfoque.
+   - **Las tres mejores**, en su propio grupo: tarjetas con icono, nombre, puntaje y rating. En
+     teléfono la mejor ocupa todo el ancho. Marca "La mejor" y "Lo que hace hoy".
+   - **Más opciones**: las demás rotaciones como cuadrados con icono, nombre y porcentaje.
+   - **Por qué estas tres**: Gemini explica el top 3 con el clima de la zona, con la misma línea
+     de tiempo del análisis de una rotación (consulta `top3` en `/api/analisis`), y al terminar
+     abre el chat de seguimiento.
+   - **Sus respuestas**: una fila de chips con cada dato en palabras. Tocar uno abre solo esa
+     pregunta del cuestionario (`soloPaso`) y al contestarla se vuelve al Plan.
+3. **Resumen rápido de respaldo para todo lo que escribe Gemini** (`lib/decision/textos.ts`):
+   `resumenRapido` (una rotación o el top 3) si el análisis tarda o falla (si el servidor no
+   tiene la clave de Gemini se muestra solo, sin aviso de error ni reintento), y `respuestaRapida`
+   para el chat de seguimiento: si Gemini no contesta, responde con los datos de la decisión
+   según de qué trate la pregunta (agua, cómo empezar, riesgos o razones).
 4. **Detalle** (`/rotacion/:id`), con patrones de M3: barra superior pequeña con "Volver"; tarjeta
    héroe con indicador circular del puntaje (en tinta), rating y diferencia frente a lo de hoy;
    "Por qué" como lista con icono por parte; "Su año de siembra" como línea de tiempo con barra de
@@ -313,12 +333,29 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
    expandible "De dónde salen los datos"; análisis de Gemini con chip de estado; chat de
    seguimiento con campo de texto relleno.
 
+### Preguntar (`/chat` y `/chat/:id`), revisión 4 (2026-11-15)
+
+- **Varios chats** (`estado/Conversacion.tsx`, guardados en el teléfono): crear, nombrar (el
+  título sale de la primera pregunta hasta que se le pone uno), fijar arriba y borrar con deshacer.
+- **`/chat` es la selección de chats** (`Chat/Lista.tsx`), con la barra superior y la navegación
+  de siempre y el botón "Nuevo chat".
+- **`/chat/:id` es el chat y toma la pantalla**: sin barra superior y, en teléfono, sin
+  navegación inferior. Se vuelve con la flecha de arriba o deslizando desde el borde izquierdo.
+  En computadora queda el menú lateral y la lista de chats va en una columna a la izquierda.
+- **La respuesta nueva se va escribiendo** a la vista (`MensajeEscribiendose`); con movimiento
+  reducido sale completa.
+- **El chat puede dibujar** (`Chat/Enriquecido.tsx`): `[[mapa:ID]]` muestra el mapa del cultivo
+  con el enfoque en el departamento del productor y `[[animacion:Título|Paso|Paso=72]]` una
+  explicación animada paso a paso, con barras que crecen y botón "Repetir". Gemini las usa solo
+  si se le pide; una etiqueta mal escrita se descarta.
+- Gemini responde **solo sobre cultivos**, breve (80 palabras) y útil.
+
 **Backend** (`api/`, funciones de Vercel; en local las sirve Vite):
 
 - `POST /api/decision { entrada }` → `Decision`. Gemini Decision (`src/lib/decision/motor.ts`) es
   determinista: lee `public/kharis/<punto>.json` (lluvia, ET0, temperatura máxima, señales P2, P4,
   P7, P8) y puntúa cada rotación. Si el backend no responde, el navegador corre el mismo código.
-- `POST /api/analisis { entrada, rotacionId }` → NDJSON en vivo (`paso`, `decision`, `texto`,
+- `POST /api/analisis { entrada, rotacionId }` (`rotacionId` puede ser `top3`) → NDJSON en vivo (`paso`, `decision`, `texto`,
   `fin`, `error`). Gemini explica los números; no los cambia.
 - `POST /api/chat { mensajes, contexto }` → `{ texto }`; con `contexto.consulta` recibe el ranking.
 - Línea de tiempo (`src/lib/decision/estadoAnalisis.ts`, límite de 6 s): si el primer texto llega

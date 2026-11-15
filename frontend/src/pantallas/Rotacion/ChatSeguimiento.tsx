@@ -7,18 +7,34 @@ import { Chip } from '../../componentes/Chip'
 import type { MensajeChat } from '../../estado/Conversacion'
 import { ErrorChat, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import { crearClienteHttp } from '../../lib/chat/clienteHttp'
+import { ContenidoMensaje, MensajeEscribiendose } from '../Chat/Enriquecido'
 import estilos from './Rotacion.module.css'
 
 let siguienteId = 0
 
 /** Chat de seguimiento sobre una rotacion. Gemini recibe el ranking y la evidencia de la consulta. */
-export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat; cliente?: ClienteChat }) {
+export function ChatSeguimiento({
+  contexto,
+  cliente,
+  titulo: tituloDado,
+  sugerencias: sugerenciasDadas,
+  respaldo,
+}: {
+  contexto: ContextoChat
+  cliente?: ClienteChat
+  /** Por defecto, "Pregunte sobre esta rotación" en el idioma actual. */
+  titulo?: string
+  sugerencias?: string[]
+  /** Respuesta preparada de antemano con los datos de la decisión, por si Gemini no contesta. */
+  respaldo?: (pregunta: string) => string
+}) {
   const { t } = useTranslation()
-  const sugerencias = listaT(t, 'chatSeguimiento.sugerencias')
+  const titulo = tituloDado ?? t('chatSeguimiento.titulo')
+  const sugerencias = sugerenciasDadas ?? listaT(t, 'chatSeguimiento.sugerencias')
   const [mensajes, fijarMensajes] = useState<MensajeChat[]>([])
   const [texto, fijarTexto] = useState('')
   const [esperando, fijarEsperando] = useState(false)
-  const [error, fijarError] = useState(false)
+  const [error, fijarError] = useState<'no' | 'reintentar' | 'respaldo'>('no')
   const control = useRef<AbortController | null>(null)
   const clienteReal = useRef<ClienteChat>(cliente ?? crearClienteHttp('/api'))
 
@@ -31,7 +47,7 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
     const conNuevo = [...lista, nuevo]
     fijarMensajes(conNuevo)
     fijarTexto('')
-    fijarError(false)
+    fijarError('no')
     const c = new AbortController()
     control.current = c
     fijarEsperando(true)
@@ -40,7 +56,12 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
       fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: r.texto, fecha: new Date().toISOString() }])
     } catch (e) {
       if (c.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
-      fijarError(true)
+      if (respaldo) {
+        fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: respaldo(limpio), fecha: new Date().toISOString() }])
+        fijarError('respaldo')
+        return
+      }
+      fijarError('reintentar')
       fijarMensajes(lista)
       fijarTexto(limpio)
     } finally {
@@ -58,7 +79,7 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
   return (
     <section className={estilos.chat} aria-labelledby="titulo-chat">
       <h2 id="titulo-chat" className={estilos.tituloTarjeta}>
-        {t('chatSeguimiento.titulo')}
+        {titulo}
       </h2>
       {mensajes.length === 0 && (
         <div className={estilos.sugerencias} role="group" aria-label={t('comun.sugerencias')}>
@@ -69,11 +90,21 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
           ))}
         </div>
       )}
-      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={t('chatSeguimiento.conversacion')}>
-        {mensajes.map((m) => (
-          <p key={m.id} className={m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}>
-            {m.texto}
-          </p>
+      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={t('chatSeguimiento.conversacion', { titulo })}>
+        {mensajes.map((m, i) => (
+          m.rol === 'usuario' ? (
+            <p key={m.id} className={estilos.burbujaUsuario}>
+              {m.texto}
+            </p>
+          ) : (
+            <div key={m.id} className={estilos.burbujaAsistente}>
+              {i === mensajes.length - 1 ? (
+                <MensajeEscribiendose texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              ) : (
+                <ContenidoMensaje texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              )}
+            </div>
+          )
         ))}
         {esperando && (
           <p className={estilos.burbujaAsistente}>
@@ -82,9 +113,9 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
           </p>
         )}
       </div>
-      {error && (
+      {error !== 'no' && (
         <p className={estilos.fallo} role="alert">
-          {t('chatSeguimiento.error')}
+          {t(error === 'respaldo' ? 'chatSeguimiento.errorRespaldo' : 'chatSeguimiento.error')}
         </p>
       )}
       <div className={estilos.redactor}>

@@ -1,0 +1,224 @@
+/* Telefono: o la lista o el chat, nunca los dos. Computadora: lista a la izquierda, chat a la derecha. */
+.chatsPantalla {
+  flex-direction: column;
+}
+
+.chatsPantalla[data-abierto] .lista,
+.chatsPantalla:not([data-abierto]) .conversacion {
+  display: none;
+}
+
+.conversacion {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  /* Con un chat abierto no hay barra superior ni navegacion inferior: el chat llena la pantalla. */
+  min-height: 100dvh;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  width: 100%;
+  max-width: var(--ancho-lectura);
+  margin-inline: auto;
+  padding: var(--esp-4);
+}
+
+.tituloLista {
+  font: var(--tipo-pregunta);
+  letter-spacing: -0.01em;
+}
+
+/* Buscador de chats: barra de búsqueda de M3. */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-height: var(--zona-tactil);
+  padding-inline: var(--esp-4);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.buscador:focus-within {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}
+
+.buscador > input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.buscador > input::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 1;
+}
+
+.nuevo {
+  width: 100%;
+  justify-content: center;
+}
+
+.vacioLista {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.chats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.filaChat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-inline-end: var(--esp-1);
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container);
+}
+
+.filaAbierta {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.filaAbierta :global(.tipo-nota) {
+  color: inherit;
+}
+
+.enlaceChat {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+  min-height: 64px;
+  padding: var(--esp-2) var(--esp-1) var(--esp-2) var(--esp-3);
+  border-radius: var(--forma-xl);
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+}
+
+.iconoChat {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.textoChat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nombreChat {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+  font: var(--tipo-cuerpo-fuerte);
+  overflow-wrap: anywhere;
+}
+
+.nombreChat > svg {
+  flex: none;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Las opciones del chat se abren en una fila propia, debajo de su título. */
+.accionesChat {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  gap: var(--esp-1);
+  padding: 0 var(--esp-2) var(--esp-2);
+}
+
+.renombrar {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: var(--esp-2) var(--esp-2) var(--esp-2) var(--esp-3);
+}
+
+.campoNombre {
+  flex: 1 1 10rem;
+  min-width: 0;
+  min-height: var(--zona-tactil);
+  padding: 0 var(--esp-4);
+  border: 0;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.campoNombre:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}
+
+.sinChat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-4);
+  padding: var(--esp-8);
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+
+@media (min-width: 840px) {
+  .chatsPantalla {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .chatsPantalla[data-abierto] .lista,
+  .chatsPantalla:not([data-abierto]) .conversacion {
+    display: flex;
+  }
+
+  .lista {
+    flex: none;
+    width: 22rem;
+    max-width: none;
+    margin-inline: 0;
+    border-inline-end: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  .chatsPantalla[data-abierto] .lista {
+    position: sticky;
+    inset-block-start: 0;
+    align-self: flex-start;
+    max-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .chatsPantalla:not([data-abierto]) .conversacion {
+    min-height: 0;
+  }
+}

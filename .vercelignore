@@ -1,0 +1,14 @@
+/brag-output
+/data
+/processed
+/raw
+/config
+/scripts
+/kharis_engine
+/kharis_documentacion
+/mapa
+/maqueta
+/agromapa.zip
+/.claude
+/frontend/node_modules
+/frontend/dist

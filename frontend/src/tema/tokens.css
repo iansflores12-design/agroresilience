@@ -47,10 +47,11 @@
   --mov-medio: 300ms;
   --mov-lento: 450ms;
 
-  /* Elevacion (valores M3). Solo para lo que flota. */
-  --elevacion-1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
-  --elevacion-2: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
-  --elevacion-3: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+  /* Elevacion tonal de M3: lo que flota se distingue por el tono de su superficie y una linea
+     fina, no por sombras (las sombras se veian sucias sobre el papel claro y en el tema oscuro). */
+  --elevacion-1: none;
+  --elevacion-2: none;
+  --elevacion-3: none;
 
   /* Capa de estado */
   --estado-hover: 0.08;

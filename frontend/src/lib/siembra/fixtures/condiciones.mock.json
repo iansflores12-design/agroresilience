@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "origen": "mockup",
+  "generado": "2026-11-14",
+  "caja": { "lat_min": 12.9, "lat_max": 16.6, "lon_min": -89.4, "lon_max": -83.1 },
+  "puntos": [
+    { "id": "choluteca", "nombre": "Choluteca", "lat": 13.3, "lon": -87.19, "humedadSuelo_m3m3": 0.12, "lluvia30d_mm": 38, "lluviaNormal30d_mm": 110, "temperatura_c": 29.5, "arcilla_pct": 18, "arena_pct": 58 },
+    { "id": "comayagua", "nombre": "Comayagua", "lat": 14.45, "lon": -87.64, "humedadSuelo_m3m3": 0.16, "lluvia30d_mm": 55, "lluviaNormal30d_mm": 95, "temperatura_c": 26.0, "arcilla_pct": 30, "arena_pct": 35 },
+    { "id": "olancho", "nombre": "Juticalpa, Olancho", "lat": 14.66, "lon": -86.22, "humedadSuelo_m3m3": 0.18, "lluvia30d_mm": 70, "lluviaNormal30d_mm": 100, "temperatura_c": 27.0, "arcilla_pct": 35, "arena_pct": 30 },
+    { "id": "santa_barbara", "nombre": "Santa Barbara", "lat": 14.92, "lon": -88.24, "humedadSuelo_m3m3": 0.28, "lluvia30d_mm": 120, "lluviaNormal30d_mm": 115, "temperatura_c": 24.5, "arcilla_pct": 28, "arena_pct": 38 },
+    { "id": "lempira", "nombre": "Gracias, Lempira", "lat": 14.58, "lon": -88.58, "humedadSuelo_m3m3": 0.3, "lluvia30d_mm": 135, "lluviaNormal30d_mm": 105, "temperatura_c": 22.0, "arcilla_pct": 42, "arena_pct": 22 },
+    { "id": "atlantida", "nombre": "La Ceiba, Atlantida", "lat": 15.78, "lon": -86.8, "humedadSuelo_m3m3": 0.4, "lluvia30d_mm": 320, "lluviaNormal30d_mm": 220, "temperatura_c": 27.5, "arcilla_pct": 48, "arena_pct": 15 },
+    { "id": "el_paraiso", "nombre": "Danli, El Paraiso", "lat": 14.03, "lon": -86.58, "humedadSuelo_m3m3": 0.14, "lluvia30d_mm": null, "lluviaNormal30d_mm": 90, "temperatura_c": 25.5, "arcilla_pct": null, "arena_pct": 45 },
+    { "id": "francisco_morazan", "nombre": "Tegucigalpa, Francisco Morazan", "lat": 14.08, "lon": -87.2, "humedadSuelo_m3m3": 0.22, "lluvia30d_mm": 85, "lluviaNormal30d_mm": 90, "temperatura_c": 24.0, "arcilla_pct": 32, "arena_pct": 33 }
+  ]
+}
