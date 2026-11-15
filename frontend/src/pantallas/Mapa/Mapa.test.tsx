@@ -115,7 +115,7 @@ describe('Mapa', () => {
       renderizarApp('/mapa')
       await usuario.click(screen.getByRole('button', { name: /^Cultivo: / }))
       await usuario.click(screen.getByRole('button', { name: 'Sorgo (maicillo)' }))
-      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el sorgo en Choluteca?' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el sorgo (maicillo) en Choluteca?' })).toBeInTheDocument()
     })
 
     it('lista que sembrar despues y abre y cierra el detalle de una opcion', async () => {
