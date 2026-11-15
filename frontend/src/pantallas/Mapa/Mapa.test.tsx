@@ -20,7 +20,10 @@ describe('Mapa', () => {
     renderizarApp('/mapa')
     expect(screen.getByRole('region', { name: 'Mapa' })).toBeInTheDocument()
     for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toBeInTheDocument()
-    expect(screen.getByText('Toque un punto del mapa o un lugar de la lista.')).toBeInTheDocument()
+    expect(screen.getByText('Toque un punto del mapa o use su ubicación.')).toBeInTheDocument()
+    expect(screen.getByText('Todavía no eligió un lugar.')).toBeInTheDocument()
+    // En telefono (jsdom no es ancho) la lista de lugares empieza plegada.
+    expect(screen.getByText(`Todos los lugares (${zonas.length})`).closest('details')).not.toHaveAttribute('open')
     // Sin cultivo no hay puntajes: se invita a elegirlo.
     expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
@@ -100,8 +103,9 @@ describe('Mapa', () => {
       renderizarApp('/mapa')
       const seco = aptitud('HN-CH', 'maiz', 'seco')!
       expect(seco.total).not.toBe(aptitud('HN-CH', 'maiz', 'normal')!.total)
-      await usuario.click(screen.getByRole('button', { name: 'Año seco' }))
-      expect(screen.getByRole('button', { name: 'Año seco' })).toHaveAttribute('aria-pressed', 'true')
+      const anio = screen.getByRole('group', { name: '¿Cómo viene el año?' })
+      await usuario.click(within(anio).getByRole('button', { name: 'Seco' }))
+      expect(within(anio).getByRole('button', { name: 'Seco' })).toHaveAttribute('aria-pressed', 'true')
       expect(screen.getByText(`${seco.total} de 100. Puesto ${seco.puesto} de 18 departamentos.`)).toBeInTheDocument()
     })
 
