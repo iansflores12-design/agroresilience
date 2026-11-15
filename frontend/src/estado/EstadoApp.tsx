@@ -40,6 +40,8 @@ interface AccionesEstadoApp {
   alternarSonido(): void
   /** Guarda las respuestas del cuestionario de Gemini Decision. */
   fijarPerfil(p: Perfil): void
+  /** Cambia solo los datos dados (cultivo y semanas, o lugar y ubicacion) sin pedir el perfil completo. */
+  actualizarPerfil(p: Partial<Perfil>): void
   alternarObjetivo(o: Objetivo): void
 }
 
@@ -123,6 +125,14 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   const alternarSonido = useCallback(() => {
     setEstado((e) => ({ ...e, sonido: !e.sonido }))
   }, [])
+  const actualizarPerfil = useCallback((p: Partial<Perfil>) => {
+    setEstado((e) => {
+      const definidos = Object.fromEntries(Object.entries(p).filter(([, v]) => v !== undefined)) as Partial<Perfil>
+      const siguiente = { ...e, ...definidos }
+      if (definidos.cultivoId && definidos.cultivoId !== e.cultivoId && definidos.edadSemanas === undefined) siguiente.edadSemanas = 0
+      return siguiente
+    })
+  }, [])
   const fijarPerfil = useCallback((p: Perfil) => {
     setEstado((e) => ({
       ...e,
@@ -140,8 +150,8 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   }, [])
 
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo }),
-    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo],
+    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo }),
+    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, actualizarPerfil, alternarObjetivo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }

@@ -25,7 +25,7 @@ interface Opcion {
   icono: NombreIcono
 }
 
-type Respuestas = Partial<Perfil>
+export type Respuestas = Partial<Perfil>
 
 export type ClavePregunta = 'zonaId' | 'terreno' | 'cultivoId' | 'temporada' | 'objetivos'
 
@@ -97,6 +97,7 @@ export function Cuestionario({
   alCancelar,
   soloPaso,
   pasoInicial,
+  alResponder,
 }: {
   inicial: Respuestas
   alTerminar: (p: Perfil) => void
@@ -104,6 +105,11 @@ export function Cuestionario({
   soloPaso?: ClavePregunta
   /** Pregunta con la que abre el cuestionario completo (desde los chips de la barra superior). */
   pasoInicial?: ClavePregunta
+  /**
+   * Con `soloPaso`: recibe las respuestas al contestar esa pregunta, aunque el perfil aun no este
+   * completo (desde los chips de la barra superior se cambia un solo dato).
+   */
+  alResponder?: (r: Respuestas) => void
 }) {
   const { t } = useTranslation()
   const PREGUNTAS = useMemo(() => preguntas(t), [t])
@@ -144,6 +150,10 @@ export function Cuestionario({
     confirmar()
     if (!soloPaso && paso < ULTIMA) {
       fijarPaso(paso + 1)
+      return
+    }
+    if (soloPaso && alResponder) {
+      alResponder(nuevas)
       return
     }
     const { zonaId, terreno, cultivoId, temporada, parcela, edadSemanas, objetivos } = nuevas

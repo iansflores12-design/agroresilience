@@ -114,8 +114,22 @@ describe('Mapa', () => {
       const usuario = userEvent.setup()
       renderizarApp('/mapa')
       await usuario.click(screen.getByRole('button', { name: /^Cultivo: / }))
-      await usuario.click(screen.getByRole('button', { name: 'Sorgo (maicillo)' }))
+      // Abre la misma pregunta del cuestionario, a pantalla completa.
+      expect(screen.getByRole('heading', { level: 1, name: /siembra ahora/ })).toBeInTheDocument()
+      await usuario.click(screen.getByRole('button', { name: /^Sorgo \(maicillo\)/ }))
+      await usuario.click(screen.getByRole('button', { name: 'Guardar' }))
+      expect(screen.queryByRole('button', { name: 'Guardar' })).not.toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el sorgo (maicillo) en Choluteca?' })).toBeInTheDocument()
+    })
+
+    it('el chip de lugar abre la pregunta del lugar y la cambia sin salir del mapa', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      await usuario.click(screen.getByRole('button', { name: /^Lugar: / }))
+      const pagina = screen.getByRole('dialog')
+      expect(within(pagina).getByRole('searchbox')).toBeInTheDocument()
+      await usuario.click(within(pagina).getByRole('button', { name: /^Comayagua/ }))
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el maíz en Comayagua?' })).toBeInTheDocument()
     })
 
     it('lista que sembrar despues y abre y cierra el detalle de una opcion', async () => {

@@ -1,0 +1,52 @@
+/* Pagina completa encima de la pantalla actual: la misma pregunta que en el cuestionario del Plan. */
+.pagina {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pagina::backdrop {
+  background-color: var(--md-sys-color-surface);
+}
+
+.barra {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding: calc(var(--esp-2) + env(safe-area-inset-top)) calc(var(--esp-2) + env(safe-area-inset-right)) var(--esp-2)
+    var(--esp-2);
+  background-color: var(--md-sys-color-surface);
+}
+
+.contenido {
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding: 0 calc(var(--esp-4) + env(safe-area-inset-right)) calc(var(--esp-8) + env(safe-area-inset-bottom))
+    calc(var(--esp-4) + env(safe-area-inset-left));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pagina[open] {
+    animation: entrar var(--mov-espacial) var(--curva-estandar);
+  }
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--esp-8));
+  }
+}

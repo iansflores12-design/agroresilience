@@ -35,9 +35,6 @@ const en: Recursos = {
     activarSonido: 'Turn sound on',
   },
   contexto: {
-    tituloCultivo: 'What are you planting?',
-    tituloLugar: 'Where is your plot?',
-    elegirEnMapa: 'Choose on the map',
     grupo: 'Chosen context',
     cultivoAria: 'Crop: {{cultivo}}',
     sinCultivoAria: 'No crop. Choose a crop',

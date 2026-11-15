@@ -35,9 +35,6 @@ const pt: Recursos = {
     activarSonido: 'Ativar som',
   },
   contexto: {
-    tituloCultivo: 'O que você está plantando?',
-    tituloLugar: 'Onde fica sua parcela?',
-    elegirEnMapa: 'Escolher no mapa',
     grupo: 'Contexto escolhido',
     cultivoAria: 'Cultura: {{cultivo}}',
     sinCultivoAria: 'Sem cultura. Escolher cultura',

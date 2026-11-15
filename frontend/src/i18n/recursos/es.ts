@@ -32,9 +32,6 @@ const es = {
     activarSonido: 'Activar sonido',
   },
   contexto: {
-    tituloCultivo: '¿Qué está sembrando?',
-    tituloLugar: '¿Dónde está su parcela?',
-    elegirEnMapa: 'Elegir en el mapa',
     grupo: 'Contexto elegido',
     cultivoAria: 'Cultivo: {{cultivo}}',
     sinCultivoAria: 'Sin cultivo. Elegir cultivo',

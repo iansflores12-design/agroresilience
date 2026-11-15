@@ -4,19 +4,18 @@ import { buscarCultivo } from '../datos/cultivos'
 import { buscarZona } from '../datos/zonas'
 import { useEstadoApp } from '../estado/EstadoApp'
 import { nombreCultivo } from '../i18n/dominio'
-import { CULTIVOS, LUGARES } from '../lib/decision/parametros'
 import { Chip } from './Chip'
-import { MenuContexto } from './MenuContexto'
+import { PreguntaContexto } from './PreguntaContexto'
 import estilos from './TiraContexto.module.css'
 
 /**
- * Dice en palabras completas el cultivo y el lugar elegidos. Cada chip abre una hoja para
- * cambiarlo ahí mismo: la pantalla en la que se está se actualiza sin ir a otra.
+ * Dice en palabras completas el cultivo y el lugar elegidos. Cada chip abre a pantalla completa la
+ * misma pregunta del cuestionario; al contestarla se vuelve a la pantalla de antes, ya actualizada.
  */
 export function TiraContexto() {
   const { t } = useTranslation()
-  const { cultivoId, zonaId, temporada, parcela, elegirCultivo, elegirZona } = useEstadoApp()
-  const [abierto, fijarAbierto] = useState<'cultivo' | 'lugar' | null>(null)
+  const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
+  const [abierta, fijarAbierta] = useState<'cultivoId' | 'zonaId' | null>(null)
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
   const textoCultivo = cultivo
@@ -37,34 +36,18 @@ export function TiraContexto() {
 
   return (
     <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-      <Chip icono="grass" aria-label={ariaCultivo} aria-haspopup="dialog" onClick={() => fijarAbierto('cultivo')}>
+      <Chip icono="grass" aria-label={ariaCultivo} aria-haspopup="dialog" onClick={() => fijarAbierta('cultivoId')}>
         {textoCultivo}
       </Chip>
       <Chip
         icono={conParcela ? 'my_location' : 'location_on'}
         aria-label={ariaLugar}
         aria-haspopup="dialog"
-        onClick={() => fijarAbierto('lugar')}
+        onClick={() => fijarAbierta('zonaId')}
       >
         {conParcela ? t('contexto.suParcela') : zona ? zona.nombre : t('contexto.elegirLugar')}
       </Chip>
-      <MenuContexto
-        abierto={abierto === 'cultivo'}
-        titulo={t('contexto.tituloCultivo')}
-        opciones={Object.keys(CULTIVOS).map((id) => ({ id, nombre: nombreCultivo(t, id) }))}
-        elegida={cultivoId}
-        alElegir={elegirCultivo}
-        alCerrar={() => fijarAbierto(null)}
-      />
-      <MenuContexto
-        abierto={abierto === 'lugar'}
-        titulo={t('contexto.tituloLugar')}
-        opciones={Object.entries(LUGARES).map(([id, l]) => ({ id, nombre: l.nombre }))}
-        elegida={zonaId}
-        alElegir={elegirZona}
-        alCerrar={() => fijarAbierto(null)}
-        enlace={{ texto: t('contexto.elegirEnMapa'), to: '/mapa' }}
-      />
+      <PreguntaContexto clave={abierta} alCerrar={() => fijarAbierta(null)} />
     </div>
   )
 }
