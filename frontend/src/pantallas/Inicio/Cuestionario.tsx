@@ -4,7 +4,8 @@ import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import type { NombreIcono } from '../../componentes/iconos'
-import { SelectorCultivo } from '../../componentes/decision/SuCultivo'
+import { EdadCultivo, SelectorCultivo } from '../../componentes/decision/SuCultivo'
+import { buscarCultivo } from '../../datos/cultivos'
 import { zonas } from '../../datos/zonas'
 import { dentroDeHonduras, distanciaKm } from '../../lib/decision/escala'
 import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
@@ -100,9 +101,11 @@ export function Cuestionario({
       fijarPaso(paso + 1)
       return
     }
-    const { zonaId, terreno, cultivoId, temporada, parcela } = nuevas
-    if (zonaId && terreno && cultivoId && temporada) alTerminar({ zonaId, terreno, cultivoId, temporada, parcela: parcela ?? null })
+    const { zonaId, terreno, cultivoId, temporada, parcela, edadSemanas } = nuevas
+    if (zonaId && terreno && cultivoId && temporada) alTerminar({ zonaId, terreno, cultivoId, temporada, parcela: parcela ?? null, edadSemanas })
   }
+
+  const cultivoElegido = pregunta.clave === 'cultivoId' ? buscarCultivo(respuestas.cultivoId ?? null) : null
 
   function elegir(id: string) {
     // Elegir un lugar de la lista quita la ubicacion GPS: se usa el punto de ese lugar.
@@ -177,7 +180,23 @@ export function Cuestionario({
         </div>
       )}
       {pregunta.clave === 'cultivoId' ? (
-        <SelectorCultivo elegido={elegida} alElegir={elegir} />
+        <>
+          {/* Como en la pantalla original: al elegir el cultivo se abre abajo el selector de semanas. */}
+          <SelectorCultivo
+            elegido={elegida}
+            alElegir={(id) => {
+              if (id !== respuestas.cultivoId) fijarRespuestas({ ...respuestas, cultivoId: id, edadSemanas: 0 })
+              confirmar()
+            }}
+          />
+          {cultivoElegido && (
+            <EdadCultivo
+              cultivo={cultivoElegido}
+              semanas={respuestas.edadSemanas ?? 0}
+              alCambiar={(s) => fijarRespuestas((r) => ({ ...r, edadSemanas: s }))}
+            />
+          )}
+        </>
       ) : (
       <ul className={estilos.opciones}>
         {pregunta.opciones.map((o) => {
