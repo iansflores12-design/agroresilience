@@ -18,6 +18,15 @@ export class ErrorGemini extends Error {
 export interface MensajeGemini {
   rol: 'user' | 'model'
   texto: string
+  /** Foto del productor (base64 sin el prefijo data:), parte multimodal de Gemini. */
+  imagen?: { mimeType: string; data: string }
+}
+
+function partesDe(m: MensajeGemini): object[] {
+  const partes: object[] = []
+  if (m.imagen) partes.push({ inlineData: { mimeType: m.imagen.mimeType, data: m.imagen.data } })
+  if (m.texto || !partes.length) partes.push({ text: m.texto })
+  return partes
 }
 
 export interface PedidoGemini {
@@ -25,26 +34,52 @@ export interface PedidoGemini {
   mensajes: MensajeGemini[]
   signal?: AbortSignal
   maxTokens?: number
+  /** Deja que el modelo busque en Google antes de responder. */
+  busqueda?: boolean
+  temperatura?: number
 }
 
 export function hayClave(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim())
 }
 
-/** El modelo configurado y, detrás, el de respaldo: se usa si el primero está saturado, sin cuota o no existe. */
-function modelos(): string[] {
-  const principal = process.env.GEMINI_MODELO?.trim() || 'gemini-3.8-flash'
-  const respaldo = process.env.GEMINI_MODELO_RESPALDO?.trim() || 'gemini-3.5-flash'
-  return principal === respaldo ? [principal] : [principal, respaldo]
+/**
+ * Cadena de modelos, del que da mas consultas gratis al dia al que da menos (probado el 15-11-2026 con
+ * una clave sin facturacion, scripts/probar_modelos.mjs): los Flash-Lite dan cientos de consultas al
+ * dia y los Flash solo unas 20. Si uno esta sin cuota, saturado o no existe, se prueba el siguiente.
+ */
+const CADENA = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash']
+
+/**
+ * GEMINI_MODELOS (lista separada por comas) reemplaza la cadena completa. GEMINI_MODELO y
+ * GEMINI_MODELO_RESPALDO, de configuraciones anteriores, se suman al final como respaldo extra:
+ * asi una clave vieja con un Flash de 20 consultas al dia no deja al sitio sin cuota.
+ */
+export function modelos(): string[] {
+  const lista = process.env.GEMINI_MODELOS?.split(',').map((m) => m.trim()).filter(Boolean)
+  if (lista?.length) return [...new Set(lista)]
+  const elegidos = [process.env.GEMINI_MODELO, process.env.GEMINI_MODELO_RESPALDO].map((m) => m?.trim()).filter((m): m is string => Boolean(m))
+  return [...new Set([...CADENA, ...elegidos])]
+}
+
+/** Modelos que acaban de fallar: se saltan un rato para no gastar una llamada en cada consulta. */
+const enPausa = new Map<string, number>()
+
+function pausaMs(estado: number, busqueda: boolean): number {
+  // Sin facturacion la busqueda con Google no tiene cuota: no vale la pena insistir pronto.
+  if (estado === 429) return busqueda ? 60 * 60_000 : 5 * 60_000
+  if (estado === 404) return 60 * 60_000
+  return 30_000
 }
 
 function cuerpo(p: PedidoGemini): string {
   const nivel = process.env.GEMINI_PENSAMIENTO?.trim()
   return JSON.stringify({
     systemInstruction: { parts: [{ text: p.sistema }] },
-    contents: p.mensajes.map((m) => ({ role: m.rol, parts: [{ text: m.texto }] })),
+    contents: p.mensajes.map((m) => ({ role: m.rol, parts: partesDe(m) })),
+    ...(p.busqueda ? { tools: [{ google_search: {} }] } : {}),
     generationConfig: {
-      temperature: 0.4,
+      temperature: p.temperatura ?? 0.4,
       // Holgado: los modelos que razonan gastan parte de este tope antes de escribir y, si es
       // corto, la respuesta llega cortada a media frase. El largo real lo limita el pedido.
       maxOutputTokens: p.maxTokens ?? 4096,
@@ -52,6 +87,9 @@ function cuerpo(p: PedidoGemini): string {
     },
   })
 }
+
+/** Tope para que un modelo empiece a responder antes de pasar al siguiente. */
+const limiteModeloMs = () => Number(process.env.GEMINI_LIMITE_MS) || 20_000
 
 const esperar = (ms: number) => new Promise((listo) => setTimeout(listo, ms))
 
@@ -61,24 +99,47 @@ const PROBAR_OTRO = new Set([429, 500, 503, 404])
 async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   const clave = process.env.GEMINI_API_KEY?.trim()
   if (!clave) throw new ErrorGemini('sin_clave', 'Falta GEMINI_API_KEY en el servidor')
-  const lista = modelos()
+  const todos = modelos()
+  const marca = (m: string) => (p.busqueda ? `${m}|busqueda` : m)
+  const ahora = Date.now()
+  const libres = todos.filter((m) => (enPausa.get(marca(m)) ?? 0) <= ahora)
+  // Si todos estan en pausa se prueba igual el primero, para devolver su error real.
+  const lista = libres.length ? libres : todos.slice(0, 1)
   let r: Response
   for (let i = 0; ; i++) {
+    // Cada modelo tiene un tope para empezar a responder: si se cuelga, se prueba el siguiente.
+    // El tope se quita en cuanto llegan los encabezados, asi no corta una respuesta en vivo larga.
+    const control = new AbortController()
+    const alCancelar = () => control.abort()
+    p.signal?.addEventListener('abort', alCancelar, { once: true })
+    const tope = setTimeout(() => control.abort(), limiteModeloMs())
     try {
       r = await fetch(`${URL_BASE}${lista[i]}:${metodo}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
         body: cuerpo(p),
-        signal: p.signal,
+        signal: control.signal,
       })
     } catch (e) {
       if (p.signal?.aborted) throw new ErrorGemini('cancelado')
+      // Sin red o colgado: este modelo descansa un rato y se prueba el siguiente.
+      enPausa.set(marca(lista[i]), Date.now() + 30_000)
+      if (i < lista.length - 1) {
+        console.error(`[gemini] ${lista[i]} no respondio (${String(e).slice(0, 80)}); se prueba ${lista[i + 1]}`)
+        continue
+      }
       throw new ErrorGemini('red', String(e))
+    } finally {
+      clearTimeout(tope)
+      p.signal?.removeEventListener('abort', alCancelar)
     }
-    if (PROBAR_OTRO.has(r.status) && i < lista.length - 1 && !p.signal?.aborted) {
-      console.error(`[gemini] ${lista[i]} respondio ${r.status}; se prueba ${lista[i + 1]}`)
-      await esperar(300)
-      continue
+    if (PROBAR_OTRO.has(r.status)) {
+      enPausa.set(marca(lista[i]), Date.now() + pausaMs(r.status, Boolean(p.busqueda)))
+      if (i < lista.length - 1 && !p.signal?.aborted) {
+        console.error(`[gemini] ${lista[i]} respondio ${r.status}; se prueba ${lista[i + 1]}`)
+        await esperar(200)
+        continue
+      }
     }
     break
   }
@@ -88,6 +149,11 @@ async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   if (r.status === 429 || r.status === 503) throw new ErrorGemini('cuota', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
   if (r.status === 401 || r.status === 403) throw new ErrorGemini('clave', detalle)
   throw new ErrorGemini('servidor', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
+}
+
+/** Solo para pruebas: olvida las pausas. */
+export function reiniciarPausas(): void {
+  enPausa.clear()
 }
 
 function textoDe(dato: unknown): string {
@@ -136,4 +202,26 @@ export async function geminiTexto(p: PedidoGemini): Promise<string> {
   const texto = textoDe(await r.json().catch(() => null)).trim()
   if (!texto) throw new ErrorGemini('servidor', 'Gemini no devolvio texto')
   return texto
+}
+
+export interface FuenteWeb {
+  titulo: string
+  url: string
+}
+
+/** Respuesta completa con las paginas que el modelo consulto (para pedidos con `busqueda`). */
+export async function geminiConFuentes(p: PedidoGemini): Promise<{ texto: string; fuentes: FuenteWeb[] }> {
+  const r = await llamar('generateContent', p)
+  const dato: unknown = await r.json().catch(() => null)
+  const texto = textoDe(dato).trim()
+  if (!texto) throw new ErrorGemini('servidor', 'Gemini no devolvio texto')
+  const trozos = (dato as { candidates?: { groundingMetadata?: { groundingChunks?: { web?: { uri?: string; title?: string } }[] } }[] })
+    ?.candidates?.[0]?.groundingMetadata?.groundingChunks
+  const fuentes: FuenteWeb[] = []
+  for (const t of trozos ?? []) {
+    const url = t.web?.uri
+    if (typeof url !== 'string' || !url.startsWith('https://') || fuentes.some((f) => f.url === url)) continue
+    fuentes.push({ titulo: (t.web?.title ?? '').slice(0, 80) || 'Fuente', url })
+  }
+  return { texto, fuentes }
 }

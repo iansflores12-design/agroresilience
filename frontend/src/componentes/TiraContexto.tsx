@@ -1,17 +1,28 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buscarCultivo } from '../datos/cultivos'
 import { buscarZona } from '../datos/zonas'
+import { buscarDepartamento } from '../datos/aptitud'
+import { departamentoElegido } from '../datos/lugarDepartamento'
 import { useEstadoApp } from '../estado/EstadoApp'
 import { nombreCultivo } from '../i18n/dominio'
 import { Chip } from './Chip'
+import { PreguntaContexto } from './PreguntaContexto'
 import estilos from './TiraContexto.module.css'
 
-/** Dice en palabras completas el cultivo y el lugar elegidos. Cada chip lleva a donde se elige. */
+/**
+ * Dice en palabras completas el cultivo y el lugar elegidos. Cada chip abre a pantalla completa la
+ * misma pregunta del cuestionario; al contestarla se vuelve a la pantalla de antes, ya actualizada.
+ */
 export function TiraContexto() {
   const { t } = useTranslation()
-  const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
+  const estado = useEstadoApp()
+  const { cultivoId, zonaId, temporada, parcela } = estado
+  const [abierta, fijarAbierta] = useState<'cultivoId' | 'zonaId' | null>(null)
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
+  // El lugar se elige por departamento; los estados viejos solo traen el punto de datos.
+  const nombreLugar = buscarDepartamento(departamentoElegido(estado))?.nombre ?? zona?.nombre ?? null
   const textoCultivo = cultivo
     ? temporada
       ? t('contexto.cultivoDeTemporada', {
@@ -20,32 +31,28 @@ export function TiraContexto() {
         })
       : nombreCultivo(t, cultivo.id)
     : t('contexto.elegirCultivo')
-  const ariaCultivo = cultivo ? t('contexto.cultivoAria', { cultivo: textoCultivo }) : t('contexto.sinCultivoAria')
+  const ariaCultivo = cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : t('contexto.sinCultivoAria')
+  const conParcela = Boolean(zona && parcela)
+  const ariaLugar = conParcela
+    ? t('contexto.suParcelaAria', { lugar: nombreLugar })
+    : nombreLugar
+      ? t('contexto.lugarAria', { lugar: nombreLugar })
+      : t('contexto.sinLugarAria')
 
-  if (zona && parcela) {
-    return (
-      <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-        <Chip to="/" icono="grass" aria-label={cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : ariaCultivo}>
-          {textoCultivo}
-        </Chip>
-        <Chip to="/" icono="my_location" aria-label={t('contexto.suParcelaAria', { lugar: zona.nombre })}>
-          {t('contexto.suParcela')}
-        </Chip>
-      </div>
-    )
-  }
   return (
     <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-      <Chip to="/" icono="grass" aria-label={ariaCultivo}>
+      <Chip icono="grass" aria-label={ariaCultivo} aria-haspopup="dialog" onClick={() => fijarAbierta('cultivoId')}>
         {textoCultivo}
       </Chip>
       <Chip
-        to="/mapa"
-        icono="location_on"
-        aria-label={zona ? t('contexto.lugarAria', { lugar: zona.nombre }) : t('contexto.sinLugarAria')}
+        icono={conParcela ? 'my_location' : 'location_on'}
+        aria-label={ariaLugar}
+        aria-haspopup="dialog"
+        onClick={() => fijarAbierta('zonaId')}
       >
-        {zona ? zona.nombre : t('contexto.elegirLugar')}
+        {conParcela ? t('contexto.suParcela') : (nombreLugar ?? t('contexto.elegirLugar'))}
       </Chip>
+      <PreguntaContexto clave={abierta} alCerrar={() => fijarAbierta(null)} />
     </div>
   )
 }

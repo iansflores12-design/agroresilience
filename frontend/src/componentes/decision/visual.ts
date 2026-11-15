@@ -16,6 +16,7 @@ export function iconoRazon(r: Razon, diferencia: number): NombreIcono {
   if (r.tipo === 'comparacion') return diferencia >= 0 ? 'trending_up' : 'trending_down'
   if (r.tipo === 'objetivos') return 'flag'
   if (r.tipo === 'actual') return 'schedule'
+  if (r.tipo === 'historial') return 'calendar_month'
   return ICONO_FACTOR[r.tipo]
 }
 
@@ -26,6 +27,12 @@ export const ICONO_CULTIVO: Record<string, NombreIcono> = {
   arroz: 'rice_bowl',
   tomate: 'nutrition',
   'frijol-terciopelo': 'local_florist',
+  cafe: 'coffee',
+  platano: 'nature',
+  palma: 'park',
+  cana: 'energy_savings_leaf',
+  melon: 'grocery',
+  tabaco: 'nest_eco_leaf',
 }
 
 export const ICONO_TEMPORADA: Record<Temporada, NombreIcono> = {

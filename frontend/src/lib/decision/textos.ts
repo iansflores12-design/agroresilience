@@ -3,6 +3,7 @@
 
 import type { TFunction } from 'i18next'
 import { lista, traductor } from '../../i18n/traductor.js'
+import { fechaCorta, lempiras, preciosUsados } from './precios.js'
 import type { Decision, RotacionDecidida } from './tipos.js'
 
 /** "2026-11-10" -> "10 de noviembre" (o "November 10", "10 de novembro"). */
@@ -119,6 +120,22 @@ function detalleRotacion(t: TFunction, r: RotacionDecidida): string[] {
   ]
 }
 
+/** Precio de cada cultivo que entra en la decision, con su mercado, fecha, fuente y efecto en la venta. */
+function lineasPrecios(t: TFunction, d: Decision): string[] {
+  const lineas = preciosUsados(d.precios).map((p) => {
+    const base = t('gemini.precioBase', {
+      cultivo: t(`cultivos.${p.id}.nombre`),
+      precio: lempiras(p.lempirasQq),
+      mercado: p.mercado,
+      fecha: p.fecha ? ` (${fechaCorta(p.fecha)})` : '',
+    })
+    if (!p.deRegion) return t('gemini.precioReferencia', { base, fuente: p.fuente })
+    const efecto = p.ajuste > 0 ? t('motor.precios.sumaCorto', { n: p.ajuste }) : p.ajuste < 0 ? t('motor.precios.restaCorto', { n: -p.ajuste }) : t('motor.precios.igualCorto')
+    return t('gemini.precioRegion', { base, fuente: p.fuente, referencia: lempiras(p.referenciaQq), efecto })
+  })
+  return [t('gemini.precios'), ...lineas]
+}
+
 /** Datos de la consulta en texto plano, para que Gemini no tenga que adivinar nada. */
 export function datosParaGemini(d: Decision, id: string): string {
   const t = traductor(d.entrada.idioma)
@@ -129,6 +146,15 @@ export function datosParaGemini(d: Decision, id: string): string {
     t('gemini.terreno', { nombre: t(`terrenos.${e.terreno}.nombre`), descripcion: t(`terrenos.${e.terreno}.descripcion`) }),
     t('gemini.cultivoActual', { cultivo: t(`cultivos.${e.cultivoId}.nombre`), temporada: t(`temporadas.${e.temporada}.nombre`), meses: t(`temporadas.${e.temporada}.texto`) }),
     t('gemini.objetivos', { lista: e.objetivos.length ? e.objetivos.map((o) => t(`objetivos.${o}.nombre`)).join(', ') : t('gemini.noEligio') }),
+    ...(e.cosechas?.length
+      ? [
+          t('gemini.cosechas', {
+            lista: e.cosechas
+              .map((c) => t('gemini.cosechaItem', { cultivo: t(`cultivos.${c.cultivoId}.nombre`), temporada: t(`temporadas.${c.temporada}.nombre`), anio: c.anio, resultado: t(`rotacion.cosechas.${c.resultado}`) }))
+              .join('; '),
+          }),
+        ]
+      : []),
     '',
     t('gemini.ranking'),
     ...d.rotaciones.map(
@@ -143,18 +169,24 @@ export function datosParaGemini(d: Decision, id: string): string {
   } else if (r) {
     lineas.push('', t('gemini.consultada', { nombre: r.nombre, id: r.id }), ...detalleRotacion(t, r))
   }
-  lineas.push('', t('gemini.avisos') + d.avisos.join(' '))
+  lineas.push('', ...lineasPrecios(t, d), '', t('gemini.avisos') + d.avisos.join(' '))
   return lineas.join('\n')
 }
 
 /** Instrucciones de sistema para Gemini en el idioma de la consulta. */
 export function instruccionesGemini(idioma?: string | null): string {
-  return traductor(idioma)('gemini.instrucciones')
+  const t = traductor(idioma)
+  return `${t('gemini.instrucciones')}\n${t('gemini.reglasHistorial')}`
 }
 
-/** Lo que se le pide a Gemini segun la consulta: una rotacion o las tres mejores. */
-export function pedidoPara(id: string, idioma?: string | null): string {
-  return traductor(idioma)(id === TOP3 ? 'geminiTop3.pedido' : 'gemini.pedidoAnalisis')
+/**
+ * Lo que se le pide a Gemini segun la consulta: una rotacion o las tres mejores. Con historial del
+ * departamento se agrega el paso de la prediccion con años parecidos.
+ */
+export function pedidoPara(id: string, idioma?: string | null, conHistorial = false): string {
+  const t = traductor(idioma)
+  const base = t(id === TOP3 ? 'geminiTop3.pedido' : 'gemini.pedidoAnalisis')
+  return conHistorial ? `${base}\n${t('gemini.pedidoHistorial')}` : base
 }
 
 /** Versiones en español, como antes de la traduccion. */

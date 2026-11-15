@@ -57,6 +57,37 @@
   stroke-width: 2.5px;
 }
 
+/* Con un fondo de teselas el color del puntaje pasa a ser un velo, para que se vea el terreno.
+   Las teselas no siguen el tema claro u oscuro: el trazo usa un color fijo que contraste con cada fondo. */
+.raiz[data-fondo] path {
+  fill-opacity: 0.4;
+  stroke-opacity: 0.7;
+}
+
+.raiz[data-fondo='relieve'] path {
+  stroke: #1b1c18;
+}
+
+.raiz[data-fondo='satelite'] path {
+  stroke: #ffffff;
+}
+
+/* Con una capa de datos de satelite el puntaje se apaga y quedan solo los limites: asi los colores
+   que se ven son los de la capa y no se mezclan con los del puntaje. */
+.raiz[data-capa] path {
+  fill-opacity: 0;
+  stroke: var(--md-sys-color-on-surface);
+  stroke-opacity: 0.6;
+}
+
+.raiz[data-capa][data-fondo='relieve'] path {
+  stroke: #1b1c18;
+}
+
+.raiz[data-capa][data-fondo='satelite'] path {
+  stroke: #ffffff;
+}
+
 .raiz path:focus-visible {
   stroke: var(--md-sys-color-on-surface);
   stroke-width: 2.5px;

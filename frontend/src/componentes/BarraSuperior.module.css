@@ -47,11 +47,30 @@
   grid-area: acciones;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
   gap: var(--esp-2);
+  flex: none;
 }
 
 .barra > :nth-child(2) {
   grid-area: tira;
+}
+
+/* En tableta la marca, el contexto y las acciones (idioma y sonido) caben en una sola fila: la barra
+   fija ocupa una fila menos y deja mas pantalla al contenido. Si el contexto no cabe, pasa de linea
+   dentro de su columna; las acciones nunca bajan de fila. */
+@media (min-width: 600px) and (max-width: 839px) {
+  .barra {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'marca tira acciones';
+    gap: var(--esp-4);
+  }
+
+  /* "safe": si los chips no caben, la fila se desliza desde el primero en vez de cortarlo por la izquierda. */
+  .barra > :nth-child(2) {
+    justify-content: safe flex-end;
+  }
 }
 
 @media (min-width: 840px) {

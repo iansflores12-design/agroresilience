@@ -1,4 +1,6 @@
 .medio {
+  /* Ocupa el alto libre: asi el redactor queda pegado abajo aunque haya pocos mensajes. */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--esp-4);
@@ -184,15 +186,6 @@
   margin-inline: auto;
 }
 
-.insignia {
-  align-self: flex-start;
-  padding: var(--esp-1) var(--esp-3);
-  border-radius: var(--forma-completa);
-  background-color: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
-  font: var(--tipo-nota);
-}
-
 .campoFila {
   display: flex;
   align-items: flex-end;
@@ -277,5 +270,94 @@
 
   .sugerencias {
     justify-content: center;
+  }
+}
+
+/* ---------- Fotos ---------- */
+
+.fotoMensaje {
+  display: block;
+  width: 100%;
+  max-width: 16rem;
+  max-height: 16rem;
+  object-fit: cover;
+  border-radius: var(--forma-lg);
+}
+
+.fotoMensaje + p {
+  margin-block-start: var(--esp-2);
+}
+
+.vistaFoto {
+  position: relative;
+  align-self: flex-start;
+}
+
+.vistaFoto img {
+  display: block;
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: var(--forma-md);
+}
+
+.vistaFoto > :last-child {
+  position: absolute;
+  inset-block-start: calc(var(--esp-2) * -1);
+  inset-inline-end: calc(var(--esp-6) * -1);
+}
+
+/* La camara solo tiene sentido en pantallas tactiles. */
+.soloTactil {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .soloTactil {
+    display: contents;
+  }
+}
+
+/* ---------- Seguimiento y pista de teclado ---------- */
+
+.seguimiento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding-block-start: var(--esp-2);
+}
+
+.chipsSeguir {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.pista {
+  display: none;
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+  padding-inline: var(--esp-4);
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 600px) {
+  .pista {
+    display: block;
+  }
+}
+
+/* En celular angosto el boton Enviar queda solo con el icono y el campo gana espacio. */
+@media (max-width: 479px) {
+  .enviar {
+    padding-inline: var(--esp-3);
+  }
+
+  .textoEnviar {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

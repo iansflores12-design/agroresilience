@@ -29,3 +29,9 @@ kharis_engine.zip
 
 # Enlace local de Vercel
 .vercel
+
+# Archivos de macOS, cuadros intermedios del video y NetCDF de mas de 100 MB (limite de GitHub)
+.DS_Store
+brag-output/work/
+data/processed/imerg_honduras.nc
+data/processed/smap_honduras.nc

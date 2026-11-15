@@ -7,6 +7,7 @@ import { buscarDepartamento, ranking } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
 import { nombreCultivo } from '../../i18n/dominio'
 import limitesJson from '../../datos/departamentos.geo.json'
+import { BASES, DATOS, desenfoque } from './capas'
 import type { PropsMapa } from './ContenedorMapa'
 import { nombreCorto } from './formato'
 import estilos from './MapaHonduras.module.css'
@@ -27,6 +28,8 @@ interface Interno {
   departamentos: Map<string, L.Path>
   lugares: Map<string, L.Marker>
   verTodo(): void
+  /** El productor acerco o alejo: un cambio de tamano ya no vuelve a encuadrar todo el pais. */
+  marcarMovido(): void
 }
 
 /** Si un lugar cae sobre el centro del departamento, corre el puntaje para que el punto no lo tape. */
@@ -53,8 +56,9 @@ function alActivar(el: Element, accion: () => void) {
 }
 
 /**
- * Honduras por departamento, con Leaflet y sin teselas de fondo: solo se dibujan los limites,
- * asi el mapa carga igual con conexion lenta. Cada departamento se pinta segun que tan bien se
+ * Honduras por departamento, con Leaflet. Por defecto va sin teselas de fondo: solo se dibujan los
+ * limites, asi el mapa carga igual con conexion lenta. Quien lo usa puede pedir un fondo (relieve o
+ * satelite) y una capa de datos de satelite encima. Cada departamento se pinta segun que tan bien se
  * da el cultivo elegido; al tocar uno aparece su puntaje encima. Cada lugar con datos es un punto.
  */
 export function MapaHonduras({
@@ -67,6 +71,8 @@ export function MapaHonduras({
   alSeleccionarDepartamento,
   escenario = 'normal',
   enfocar = false,
+  base = 'simple',
+  datos = null,
   ref,
 }: PropsMapa) {
   const { t } = useTranslation()
@@ -89,9 +95,11 @@ export function MapaHonduras({
       zoom: 7,
       zoomSnap: 0.25,
       zoomDelta: 0.75,
-      minZoom: 5.5,
+      // El minimo real se fija al ver todo el pais (ver `verTodo`): en un telefono angosto el pais
+      // entero ya queda cerca de 5.5 y, con ese tope fijo, el boton de alejar no hacia nada.
+      minZoom: 3,
       maxZoom: 10,
-      maxBounds: honduras.pad(0.5),
+      maxBounds: honduras.pad(1.5),
       zoomControl: false,
       attributionControl: false,
       // La rueda y el dedo mueven la pagina, no el mapa (ver `alAcercar`).
@@ -104,8 +112,12 @@ export function MapaHonduras({
     const verTodo = () => {
       movido = false
       const { x, y } = mapa.getSize()
-      if (x > 0 && y > 0) mapa.fitBounds(honduras, { animate: false })
+      if (x <= 0 || y <= 0) return
+      mapa.setMinZoom(3)
+      mapa.fitBounds(honduras, { animate: false })
       zoomCompleto = mapa.getZoom()
+      // Se puede alejar un paso mas alla del pais completo (sin fondo, mas lejos ya no se ve nada).
+      mapa.setMinZoom(Math.max(3, zoomCompleto - 0.75))
     }
     // En telefono, arrastrar solo mueve el mapa cuando esta acercado; si no, desplaza la pagina.
     const alAcercar = () => {
@@ -169,13 +181,42 @@ export function MapaHonduras({
           })
     observador?.observe(el)
 
-    interno.current = { mapa, departamentos, lugares, verTodo }
+    interno.current = { mapa, departamentos, lugares, verTodo, marcarMovido: () => (movido = true) }
     return () => {
       observador?.disconnect()
       interno.current = null
       mapa.remove()
     }
   }, [zonas, caja, seEligenDepartamentos])
+
+  // Fondo y capa de datos: teselas debajo de los departamentos. Se vuelven a poner si el mapa se crea de nuevo.
+  useEffect(() => {
+    const mapa = interno.current?.mapa
+    if (!mapa) return
+    const capas: L.TileLayer[] = []
+    const fondo = BASES[base].url
+    if (fondo) capas.push(L.tileLayer(fondo, { maxZoom: 10, zIndex: 1 }))
+    let ajustar: (() => void) | null = null
+    if (datos) {
+      const def = DATOS[datos]
+      // Panel propio para la capa de satelite: el desenfoque va sobre el panel entero y no sobre cada
+      // tesela, asi no aparecen costuras entre teselas. Queda entre el fondo y los departamentos.
+      const panel = mapa.getPane('datos') ?? mapa.createPane('datos')
+      panel.style.zIndex = '250'
+      panel.style.pointerEvents = 'none'
+      ajustar = () => {
+        panel.style.filter = `blur(${desenfoque(def, mapa.getZoom()).toFixed(1)}px)`
+      }
+      ajustar()
+      mapa.on('zoomend', ajustar)
+      capas.push(L.tileLayer(def.url, { pane: 'datos', maxNativeZoom: def.zoomNativo, maxZoom: 10, opacity: 0.75 }))
+    }
+    capas.forEach((c) => c.addTo(mapa))
+    return () => {
+      capas.forEach((c) => c.remove())
+      if (ajustar) mapa.off('zoomend', ajustar)
+    }
+  }, [base, datos, zonas, caja, seEligenDepartamentos])
 
   // Pinta la seleccion: color y puntaje de cada departamento, y el lugar elegido.
   useEffect(() => {
@@ -231,8 +272,14 @@ export function MapaHonduras({
   useImperativeHandle(
     ref,
     () => ({
-      acercar: () => interno.current?.mapa.zoomIn(),
-      alejar: () => interno.current?.mapa.zoomOut(),
+      acercar: () => {
+        interno.current?.marcarMovido()
+        interno.current?.mapa.zoomIn()
+      },
+      alejar: () => {
+        interno.current?.marcarMovido()
+        interno.current?.mapa.zoomOut()
+      },
       verTodo: () => interno.current?.verTodo(),
       irA: (lat, lon) => {
         const mapa = interno.current?.mapa
@@ -242,5 +289,13 @@ export function MapaHonduras({
     [],
   )
 
-  return <div ref={raiz} className={estilos.raiz} data-enfoque={enfocar && departamentoId ? '' : undefined} />
+  return (
+    <div
+      ref={raiz}
+      className={estilos.raiz}
+      data-enfoque={enfocar && departamentoId ? '' : undefined}
+      data-fondo={base === 'simple' ? undefined : base}
+      data-capa={datos ?? undefined}
+    />
+  )
 }

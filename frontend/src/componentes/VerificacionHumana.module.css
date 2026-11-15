@@ -1,0 +1,50 @@
+.pantalla {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: calc(var(--esp-6) + env(safe-area-inset-top)) var(--esp-4) calc(var(--esp-6) + env(safe-area-inset-bottom));
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-4);
+  width: min(100%, 26rem);
+  padding: var(--esp-8) var(--esp-6);
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-low);
+  text-align: center;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: var(--esp-16);
+  height: var(--esp-16);
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.titulo {
+  font: var(--tipo-titulo);
+}
+
+.texto {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* El widget de Turnstile mide 300 x 65 px. */
+.widget {
+  min-height: 65px;
+}
+
+.estado {
+  min-height: 1.5em;
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}

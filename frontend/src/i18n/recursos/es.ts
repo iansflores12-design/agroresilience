@@ -18,7 +18,15 @@ const es = {
     idioma: 'Idioma',
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
+  verificacion: {
+    titulo: 'Un momento',
+    texto: 'Comprobamos que es una persona antes de abrir AgroResilience.',
+    validando: 'Verificando…',
+    error: 'No se pudo verificar. Revise su conexión e inténtelo de nuevo.',
+  },
   nav: {
+    reordenarAyuda: 'Arrastre para cambiar el orden, o use Alt y las flechas.',
+    movido: '{{destino}}: posición {{n}} de {{total}}',
     principal: 'Principal',
     plan: 'Plan',
     mapa: 'Mapa',
@@ -44,6 +52,7 @@ const es = {
     elegirLugar: 'Elegir lugar',
   },
   comun: {
+    cerrar: 'Cerrar',
     deCien: '{{valor}} de 100',
     unasSemanas: 'Unas {{n}} semanas',
     reintentar: 'Reintentar',
@@ -151,6 +160,84 @@ const es = {
         falta: ['Si puede dejar la parcela una temporada sin cosecha'],
       },
     ),
+    cafe: cultivo(
+      'Café',
+      { el: 'el café', del: 'del café', al: 'al café' },
+      { establecimiento: 'Vivero y establecimiento', crecimiento: 'Crecimiento del cafeto', produccion: 'Producción' },
+      ['Es el cultivo que más vende Honduras afuera', 'Da cosecha cada año sin volver a sembrar', 'Con sombra protege la tierra de la ladera'],
+      ['Tarda unos tres años en dar la primera cosecha', 'La roya y la broca lo atacan', 'El precio cambia mucho de un año a otro'],
+      ['El precio del café esta cosecha en su beneficio o cooperativa'],
+      {
+        ventajas: ['Se da en las tierras altas y frescas', 'Tiene compradores seguros (IHCAFE y cooperativas)'],
+        riesgos: ['Sufre con el calor de las tierras bajas', 'La roya avanza con la humedad'],
+        falta: ['La variedad que tiene y la sombra de su finca'],
+      },
+    ),
+    platano: cultivo(
+      'Banano y plátano',
+      { el: 'el plátano', del: 'del plátano', al: 'al plátano' },
+      { establecimiento: 'Siembra del hijo', vegetativa: 'Crecimiento', floracion: 'Parición (floración)', llenado: 'Llenado del racimo', cosecha: 'Cosecha' },
+      ['Da comida para la casa todo el año', 'Sus hojas y tallos cubren la tierra', 'Se vende en el mercado local'],
+      ['Necesita agua todo el año', 'El viento fuerte lo tumba', 'La sigatoka negra daña las hojas'],
+      ['Si hay agua o riego en el verano'],
+      {
+        ventajas: ['Se da en tierras bajas, calientes y lluviosas', 'Da cosecha todo el año'],
+        riesgos: ['Sufre con la canícula larga', 'Los huracanes lo tumban'],
+        falta: ['Si hay agua o riego en el verano'],
+      },
+    ),
+    palma: cultivo(
+      'Palma africana',
+      { el: 'la palma africana', del: 'de la palma africana', al: 'a la palma africana' },
+      { establecimiento: 'Establecimiento', crecimiento: 'Crecimiento', produccion: 'Producción de racimos' },
+      ['Tiene compradores seguros en las extractoras', 'Da cosecha muchos años'],
+      ['Tarda unos tres años en producir', 'Ocupa la tierra por más de 20 años', 'Necesita mucha lluvia bien repartida'],
+      ['La extractora más cercana y lo que paga'],
+      {
+        ventajas: ['Se da en la costa norte, caliente y lluviosa'],
+        riesgos: ['No se da en tierras altas ni secas'],
+        falta: ['La extractora más cercana y lo que paga'],
+      },
+    ),
+    cana: cultivo(
+      'Caña de azúcar',
+      { el: 'la caña de azúcar', del: 'de la caña de azúcar', al: 'a la caña de azúcar' },
+      { brotacion: 'Brotación', macollamiento: 'Macollamiento', crecimiento: 'Gran crecimiento', maduracion: 'Maduración' },
+      ['Los ingenios compran la cosecha', 'Retoña varios años sin volver a sembrar', 'Sus hojas sirven de comida para el ganado'],
+      ['Ocupa la tierra todo el año', 'La quema daña la tierra y el aire'],
+      ['El contrato con el ingenio más cercano'],
+      {
+        ventajas: ['Aguanta el calor y algo de sequía'],
+        riesgos: ['Rinde menos sin agua en la canícula'],
+        falta: ['El contrato con el ingenio más cercano'],
+      },
+    ),
+    melon: cultivo(
+      'Melón',
+      { el: 'el melón', del: 'del melón', al: 'al melón' },
+      { emergencia: 'Emergencia', vegetativa: 'Guías', floracion: 'Floración', fructificacion: 'Crecimiento del fruto', cosecha: 'Cosecha' },
+      ['Se exporta y se paga bien con contrato', 'Es corto: unas 12 semanas', 'Cambia de familia y corta las plagas del grano'],
+      ['Necesita riego seguro', 'La lluvia en la cosecha pudre la fruta'],
+      ['Si hay riego en su parcela', 'Un comprador o contrato antes de sembrar'],
+      {
+        ventajas: ['Se da en el sur, seco y caliente, con riego'],
+        riesgos: ['La mucha lluvia trae hongos'],
+        falta: ['Si hay riego en su parcela'],
+      },
+    ),
+    tabaco: cultivo(
+      'Tabaco',
+      { el: 'el tabaco', del: 'del tabaco', al: 'al tabaco' },
+      { trasplante: 'Trasplante', crecimiento: 'Crecimiento', despunte: 'Botón floral y despunte', cosecha: 'Corte de hojas' },
+      ['Las fábricas de puros compran la hoja', 'Se siembra en verano, fuera de los granos'],
+      ['Es de la familia del tomate: comparte sus plagas', 'Pide mucha mano de obra y secado en galera'],
+      ['Un contrato con una fábrica de puros'],
+      {
+        ventajas: ['Se da en los valles templados del oriente (Danlí, Jamastrán)'],
+        riesgos: ['La mucha lluvia daña la hoja'],
+        falta: ['Un contrato con una fábrica de puros'],
+      },
+    ),
   },
   temporadas: {
     primera: { nombre: 'Primera', texto: 'Mayo a agosto' },
@@ -216,12 +303,42 @@ const es = {
       forraje: '{{el}} sirve de comida para los animales.',
       plagas: 'Pasar {{al}} corta el ciclo de las plagas {{delActual}}.',
       nitrogeno: 'Deja abono natural: las leguminosas fijan nitrógeno del aire.',
+      ventaPrecio: 'Suma una cosecha de {{cultivo}}, que en {{mercado}} se paga a {{precio}} el quintal, más que la referencia nacional.',
     },
     riesgos: {
       sinAgua: 'En {{temporada}} la lluvia prevista no alcanza para {{el}}: sin riego se puede perder.',
       calor: 'En {{temporada}} hay {{dias}} días de calor fuerte en la floración {{del}}.',
       encharca: 'En terreno bajo {{el}} sufre si se encharca.',
       desnuda: 'La tierra queda desnuda una temporada y en su terreno la lluvia se la puede llevar.',
+    },
+    precios: {
+      del: 'del {{cultivo}}',
+      referencia: 'Precio de referencia {{del}}: {{precio}} el quintal en {{mercado}} ({{fecha}}). No se halló el de su región: la venta se califica sin ajuste.',
+      local: 'Precio {{del}} en {{mercado}}: {{precio}} el quintal{{fecha}}. La referencia nacional es {{referencia}}: {{efecto}}.',
+      fuente: '{{fuente}}; búsqueda en la web del {{fecha}}',
+      suma: 'suma {{n}} puntos a su venta',
+      resta: 'resta {{n}} puntos a su venta',
+      igual: 'no cambia su venta',
+      sumaCorto: 'suma {{n}} puntos',
+      restaCorto: 'resta {{n}} puntos',
+      igualCorto: 'no cambia',
+      avisoBusqueda: 'El agua de cada cultivo sale de FAO-56. Los precios de {{region}} se buscaron en la web y se comparan con la referencia de SIMPAH 2026: confírmelos en su mercado. El forraje y el frijol terciopelo son aproximados.',
+    },
+    historial: {
+      mal: 'En {{depto}}, en años de {{fase}}, {{el}} de {{temporada}} fracasó {{fracasos}} de {{n}} veces: −{{puntos}} en el puntaje.',
+      bien: 'En {{depto}}, en años de {{fase}}, {{el}} de {{temporada}} salió bien {{buenos}} de {{n}} veces: +{{puntos}} en el puntaje.',
+      riesgo: 'En años de {{fase}} {{el}} de {{temporada}} ha fracasado {{fracasos}} de {{n}} veces en {{depto}}.',
+      evidencia: '{{cultivo}} en {{temporada}}, {{depto}}, años de {{fase}} ({{periodo}}): buen año {{buenos}} de {{n}}, fracaso {{fracasos}} de {{n}}, rendimiento típico {{mediana}} % del potencial.',
+      fuente: 'Simulación con clima de NASA POWER y ERA5, FAO-56 y FAO-33; fase de El Niño de NOAA',
+      propia: {
+        mal_one: 'Usted reportó una cosecha mala de {{el}} en {{temporada}}: eso baja el puntaje de este plan.',
+        mal_other: 'Usted reportó {{count}} cosechas de {{el}} en {{temporada}} ({{malas}} malas): eso baja el puntaje de este plan.',
+        bien_one: 'Usted reportó una cosecha de {{el}} en {{temporada}} que no salió mala: eso sostiene el puntaje de este plan.',
+        bien_other: 'Usted reportó {{count}} cosechas de {{el}} en {{temporada}} ({{buenas}} buenas): eso sostiene el puntaje de este plan.',
+        evidencia: '{{cultivo}} en {{temporada}}, en su parcela: {{buenas}} buenas, {{regulares}} regulares y {{malas}} malas de {{k}} cosechas reportadas. Cada una pesa como 3 años simulados.',
+        fuente: 'Lo que usted reportó en esta app',
+      },
+      fases: { nino: 'El Niño', neutro: 'clima neutral', nina: 'La Niña', todo: 'todo tipo' },
     },
     faltaPasado: 'Cómo le fue en su parcela en años pasados',
     puntoParcela: 'su parcela, cerca de {{lugar}}',
@@ -252,23 +369,39 @@ const es = {
     cuidado: 'Tenga cuidado: {{riesgo}}',
   },
   gemini: {
+    fotoSinTexto: '¿Qué ves en esta foto de mi cultivo?',
+    instruccionFoto: 'El productor mandó una foto. Identifica el cultivo si se puede y busca señales de sequía o estrés hídrico, plagas, enfermedades o falta de nutrientes. Di qué tan seguro estás, qué revisar en el campo y qué hacer primero. Si la foto no muestra un cultivo o no se ve bien, dilo y pide otra.',
     instrucciones: `Eres el asistente agrícola de AgroResilience para productores de Honduras.
 Escribes en español sencillo, con frases cortas, para personas que leen con esfuerzo. Usa "usted".
 Reglas:
 - Usa SOLO los datos que te doy. Los puntajes ya están calculados por Gemini Decision: no los cambies ni inventes otros números.
-- No inventes precios, dosis, variedades ni fechas exactas de lluvia.
+- Los precios por cultivo vienen en los datos. Cuando hables de venta, ingreso o qué conviene sembrar, usa esos precios: di el precio por quintal, su mercado y si es de la región o la referencia nacional, y compara los cultivos de la rotación por lo que pagan.
+- No inventes otros precios, ni dosis, variedades o fechas exactas de lluvia.
 - Explica términos técnicos con palabras de todos los días (por ejemplo, evapotranspiración = el agua que la planta y la tierra pierden al aire).
 - Recuerda que es una ayuda: la decisión es del productor y de su técnico local.
-- Responde solo sobre cultivos, siembra, tierra, agua, clima y manejo de la parcela. Si preguntan otra cosa, di en una frase que solo ayudas con cultivos.
+- Tu tema es el campo: cultivos, siembra, cosecha, tierra, agua, riego, clima, plagas, animales de la finca, precios y manejo de la parcela. Esas preguntas respóndelas siempre, aunque falten datos de la consulta: usa lo que sepas en general y di qué dato ayudaría.
+- Solo si la pregunta no tiene nada que ver con el campo (por ejemplo deportes, política o tareas escolares), responde en una frase que solo ayudas con temas del campo. Nunca agregues esa frase a una respuesta del campo.
 - Sé breve y útil: ve directo a lo que el productor puede hacer.
 - Sin emojis. Sin tablas. Texto plano con títulos cortos en líneas propias, sin símbolos de Markdown.`,
     pedidoAnalisis: `Haz el análisis a fondo de la rotación consultada en este orden, con un título corto por parte:
 Por qué se recomienda (o no), comparada con lo que hace hoy y con la mejor opción.
 Qué dicen los datos (lluvia, agua que pide cada cultivo, calor, señales del motor).
-Beneficios para la tierra y para su bolsillo.
+Beneficios para la tierra y para su bolsillo, con el precio por quintal de cada cultivo que se cosecha.
 Riesgos y qué revisar con su técnico.
 Lo que falta saber.
 Máximo 250 palabras.`,
+    reglasHistorial: `Historial del departamento (cuando viene en los datos):
+- Es el desempeño de cada cultivo simulado año por año desde 1981 con la lluvia y el calor reales del departamento. Sirve para predecir con años parecidos, no para cambiar el ranking.
+- Predice así, en este orden: 1) toma la fase actual de El Niño o La Niña que viene en los datos; 2) mira los años con esa misma fase; 3) compara con todos los años y con los últimos 10; 4) si las tres cosas apuntan igual, dilo con seguridad; si no, di cuál pesa más y por qué.
+- Habla en "de cada 10 años": convierte "buen año 4 de 11" en "unos 4 de cada 10 años". Solo esa cuenta: no inventes porcentajes ni promedios nuevos.
+- Si el primero del ranking falla en 3 o más de cada 10 años parecidos, avísalo claro y di qué opción del ranking aguanta mejor esos años.
+- Si un cultivo es "solo con riego", sin riego no lo recomiendes, aunque su historial se vea bien.
+- Si menos de 5 años sirven para comparar, dilo: la predicción es débil.
+- Los cultivos de exportación (café, palma, banano, caña, melón, chile, tabaco, cacao) muestran lo que más mueve la economía del país; menciónalos solo si son de la zona del productor o si se lo preguntan, y recuerda que piden inversión, comprador y años para producir (los permanentes).
+- Es una simulación del clima, no la cosecha medida: no prometas rendimientos.`,
+    pedidoHistorial: `Agrega una parte "Lo que dicen los años parecidos": cómo le fue a cada cultivo de la rotación en años con la misma fase de El Niño o La Niña en su departamento, cuántos de cada 10 salieron buenos y cuántos fracasaron, y el peor año. Cierra con una frase de qué tan segura es la predicción.`,
+    cosechas: 'Cosechas que el productor reportó en su parcela (dato real, pesa más que la simulación): {{lista}}.',
+    cosechaItem: '{{cultivo}} en {{temporada}} {{anio}}: {{resultado}}',
     limiteChat: 'Responde en 80 palabras o menos.',
     datosConsulta: 'Datos de la consulta:',
     lugar: 'Lugar: {{lugar}} (punto Kharis {{punto}}, modelo {{modelo}}, datos observados hasta {{fecha}}).',
@@ -287,6 +420,10 @@ Máximo 250 palabras.`,
     riesgos: 'Riesgos: ',
     falta: 'Falta saber: ',
     confianza: 'Confianza: {{confianza}}.',
+    precios: 'Precios por cultivo, en lempiras por quintal de 100 libras (dato de entrada de Gemini Decision para la parte de Venta):',
+    precioBase: '- {{cultivo}}: {{precio}} en {{mercado}}{{fecha}}',
+    precioReferencia: '{{base}}, referencia nacional [{{fuente}}]. No se halló precio de la región: no mueve la venta.',
+    precioRegion: '{{base}}, precio de la región [{{fuente}}]. La referencia nacional es {{referencia}}: {{efecto}} en la venta de este cultivo.',
     avisos: 'Avisos: ',
     chatCultivo: 'Cultivo: {{cultivo}}{{semana}}{{etapa}}.',
     chatSemana: ', semana {{n}}',
@@ -315,6 +452,7 @@ Máximo 250 palabras.`,
     aumentar: 'Aumentar {{etiqueta}}',
   },
   suCultivo: {
+    permanente: 'Permanente',
     edadTitulo: '¿Hace cuánto sembró?',
     semanasDesde: 'semanas desde la siembra',
     enEtapa: 'Está en la etapa de {{etapa}}',
@@ -356,6 +494,21 @@ Máximo 250 palabras.`,
     oElija: 'O elija el lugar más cercano:',
   },
   rotacion: {
+    cosechas: {
+      titulo: '¿Cómo le fue?',
+      apoyo: 'Diga cómo salió su cosecha. El plan se corrige con lo que pasó en su parcela.',
+      anio: 'Año de la cosecha',
+      fila: '{{cultivo}} en {{temporada}}',
+      buena: 'Buena',
+      regular: 'Regular',
+      mala: 'Mala',
+      usadas_one: 'Este plan ya usa {{count}} cosecha suya.',
+      usadas_other: 'Este plan ya usa {{count}} cosechas suyas.',
+      ajuste: 'Con sus cosechas y los años parecidos: {{signo}}{{n}} puntos.',
+      guardadas: 'Sus cosechas guardadas',
+      item: '{{cultivo}}, {{temporada}} {{anio}}: {{resultado}}',
+      borrar: 'Borrar {{cultivo}} {{temporada}} {{anio}}',
+    },
     baseComparar: 'Es lo que hace hoy. Sirve de base para comparar.',
     masQueHoy: '{{n}} puntos más que lo que hace hoy',
     menosQueHoy: '{{n}} puntos menos que lo que hace hoy',
@@ -433,22 +586,41 @@ Máximo 250 palabras.`,
     elijaLista: 'Elija su lugar en la lista.',
     fueraHonduras: 'Está fuera de Honduras',
     dondeParcela: '¿Dónde está su parcela?',
-    toquePunto: 'Toque un punto del mapa o use su ubicación.',
+    toquePunto: 'Toque su departamento en el mapa o use su ubicación.',
     controles: 'Controles del mapa',
     acercar: 'Acercar',
     alejar: 'Alejar',
     miUbicacion: 'Mi ubicación',
+    capas: {
+      boton: 'Capas del mapa',
+      tipo: 'Tipo de mapa',
+      satelite: 'Datos de satélite',
+      bases: {
+        simple: { nombre: 'Simple' },
+        relieve: { nombre: 'Relieve', credito: 'Relieve: Esri y colaboradores' },
+        satelite: { nombre: 'Satélite', credito: 'Imagen de satélite: Esri, Maxar y Earthstar Geographics' },
+      },
+      datos: {
+        lluvia: { nombre: 'Lluvia', descripcion: 'Dónde está lloviendo ahora', menos: 'Poca', mas: 'Fuerte', credito: 'Lluvia: NASA GPM IMERG' },
+        humedad: { nombre: 'Agua en la tierra', descripcion: 'Qué tan mojada está la tierra hoy', menos: 'Seca', mas: 'Mojada', credito: 'Humedad del suelo: NASA SMAP' },
+        vegetacion: { nombre: 'Verdor', descripcion: 'Qué tan verde está el campo (últimos 8 días)', menos: 'Poco', mas: 'Mucho', credito: 'Vegetación: NASA MODIS' },
+        calor: { nombre: 'Calor', descripcion: 'Qué tan caliente está la tierra de día (últimos 8 días)', menos: 'Fresca', mas: 'Caliente', credito: 'Temperatura del suelo: NASA MODIS' },
+      },
+    },
     lugarElegido: 'Lugar elegido',
     sinHumedad: 'Sin lectura de humedad',
     aguaTierra: '{{pct}} % de agua en la tierra',
     verComoTierra: 'Ver cómo está la tierra',
     sinLugar: 'Todavía no eligió un lugar.',
+    todosDepartamentos: 'Todos los departamentos ({{n}})',
     todosLugares: 'Todos los lugares ({{n}})',
     seDaBienEn: '¿Se da bien {{el}} en {{departamento}}?',
     dondeSeDa: '¿Dónde se da bien {{el}}?',
     puesto: '{{total}} de 100. Puesto {{puesto}} de {{de}} departamentos.',
     loQueCuesta: 'Lo que más le cuesta: {{limite}}.',
     comoAnio: '¿Cómo viene el año?',
+    anioLluviaZona: 'Lluvia del último mes en {{lugar}}: {{pct}} % de lo normal (NASA, CHIRPS).',
+    anioLluviaPais: 'Lluvia del último mes en el país: {{pct}} % de lo normal (NASA, CHIRPS).',
     verPartes: 'Ver el puntaje por partes',
     partesEn: 'Puntaje por partes en {{departamento}}',
     toqueDepartamento: 'Toque un departamento del mapa para ver cómo se da ahí.',
@@ -570,13 +742,55 @@ Máximo 250 palabras.`,
     hace4: 'Hace 4 meses',
     hoy: 'Hoy',
   },
+  explica: {
+    cultivo: {
+      nombre: 'Por qué {{el}}',
+      p1: '{{cultivo}} en {{lugar}} saca {{total}} de 100: {{nivel}}.',
+      p2: 'Lo que más le ayuda: {{factor}} ({{valor}} de 100).',
+      p3: 'Lo que más le cuesta: {{limite}}.',
+    },
+    tierra: {
+      nombre: 'Su tierra',
+      p1: 'La tierra en {{lugar}} tiene {{arcilla}} % de arcilla, {{limo}} % de limo y {{arena}} % de arena: es {{textura}}.',
+      arcillosa: 'La arcilla guarda el agua más tiempo: aguanta mejor la canícula, pero se encharca con los aguaceros.',
+      arenosa: 'La arena deja pasar el agua rápido: no se encharca, pero se seca pronto en la canícula.',
+      franca: 'La mezcla guarda el agua sin encharcarse: es de las mejores tierras para sembrar.',
+      acida: 'Su pH es {{ph}}: ácido. Un poco de cal ayuda a que la planta aproveche el abono.',
+      neutra: 'Su pH es {{ph}}: casi neutro, bueno para la mayoría de los cultivos.',
+      alcalina: 'Su pH es {{ph}}: alcalino. Algunos cultivos toman mal el hierro; la materia orgánica ayuda.',
+      texturas: { arcillosa: 'arcillosa', arenosa: 'arenosa', franca: 'franca (bien mezclada)' },
+      arena: 'Arena',
+      limo: 'Limo',
+      arcilla: 'Arcilla',
+      escalaAcido: 'Ácido',
+      escalaNeutro: 'Neutro',
+      escalaAlcalino: 'Alcalino',
+    },
+    altura: {
+      nombre: 'La altura',
+      p1: '{{lugar}} está, en promedio, a unos {{alt}} m sobre el mar.',
+      p2: 'Cada 100 m de subida refresca unos 0.6 °C: allí la temperatura media es de {{temp}} °C.',
+      alto: 'En lo alto y fresco se dan mejor el café, el frijol y las hortalizas de clima templado.',
+      medio: 'A media altura se dan bien el maíz, el frijol, el tabaco y la caña.',
+      bajo: 'En lo bajo y caliente se dan mejor la palma, el banano, el arroz y el melón.',
+    },
+  },
   fenomeno: {
     titulo: '¿Por qué pasa esto?',
-    reservado: 'Espacio reservado: aquí irá la explicación gráfica de un fenómeno',
+    elegir: 'Elija un fenómeno',
+    repetir: 'Ver de nuevo',
+    pausar: 'Pausar',
+    seguir: 'Continuar',
+    paso: 'Paso {{n}} de {{total}}',
+    anterior: 'Paso anterior',
+    siguiente: 'Paso siguiente',
+    nino: { nombre: 'El Niño y La Niña', pasos: ['El océano Pacífico se calienta (El Niño) o se enfría (La Niña) más de lo normal.', 'Ese cambio mueve los vientos y las nubes: con El Niño llueve menos en Centroamérica; con La Niña, más.', 'Con El Niño, siembre variedades que aguantan sequía y guarde agua; con La Niña, cuide el drenaje.'] },
+    canicula: { nombre: 'Canícula y sequía', pasos: ['A mitad de la temporada de lluvias llegan semanas secas y calientes: la canícula.', 'El sol seca la tierra y la planta pierde más agua de la que saca del suelo.', 'Siembre para que la floración no caiga en la canícula y cubra el suelo con rastrojo.'] },
+    lluvias: { nombre: 'Lluvias extremas', pasos: ['Mucha lluvia cae en pocas horas, más de la que la tierra puede tragar.', 'El agua corre por encima, arrastra la tierra buena y encharca las raíces.', 'Haga zanjas y barreras vivas en curvas a nivel y no deje el suelo desnudo.'] },
+    huracan: { nombre: 'Huracanes', pasos: ['Sobre el mar caliente se forma un remolino de nubes que gira y crece.', 'Llega con vientos que tumban las plantas y días de lluvia sin parar.', 'Siga los avisos de COPECO, coseche lo que pueda antes y amarre o apuntale lo que quede.'] },
   },
+
   chat: {
-    demoTitulo: 'Modo de demostración',
-    demoDescripcion: 'Las respuestas son locales: el asistente real se conectará al backend.',
     errorRed: 'Revisa tu conexión e inténtalo de nuevo.',
     errorServidor: 'El servidor no pudo responder en este momento.',
     errorRespuesta: 'El servidor envió una respuesta que no se entiende.',
@@ -596,8 +810,26 @@ Máximo 250 palabras.`,
     conversacion: 'Conversación con el asistente',
     asistente: 'Asistente',
     escribiendo: 'El asistente está escribiendo',
-    modoPrueba: 'Modo de prueba: todavía sin conexión al asistente real',
     mensaje: 'Mensaje',
+    adjuntarFoto: 'Adjuntar foto',
+    tomarFoto: 'Tomar foto',
+    quitarFoto: 'Quitar foto',
+    fotoAdjunta: 'Foto del cultivo enviada por usted',
+    fotoVista: 'Foto lista para enviar',
+    fotoError: 'No se pudo leer esa imagen',
+    fotoErrorDetalle: 'Pruebe con otra foto en JPG o PNG.',
+    pistaTeclas: 'Tab completa una sugerencia · Flecha arriba recupera su último mensaje',
+    paraSeguir: 'Para seguir',
+    seguir: {
+      simple: 'Explícamelo más simple',
+      estaSemana: '¿Qué hago esta semana?',
+      sinLluvia: '¿Y si no llueve en dos semanas?',
+      plagas: '¿Qué plagas debo vigilar en {{cultivo}}?',
+      costo: '¿Cuánto me costaría hacerlo?',
+      fotoTratamiento: '¿Cómo lo trato sin gastar mucho?',
+      fotoEvitar: '¿Cómo evito que se repita?',
+      fenomeno: '¿Cómo me afecta El Niño este año?',
+    },
     sugerencias: {
       humedadPara: '¿Cómo está la humedad en {{zona}} para {{cultivo}}?',
       masSeca: '¿Está {{zona}} más seca de lo normal?',
@@ -612,10 +844,12 @@ Máximo 250 palabras.`,
       queEsRotacion: '¿Qué es una rotación de cultivos?',
       leerMapa: '¿Cómo leo el mapa de zonas?',
     },
-    demo: {
-      prefijo: 'Respuesta de demostración.',
-      ve: 'Esto es lo que el asistente ve ahora:',
-      real: 'El asistente real se conectará al backend.',
+    respaldo: {
+      foto: 'La foto no se pudo analizar ahora; vuelva a mandarla en un momento.',
+      intro: 'El asistente no pudo responder ahora. Mientras tanto, esto dicen sus datos:',
+      cierre: 'Vuelva a preguntar en un momento para una respuesta completa.',
+    },
+    datos: {
       cultivo: 'Cultivo: {{cultivo}}{{semana}}{{etapa}}.',
       semana: ', semana {{n}}',
       sinCultivo: 'Cultivo: ninguno elegido.',
@@ -626,6 +860,9 @@ Máximo 250 palabras.`,
     },
   },
   plan: {
+    perenneTitulo: '{{cultivo}} es un cultivo permanente',
+    perenneTexto: 'No se rota cada temporada: ocupa la tierra todo el año. Arriba ve dónde se da mejor {{el}}; en Preguntar, el asistente le dice cómo cuidarlo con el clima que viene.',
+    volverInicio: 'Volver al inicio',
     queSembrarDespues: '¿Qué sembrar después?',
     suCultivo: 'Su cultivo',
     sinObjetivos: 'Sin objetivos',
@@ -710,10 +947,12 @@ Máximo 250 palabras.`,
 El clima de su zona en esta temporada (lluvia, calor, agua que pide cada cultivo, señales del motor).
 Por qué la primera es la mejor.
 Qué ofrecen la segunda y la tercera, y en qué se quedan atrás.
+Lo que pagan: el precio por quintal de los cultivos que se cosechan en las tres.
 Qué revisar con su técnico.
 Máximo 220 palabras.`,
-    piezasVisuales: `Además del texto, puedes pedir dos piezas visuales, cada una en una línea propia y escrita exactamente así:
+    piezasVisuales: `Además del texto, puedes pedir tres piezas visuales, cada una en una línea propia y escrita exactamente así:
 [[mapa:ID]] muestra el mapa de Honduras con qué tan bien se da ese cultivo. ID es uno de: maiz, frijol, sorgo, arroz, tomate, frijol-terciopelo.
+[[fenomeno:ID]] muestra una explicación animada de un fenómeno del clima. ID es uno de: nino (El Niño y La Niña), canicula (canícula o sequía), lluvias (lluvias extremas), huracan. Úsala cuando pregunten por esos fenómenos.
 [[animacion:Título corto|Paso uno|Paso dos|Paso tres]] muestra una explicación animada, paso a paso (de 2 a 5 pasos cortos). Un paso puede terminar en =NÚMERO (de 0 a 100) para dibujar una barra, por ejemplo "Lluvia que cubre lo que pide el maíz=72"; usa solo números que estén en los datos.
 Usa el mapa cuando pregunten dónde se da un cultivo o pidan ver el mapa. Usa la animación cuando pidan una explicación animada, con efectos o paso a paso. Si no las piden, responde solo con texto. No uses otras etiquetas.`,
   },

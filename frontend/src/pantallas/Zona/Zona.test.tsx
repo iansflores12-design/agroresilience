@@ -1,4 +1,5 @@
 import { act, render, screen, within } from '@testing-library/react'
+import { departamentosConDatos } from '../../datos/lugarDepartamento'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { zonas, type Zona } from '../../datos/zonas'
@@ -28,7 +29,7 @@ describe('Zona (pantalla)', () => {
   it('sin zona muestra el estado vacio con los chips visibles y el espacio del fenomeno', () => {
     const { container } = renderizarApp('/zona')
     expect(screen.getByText('Aún no eligió un lugar')).toBeInTheDocument()
-    for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toHaveAttribute('aria-pressed', 'false')
+    for (const d of departamentosConDatos()) expect(screen.getByRole('button', { name: d.nombre })).toHaveAttribute('aria-pressed', 'false')
     expect(container.querySelector('[data-placeholder="fenomeno"]')).toBeInTheDocument()
   })
 
@@ -37,11 +38,12 @@ describe('Zona (pantalla)', () => {
     guardarZona(zonas[0].id)
     renderizarApp('/zona')
     expect(screen.getByText(esperado(zonas[0]))).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: zonas[0].nombre })).toHaveAttribute('aria-pressed', 'true')
+    // Choluteca es el departamento del punto guardado.
+    expect(screen.getByRole('button', { name: 'Choluteca' })).toHaveAttribute('aria-pressed', 'true')
 
-    const otra = zonas.find((z) => esperado(z) !== esperado(zonas[0])) as Zona
-    await usuario.click(screen.getByRole('button', { name: otra.nombre }))
-    expect(screen.getByText(esperado(otra))).toBeInTheDocument()
+    const otro = departamentosConDatos().find((d) => d.zona && esperado(d.zona) !== esperado(zonas[0]))!
+    await usuario.click(screen.getByRole('button', { name: otro.nombre }))
+    expect(screen.getByText(esperado(otro.zona as Zona))).toBeInTheDocument()
     expect(screen.queryByText(esperado(zonas[0]))).not.toBeInTheDocument()
     expect(screen.getByRole('img', { name: /Humedad del suelo, \d+ lecturas/ })).toBeInTheDocument()
   })

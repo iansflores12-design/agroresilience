@@ -6,19 +6,24 @@ import { Chip } from '../../componentes/Chip'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { EspacioFenomeno } from '../../componentes/fenomeno/EspacioFenomeno'
 import { nombreCorto } from '../../componentes/mapa/formato'
-import { buscarZona, fechaGeneracion, fuentes, zonas } from '../../datos/zonas'
+import { buscarZona, fechaGeneracion, fuentes } from '../../datos/zonas'
 import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
 import { diasEntre } from './formato'
 import { HojaZona } from './HojaZona'
 import { textoResumen } from './resumen'
+import { departamentoElegido, departamentosConDatos } from '../../datos/lugarDepartamento'
 import estilos from './Zona.module.css'
 
 /** Dias de antiguedad de la lectura de humedad a partir de los cuales se avisa. */
 const DIAS_LECTURA_ANTIGUA = 7
 
 export default function Zona() {
-  const { zonaId, cultivoId, edadSemanas, elegirZona } = useEstadoApp()
+  const estado = useEstadoApp()
+  const { zonaId, cultivoId, edadSemanas, elegirDepartamento } = estado
+  const elegidoId = departamentoElegido(estado)
+  const lista = departamentosConDatos()
+  const departamento = lista.find((d) => d.id === elegidoId) ?? null
   const zona = buscarZona(zonaId)
   const { t } = useTranslation()
   const idioma = useIdioma()
@@ -28,15 +33,15 @@ export default function Zona() {
   // En compacta la fila de zonas se desplaza: lleva el chip elegido a la vista.
   useEffect(() => {
     const contenedor = selectorRef.current
-    if (!zonaId || !contenedor) return
+    if (!elegidoId || !contenedor) return
     const elegido = Array.from(contenedor.querySelectorAll<HTMLElement>('[data-zona]')).find(
-      (el) => el.dataset.zona === zonaId,
+      (el) => el.dataset.zona === elegidoId,
     )
     if (!elegido || typeof elegido.scrollIntoView !== 'function') return
     const reducido =
       typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     elegido.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reducido ? 'auto' : 'smooth' })
-  }, [zonaId])
+  }, [elegidoId])
 
   const idZona = zona?.id ?? null
   const fechaLectura = zona?.humedad?.fecha ?? null
@@ -68,13 +73,13 @@ export default function Zona() {
     <div className={`pantalla ${estilos.pantalla}`}>
       <div className={`plano-medio ${estilos.contenido}`}>
         <h1 className={estilos.pregunta}>
-          {zona ? t('zona.comoEstaEn', { lugar: nombreCorto(zona.nombre) }) : t('zona.comoEsta')}
+          {departamento ? t('zona.comoEstaEn', { lugar: departamento.nombre }) : zona ? t('zona.comoEstaEn', { lugar: nombreCorto(zona.nombre) }) : t('zona.comoEsta')}
         </h1>
         <div role="group" aria-label={t('zona.elegirLugar')} className={estilos.selector} ref={selectorRef}>
-          {zonas.map((z) => (
-            <span key={z.id} data-zona={z.id}>
-              <Chip variante="filtro" seleccionado={z.id === zonaId} onClick={() => elegirZona(z.id)}>
-                {z.nombre}
+          {lista.map((d) => (
+            <span key={d.id} data-zona={d.id}>
+              <Chip variante="filtro" seleccionado={d.id === elegidoId} onClick={() => elegirDepartamento(d.id)}>
+                {d.nombre}
               </Chip>
             </span>
           ))}
@@ -98,7 +103,7 @@ export default function Zona() {
           </Tarjeta>
         )}
 
-        <EspacioFenomeno zona={zona} cultivoId={cultivoId} />
+        <EspacioFenomeno zona={zona} cultivoId={cultivoId} departamentoId={elegidoId} />
       </div>
     </div>
   )

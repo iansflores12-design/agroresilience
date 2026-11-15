@@ -9,6 +9,8 @@ import type { NombreIcono } from '../../componentes/iconos'
 import { EdadCultivo, SelectorCultivo } from '../../componentes/decision/SuCultivo'
 import { buscarCultivo } from '../../datos/cultivos'
 import { zonas } from '../../datos/zonas'
+import { buscarDepartamento, departamentoDeZona } from '../../datos/aptitud'
+import { departamentoEnPunto, departamentosConDatos, zonaDeDepartamento } from '../../datos/lugarDepartamento'
 import { dentroDeHonduras, distanciaKm } from '../../lib/decision/escala'
 import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
 import { CULTIVOS, LUGARES, ORDEN_TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
@@ -25,7 +27,7 @@ interface Opcion {
   icono: NombreIcono
 }
 
-type Respuestas = Partial<Perfil>
+export type Respuestas = Partial<Perfil>
 
 export type ClavePregunta = 'zonaId' | 'terreno' | 'cultivoId' | 'temporada' | 'objetivos'
 
@@ -40,7 +42,14 @@ const preguntas = (t: TFunction): Pregunta[] => [
   {
     clave: 'zonaId',
     titulo: t('cuestionario.dondeParcela'),
-    opciones: Object.entries(LUGARES).map(([id, l]) => ({ id, nombre: l.nombre, icono: 'location_on' as const })),
+    // Se elige solo el departamento (sin municipios ni de que punto salen los datos).
+    opciones: departamentosConDatos()
+      .filter((d) => d.zona && LUGARES[d.zona.id])
+      .map((d) => ({
+        id: d.id,
+        nombre: d.nombre,
+        icono: 'location_on' as const,
+      })),
   },
   {
     clave: 'terreno',
@@ -96,15 +105,24 @@ export function Cuestionario({
   alTerminar,
   alCancelar,
   soloPaso,
+  pasoInicial,
+  alResponder,
 }: {
   inicial: Respuestas
   alTerminar: (p: Perfil) => void
   alCancelar?: () => void
   soloPaso?: ClavePregunta
+  /** Pregunta con la que abre el cuestionario completo (desde los chips de la barra superior). */
+  pasoInicial?: ClavePregunta
+  /**
+   * Con `soloPaso`: recibe las respuestas al contestar esa pregunta, aunque el perfil aun no este
+   * completo (desde los chips de la barra superior se cambia un solo dato).
+   */
+  alResponder?: (r: Respuestas) => void
 }) {
   const { t } = useTranslation()
   const PREGUNTAS = useMemo(() => preguntas(t), [t])
-  const [paso, fijarPaso] = useState(() => (soloPaso ? Math.max(0, CLAVES.indexOf(soloPaso)) : 0))
+  const [paso, fijarPaso] = useState(() => (Math.max(0, CLAVES.indexOf(soloPaso ?? pasoInicial ?? 'zonaId'))))
   const [respuestas, fijarRespuestas] = useState<Respuestas>(inicial)
   // 'listo', 'buscando' o la clave de traduccion del error.
   const [gps, fijarGps] = useState<'listo' | 'buscando' | string>('listo')
@@ -113,7 +131,7 @@ export function Cuestionario({
   const titulo = useRef<HTMLHeadingElement>(null)
   const pie = useRef<HTMLDivElement>(null)
   const pregunta = PREGUNTAS[paso]
-  const valor = respuestas[pregunta.clave]
+  const valor = pregunta.clave === 'zonaId' ? (respuestas.departamentoId ?? departamentoDeZona(respuestas.zonaId)) : respuestas[pregunta.clave]
   const elegida = typeof valor === 'string' ? valor : null
   const conGps = pregunta.clave === 'zonaId' && Boolean(respuestas.parcela)
   const cultivo = pregunta.clave === 'cultivoId' ? buscarCultivo(respuestas.cultivoId ?? null) : null
@@ -143,9 +161,13 @@ export function Cuestionario({
       fijarPaso(paso + 1)
       return
     }
-    const { zonaId, terreno, cultivoId, temporada, parcela, edadSemanas, objetivos } = nuevas
+    if (soloPaso && alResponder) {
+      alResponder(nuevas)
+      return
+    }
+    const { zonaId, departamentoId, terreno, cultivoId, temporada, parcela, edadSemanas, objetivos } = nuevas
     if (zonaId && terreno && cultivoId && temporada) {
-      alTerminar({ zonaId, terreno, cultivoId, temporada, parcela: parcela ?? null, edadSemanas: edadSemanas ?? 0, objetivos: objetivos ?? [] })
+      alTerminar({ zonaId, departamentoId, terreno, cultivoId, temporada, parcela: parcela ?? null, edadSemanas: edadSemanas ?? 0, objetivos: objetivos ?? [] })
     }
   }
 
@@ -169,8 +191,13 @@ export function Cuestionario({
   }
 
   function elegir(id: string) {
-    // Elegir un lugar de la lista quita la ubicacion GPS: se usa el punto de ese lugar.
-    avanzar({ ...respuestas, [pregunta.clave]: id, ...(pregunta.clave === 'zonaId' ? { parcela: null } : {}) })
+    // Elegir un departamento de la lista quita la ubicacion GPS: se usa el punto de datos que le toca.
+    if (pregunta.clave === 'zonaId') {
+      const zona = zonaDeDepartamento(id)
+      if (zona) avanzar({ ...respuestas, zonaId: zona.id, departamentoId: id, parcela: null })
+      return
+    }
+    avanzar({ ...respuestas, [pregunta.clave]: id })
   }
 
   /** `auto`: pedida sin que el productor toque nada; si falla, no se muestra error ni se cambia de pregunta. */
@@ -191,8 +218,9 @@ export function Cuestionario({
         // El lugar del sitio mas cercano da el nombre y la tierra; el pronostico usa el punto de Kharis mas cercano.
         const cerca = zonas.filter((z) => LUGARES[z.id]).reduce((a, b) => (distanciaKm({ lat, lon }, a) <= distanciaKm({ lat, lon }, b) ? a : b))
         fijarGps('listo')
-        if (auto) fijarRespuestas((r) => ({ ...r, zonaId: cerca.id, parcela: { lat, lon } }))
-        else avanzar({ ...respuestas, zonaId: cerca.id, parcela: { lat, lon } })
+        const departamentoId = departamentoEnPunto(lat, lon) ?? departamentoDeZona(cerca.id)
+        if (auto) fijarRespuestas((r) => ({ ...r, zonaId: cerca.id, departamentoId, parcela: { lat, lon } }))
+        else avanzar({ ...respuestas, zonaId: cerca.id, departamentoId, parcela: { lat, lon } })
       },
       () => fijarGps(auto ? 'listo' : 'cuestionario.errorGps'),
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 },
@@ -236,7 +264,9 @@ export function Cuestionario({
               </span>
               <span className="tipo-nota">
                 {conGps && respuestas.zonaId
-                  ? t('plan.cercaDe', { lugar: LUGARES[respuestas.zonaId].nombre })
+                  ? t('plan.cercaDe', {
+                      lugar: buscarDepartamento(respuestas.departamentoId ?? departamentoDeZona(respuestas.zonaId))?.nombre ?? LUGARES[respuestas.zonaId].nombre,
+                    })
                   : t('cuestionario.masPreciso')}
               </span>
             </span>

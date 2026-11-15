@@ -4,3 +4,31 @@
   gap: var(--esp-2);
   min-width: 0;
 }
+
+/* En telefono y tableta los chips van en una sola fila que se desliza: la barra mide lo mismo en
+   cualquier idioma y con cualquier nombre de cultivo o lugar, y el contenido de abajo no salta. */
+@media (max-width: 839px) {
+  .tira {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .tira::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tira > * {
+    flex: none;
+  }
+}
+
+/* En el telefono el desliz llega hasta el borde de la pantalla, pero el primer chip arranca alineado con la marca. */
+@media (max-width: 599px) {
+  .tira {
+    margin-inline: calc(-1 * var(--esp-4));
+    padding-inline: var(--esp-4);
+    scroll-padding-inline: var(--esp-4);
+  }
+}

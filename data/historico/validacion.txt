@@ -1,0 +1,16 @@
+Validacion del historico simulado
+
+Corredor seco, primera, mediana 1981-2025: maiz 77.1 %, frijol 66.3 %
+  1997 (El Nino fuerte): maiz 42.0 %, frijol 53.8 %
+  2014 (FEWS NET: canicula prolongada): maiz 46.1 %, frijol 61.3 %
+  2015 (DICTA: perdida de primera): maiz 37.7 %, frijol 62.4 %
+  2018 (PMA: maiz -69 %, frijol -73 %): maiz 55.8 %, frijol 67.2 %
+  2019 (PMA: maiz -75 %, frijol -51 %): maiz 44.5 %, frijol 43.6 %
+  2023 (FEWS NET: El Nino): maiz 76.5 %, frijol 72.6 %
+  10 peores primeras simuladas (maiz): 1994, 2015, 1997, 2019, 2014, 1991, 2001, 2002, 1982, 1986
+FAOSTAT maiz 1981-2013 sin tendencia vs simulado nacional (primera): r = 0.19 (n=33)
+FAOSTAT frijol 1981-2013 sin tendencia vs simulado nacional (primera): r = 0.02 (n=33)
+
+Notas:
+- FAOSTAT despues de 2013 casi no cambia de ano a ano (imputado); no sirve para validar anos recientes.
+- El ano agricola nacional mezcla primera y postrera y riego; la correlacion esperada es moderada.

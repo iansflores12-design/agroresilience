@@ -24,7 +24,7 @@ function montar(cliente: ClienteChat, ruta = '/chat') {
   const arbol = (visible: boolean) => (
     <ProveedorEstadoApp>
       <ProveedorConversacion>
-        <MemoryRouter initialEntries={[ruta]}>{visible && <Chat cliente={cliente} modoDemo />}</MemoryRouter>
+        <MemoryRouter initialEntries={[ruta]}>{visible && <Chat cliente={cliente} />}</MemoryRouter>
       </ProveedorConversacion>
     </ProveedorEstadoApp>
   )
@@ -39,18 +39,18 @@ describe('pantalla Chat', () => {
     vi.clearAllMocks()
   })
 
-  it('muestra redactor, registro accesible, insignia y boton deshabilitado', () => {
+  it('muestra redactor, registro accesible y boton deshabilitado, sin modo de prueba', () => {
     montar(clienteDe())
     expect(screen.getByRole('textbox', { name: 'Mensaje' })).toBeInTheDocument()
     expect(screen.getByRole('log', { name: /Conversación/ })).toHaveAttribute('aria-live', 'polite')
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeDisabled()
-    expect(screen.getByText('Modo de prueba: todavía sin conexión al asistente real')).toBeInTheDocument()
+    expect(screen.queryByText(/Modo de prueba/)).not.toBeInTheDocument()
     expect(screen.getByText('Sin cultivo')).toBeInTheDocument()
     expect(screen.getByText('Sin zona')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Borrar conversación' })).not.toBeInTheDocument()
   })
 
-  it('Enter envia, agrega el mensaje y luego la respuesta, y avisa la demostracion una vez', async () => {
+  it('Enter envia, agrega el mensaje y luego la respuesta, sin avisos de demostracion', async () => {
     const cliente = clienteDe('hola de vuelta')
     const u = userEvent.setup()
     montar(cliente)
@@ -64,7 +64,7 @@ describe('pantalla Chat', () => {
     expect(cliente.enviar.mock.calls[0][0].mensajes.map((m: { texto: string }) => m.texto)).toEqual(['Pregunta uno'])
     await u.type(campo, 'Dos{Enter}')
     await waitFor(() => expect(cliente.enviar).toHaveBeenCalledTimes(2))
-    expect(mocks.avisar.info).toHaveBeenCalledTimes(1)
+    expect(mocks.avisar.info).not.toHaveBeenCalled()
   })
 
   it('Mayus+Enter salta de linea y no envia', async () => {
@@ -185,5 +185,55 @@ describe('pantalla Chat', () => {
     mostrar()
     expect(registro().getByText('recuerdame')).toBeInTheDocument()
     expect(screen.getByText('guardada')).toBeInTheDocument()
+  })
+})
+
+describe('redactor: teclas y seguimiento', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    vi.clearAllMocks()
+  })
+
+  it('Tab llena una sugerencia y flecha arriba recupera la ultima pregunta', async () => {
+    const u = userEvent.setup()
+    montar(clienteDe('Riegue en la mañana.'))
+    const campo = screen.getByRole('textbox', { name: 'Mensaje' })
+    await u.click(campo)
+    await u.keyboard('{Tab}')
+    const primera = (campo as HTMLTextAreaElement).value
+    expect(primera).not.toBe('')
+    await u.keyboard('{Tab}')
+    expect((campo as HTMLTextAreaElement).value).not.toBe(primera)
+    await u.clear(campo)
+    await u.type(campo, 'mi pregunta{Enter}')
+    await waitFor(() => expect(registro().getByText('Riegue en la mañana.')).toBeInTheDocument())
+    await u.click(campo)
+    await u.keyboard('{ArrowUp}')
+    expect((campo as HTMLTextAreaElement).value).toBe('mi pregunta')
+  })
+
+  it('despues de una respuesta ofrece preguntas para seguir', async () => {
+    const u = userEvent.setup()
+    const cliente = clienteDe('Listo.')
+    montar(cliente)
+    await u.type(screen.getByRole('textbox', { name: 'Mensaje' }), 'hola{Enter}')
+    const grupo = await screen.findByRole('group', { name: 'Para seguir' })
+    await u.click(within(grupo).getByRole('button', { name: '¿Qué hago esta semana?' }))
+    await waitFor(() => expect(cliente.enviar).toHaveBeenCalledTimes(2))
+  })
+
+  it('manda la foto adjunta con el mensaje', async () => {
+    const u = userEvent.setup()
+    const cliente = clienteDe('Es frijol sano.')
+    const imagen = await import('../../lib/chat/imagen')
+    vi.spyOn(imagen, 'comprimirImagen').mockResolvedValue('data:image/jpeg;base64,QUJD')
+    montar(cliente)
+    await u.upload(screen.getByTestId('entrada-foto'), new File(['x'], 'hoja.jpg', { type: 'image/jpeg' }))
+    expect(await screen.findByRole('img', { name: 'Foto lista para enviar' })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Enviar' }))
+    await waitFor(() => expect(cliente.enviar).toHaveBeenCalled())
+    const { mensajes } = cliente.enviar.mock.calls[0][0]
+    expect(mensajes[0].imagen).toBe('data:image/jpeg;base64,QUJD')
+    expect(registro().getByRole('img', { name: 'Foto del cultivo enviada por usted' })).toBeInTheDocument()
   })
 })

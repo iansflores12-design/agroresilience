@@ -64,7 +64,7 @@ function apiLocal(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Variables del servidor (sin prefijo VITE_): GEMINI_API_KEY, GEMINI_MODELO, GEMINI_PENSAMIENTO.
+  // Variables del servidor (sin prefijo VITE_): GEMINI_API_KEY, GEMINI_MODELOS, GEMINI_PENSAMIENTO.
   // Se leen de .env.local y nunca se mandan al navegador.
   const entorno = loadEnv(mode, process.cwd(), 'GEMINI_')
   for (const [k, v] of Object.entries(entorno)) process.env[k] ??= v

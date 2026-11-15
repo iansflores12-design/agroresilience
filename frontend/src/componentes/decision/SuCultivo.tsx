@@ -27,7 +27,9 @@ export function SelectorCultivo({ elegido, alElegir }: { elegido: string | null;
                 <Icono nombre={ICONO_CULTIVO[c.id] ?? 'grass'} tamano={32} />
               </span>
               <span className={estilos.nombreCultivo}>{nombreCultivo(t, c.id)}</span>
-              <span className="tipo-nota">{t('comun.unasSemanas', { n: c.cicloSemanas })}</span>
+              <span className="tipo-nota">
+                {c.perenne ? t('suCultivo.permanente') : t('comun.unasSemanas', { n: c.cicloSemanas })}
+              </span>
               {marcado && (
                 <span className={estilos.visto}>
                   <Icono nombre="check" tamano={20} />

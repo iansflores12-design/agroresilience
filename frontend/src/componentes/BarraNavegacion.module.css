@@ -27,6 +27,11 @@
 .enlace {
   flex: 1;
   display: flex;
+  /* Se arrastra para reordenar: sin seleccion de texto, sin menu de enlace al mantener y sin desplazar. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -201,5 +206,33 @@
   :global([data-contraido]) .marca {
     justify-content: center;
     padding-inline: 0;
+  }
+}
+
+/* ---------- Reordenar arrastrando ---------- */
+
+.elemento {
+  position: relative;
+}
+
+.listaArrastrando .enlace {
+  cursor: grabbing;
+}
+
+/* El destino que se arrastra va por encima, en una superficie mas alta con borde (sin sombras). */
+.arrastrando {
+  z-index: 1;
+}
+
+.arrastrando .enlace {
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-highest);
+  outline: 1px solid var(--md-sys-color-outline-variant);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .arrastrando .enlace {
+    scale: 1.04;
+    transition: scale var(--mov-rapido) var(--curva-estandar);
   }
 }

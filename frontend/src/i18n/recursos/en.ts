@@ -21,7 +21,15 @@ const en: Recursos = {
     idioma: 'Language',
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
+  verificacion: {
+    titulo: 'One moment',
+    texto: 'We are checking that you are a person before opening AgroResilience.',
+    validando: 'Verifying…',
+    error: 'Verification failed. Check your connection and try again.',
+  },
   nav: {
+    reordenarAyuda: 'Drag to change the order, or use Alt and the arrow keys.',
+    movido: '{{destino}}: position {{n}} of {{total}}',
     principal: 'Main',
     plan: 'Plan',
     mapa: 'Map',
@@ -47,6 +55,7 @@ const en: Recursos = {
     elegirLugar: 'Choose a place',
   },
   comun: {
+    cerrar: 'Close',
     deCien: '{{valor}} out of 100',
     unasSemanas: 'About {{n}} weeks',
     reintentar: 'Try again',
@@ -154,6 +163,84 @@ const en: Recursos = {
         falta: ['Whether you can leave the plot one season without a harvest'],
       },
     ),
+    cafe: cultivo(
+      'Coffee',
+      { el: 'coffee', del: 'coffee', al: 'coffee' },
+      { establecimiento: 'Nursery and establishment', crecimiento: 'Tree growth', produccion: 'Production' },
+      ["It is Honduras's top export crop", 'It gives a harvest every year without replanting', 'With shade it protects hillside soil'],
+      ['It takes about three years to give its first harvest', 'Leaf rust and the berry borer attack it', 'The price changes a lot from year to year'],
+      ['The coffee price this harvest at your mill or cooperative'],
+      {
+        ventajas: ['It grows in the cool highlands', 'It has reliable buyers (IHCAFE and cooperatives)'],
+        riesgos: ['It suffers in the heat of the lowlands', 'Leaf rust spreads with humidity'],
+        falta: ['Your variety and the shade on your farm'],
+      },
+    ),
+    platano: cultivo(
+      'Banana and plantain',
+      { el: 'plantain', del: 'plantain', al: 'plantain' },
+      { establecimiento: 'Planting the sucker', vegetativa: 'Growth', floracion: 'Flowering', llenado: 'Bunch filling', cosecha: 'Harvest' },
+      ['It feeds the household all year', 'Its leaves and stems cover the soil', 'It sells at the local market'],
+      ['It needs water all year', 'Strong wind knocks it down', 'Black sigatoka damages the leaves'],
+      ['Whether there is water or irrigation in the dry season'],
+      {
+        ventajas: ['It grows in hot, rainy lowlands', 'It gives a harvest all year'],
+        riesgos: ['It suffers in a long midsummer drought', 'Hurricanes knock it down'],
+        falta: ['Whether there is water or irrigation in the dry season'],
+      },
+    ),
+    palma: cultivo(
+      'Oil palm',
+      { el: 'oil palm', del: 'oil palm', al: 'oil palm' },
+      { establecimiento: 'Establishment', crecimiento: 'Growth', produccion: 'Bunch production' },
+      ['It has reliable buyers at the oil mills', 'It gives a harvest for many years'],
+      ['It takes about three years to produce', 'It occupies the land for more than 20 years', 'It needs plenty of well-spread rain'],
+      ['The nearest oil mill and what it pays'],
+      {
+        ventajas: ['It grows on the hot, rainy north coast'],
+        riesgos: ['It does not grow in highlands or dry areas'],
+        falta: ['The nearest oil mill and what it pays'],
+      },
+    ),
+    cana: cultivo(
+      'Sugarcane',
+      { el: 'sugarcane', del: 'sugarcane', al: 'sugarcane' },
+      { brotacion: 'Sprouting', macollamiento: 'Tillering', crecimiento: 'Grand growth', maduracion: 'Ripening' },
+      ['Sugar mills buy the harvest', 'It regrows for several years without replanting', 'Its leaves feed cattle'],
+      ['It occupies the land all year', 'Burning harms the soil and the air'],
+      ['The contract with the nearest sugar mill'],
+      {
+        ventajas: ['It tolerates heat and some drought'],
+        riesgos: ['It yields less without water in the midsummer drought'],
+        falta: ['The contract with the nearest sugar mill'],
+      },
+    ),
+    melon: cultivo(
+      'Melon',
+      { el: 'melon', del: 'melon', al: 'melon' },
+      { emergencia: 'Emergence', vegetativa: 'Vines', floracion: 'Flowering', fructificacion: 'Fruit growth', cosecha: 'Harvest' },
+      ['It is exported and pays well under contract', 'It is short: about 12 weeks', 'It changes family and breaks grain pests'],
+      ['It needs reliable irrigation', 'Rain at harvest rots the fruit'],
+      ['Whether your plot has irrigation', 'A buyer or contract before planting'],
+      {
+        ventajas: ['It grows in the dry, hot south with irrigation'],
+        riesgos: ['Too much rain brings fungus'],
+        falta: ['Whether your plot has irrigation'],
+      },
+    ),
+    tabaco: cultivo(
+      'Tobacco',
+      { el: 'tobacco', del: 'tobacco', al: 'tobacco' },
+      { trasplante: 'Transplanting', crecimiento: 'Growth', despunte: 'Flower bud and topping', cosecha: 'Leaf picking' },
+      ['Cigar factories buy the leaf', 'It is planted in the dry season, apart from the grains'],
+      ['It is in the tomato family: it shares its pests', 'It needs a lot of labor and barn curing'],
+      ['A contract with a cigar factory'],
+      {
+        ventajas: ['It grows in the mild eastern valleys (Danlí, Jamastrán)'],
+        riesgos: ['Too much rain damages the leaf'],
+        falta: ['A contract with a cigar factory'],
+      },
+    ),
   },
   temporadas: {
     primera: { nombre: 'Primera', texto: 'May to August' },
@@ -219,12 +306,42 @@ const en: Recursos = {
       forraje: '{{el}} is good feed for animals.',
       plagas: 'Switching to {{al}} breaks the {{delActual}} pest cycle.',
       nitrogeno: 'Leaves natural fertilizer: legumes fix nitrogen from the air.',
+      ventaPrecio: 'Adds a harvest of {{cultivo}}, which pays {{precio}} per quintal at {{mercado}}, more than the national reference.',
     },
     riesgos: {
       sinAgua: 'In {{temporada}} the expected rain is not enough for {{el}}: without irrigation it may be lost.',
       calor: 'In {{temporada}} there are {{dias}} days of strong heat during {{del}} flowering.',
       encharca: 'On low land, {{el}} suffers if it gets waterlogged.',
       desnuda: 'The soil is left bare for a season, and on your land the rain can wash it away.',
+    },
+    precios: {
+      del: 'for {{cultivo}}',
+      referencia: 'Reference price {{del}}: {{precio}} per quintal at {{mercado}} ({{fecha}}). Your regional price was not found: sales are scored without adjustment.',
+      local: 'Price {{del}} at {{mercado}}: {{precio}} per quintal{{fecha}}. The national reference is {{referencia}}: {{efecto}}.',
+      fuente: '{{fuente}}; web search on {{fecha}}',
+      suma: 'adds {{n}} points to its sales',
+      resta: 'takes {{n}} points off its sales',
+      igual: 'does not change its sales',
+      sumaCorto: 'adds {{n}} points',
+      restaCorto: 'takes off {{n}} points',
+      igualCorto: 'no change',
+      avisoBusqueda: 'The water each crop needs comes from FAO-56. Prices for {{region}} were searched on the web and compared with the SIMPAH 2026 reference: confirm them at your market. Forage and velvet bean are approximate.',
+    },
+    historial: {
+      mal: 'In {{depto}}, in {{fase}} years, {{temporada}} {{el}} failed {{fracasos}} out of {{n}} times: −{{puntos}} on the score.',
+      bien: 'In {{depto}}, in {{fase}} years, {{temporada}} {{el}} did well {{buenos}} out of {{n}} times: +{{puntos}} on the score.',
+      riesgo: 'In {{fase}} years, {{temporada}} {{el}} has failed {{fracasos}} out of {{n}} times in {{depto}}.',
+      evidencia: '{{cultivo}} in {{temporada}}, {{depto}}, {{fase}} years ({{periodo}}): good year {{buenos}} of {{n}}, failure {{fracasos}} of {{n}}, typical yield {{mediana}} % of potential.',
+      fuente: 'Simulation with NASA POWER and ERA5 climate, FAO-56 and FAO-33; El Niño phase from NOAA',
+      propia: {
+        mal_one: 'You reported one bad harvest of {{temporada}} {{el}}: that lowers the score of this plan.',
+        mal_other: 'You reported {{count}} harvests of {{temporada}} {{el}} ({{malas}} bad): that lowers the score of this plan.',
+        bien_one: 'You reported one harvest of {{temporada}} {{el}} that was not bad: that supports the score of this plan.',
+        bien_other: 'You reported {{count}} harvests of {{temporada}} {{el}} ({{buenas}} good): that supports the score of this plan.',
+        evidencia: '{{cultivo}} in {{temporada}}, on your plot: {{buenas}} good, {{regulares}} fair and {{malas}} bad out of {{k}} reported harvests. Each one weighs like 3 simulated years.',
+        fuente: 'What you reported in this app',
+      },
+      fases: { nino: 'El Niño', neutro: 'neutral', nina: 'La Niña', todo: 'all kinds of' },
     },
     faltaPasado: 'How your plot did in past years',
     puntoParcela: 'your plot, near {{lugar}}',
@@ -255,24 +372,40 @@ const en: Recursos = {
     cuidado: 'Be careful: {{riesgo}}',
   },
   gemini: {
+    fotoSinTexto: 'What do you see in this photo of my crop?',
+    instruccionFoto: 'The farmer sent a photo. Identify the crop if possible and look for signs of drought or water stress, pests, diseases or nutrient deficiency. Say how confident you are, what to check in the field and what to do first. If the photo does not show a crop or is unclear, say so and ask for another one.',
     instrucciones: `You are the AgroResilience farming assistant for producers in Honduras.
 Write in plain English, with short sentences, for people who find reading hard.
 Rules:
 - Use ONLY the data I give you. The scores were already calculated by Gemini Decision: do not change them or invent other numbers.
-- Do not invent prices, doses, varieties or exact rain dates.
+- Prices per crop come in the data. When you talk about sales, income or what is worth planting, use those prices: give the price per quintal, its market and whether it is regional or the national reference, and compare the crops in the rotation by what they pay.
+- Do not invent other prices, doses, varieties or exact rain dates.
 - Explain technical terms with everyday words (for example, evapotranspiration = the water the plant and the soil lose to the air).
 - Remember it is an aid: the decision belongs to the producer and their local extension agent.
-- Answer only about crops, planting, soil, water, climate and plot management. If they ask about anything else, say in one sentence that you only help with crops.
+- Your topic is farming: crops, planting, harvest, soil, water, irrigation, climate, pests, farm animals, prices and plot management. Always answer those questions, even if the consultation data is missing: use general knowledge and say which data would help.
+- Only if the question has nothing to do with farming (for example sports, politics or homework), answer in one sentence that you only help with farming topics. Never add that sentence to a farming answer.
 - Be brief and useful: go straight to what the producer can do.
 - No emojis. No tables. Plain text with short headings on their own lines, without Markdown symbols.
 - The data below may contain Spanish place names and labels; keep place names as they are.`,
     pedidoAnalisis: `Write the in-depth analysis of the chosen rotation in this order, with a short heading for each part:
 Why it is recommended (or not), compared with what they do today and with the best option.
 What the data say (rain, water each crop needs, heat, engine signals).
-Benefits for the soil and for their pocket.
+Benefits for the soil and for their pocket, with the price per quintal of each crop that is harvested.
 Risks and what to check with their extension agent.
 What is still unknown.
 250 words at most.`,
+    reglasHistorial: `Department history (when it comes in the data; it is written in Spanish, answer in English):
+- It is each crop's performance simulated year by year since 1981 with the department's real rain and heat. Use it to predict from similar years, not to change the ranking.
+- Predict in this order: 1) take the current El Niño or La Niña phase given in the data; 2) look at the years with that same phase; 3) compare with all years and with the last 10; 4) if all three agree, say so with confidence; if not, say which weighs more and why.
+- Speak in "out of 10 years": turn "buen año 4 de 11" into "about 4 out of 10 years". Only that conversion: do not invent new percentages or averages.
+- If the top-ranked option fails in 3 or more out of 10 similar years, warn clearly and say which ranked option holds up better in those years.
+- If a crop is "solo con riego" (irrigation only), do not recommend it without irrigation, even if its history looks good.
+- If fewer than 5 years are available to compare, say the prediction is weak.
+- Export crops (coffee, oil palm, banana, sugarcane, melon, sweet pepper, tobacco, cocoa) show what moves the country's economy most; mention them only if they belong to the farmer's area or the farmer asks, and remember they need investment, a buyer and, for perennials, years to produce.
+- It is a climate simulation, not the measured harvest: do not promise yields.`,
+    pedidoHistorial: `Add a part "What similar years say": how each crop in the rotation did in years with the same El Niño or La Niña phase in the department, how many out of 10 were good and how many failed, and the worst year. End with one sentence on how reliable the prediction is.`,
+    cosechas: 'Harvests the farmer reported on the plot (real data, weighs more than the simulation): {{lista}}.',
+    cosechaItem: '{{cultivo}} in {{temporada}} {{anio}}: {{resultado}}',
     limiteChat: 'Answer in 80 words or fewer.',
     datosConsulta: 'Query data:',
     lugar: 'Place: {{lugar}} (Kharis point {{punto}}, model {{modelo}}, observed data up to {{fecha}}).',
@@ -291,6 +424,10 @@ What is still unknown.
     riesgos: 'Risks: ',
     falta: 'Still unknown: ',
     confianza: 'Confidence: {{confianza}}.',
+    precios: 'Prices per crop, in lempiras per quintal of 100 pounds (input to Gemini Decision for the Sales part):',
+    precioBase: '- {{cultivo}}: {{precio}} at {{mercado}}{{fecha}}',
+    precioReferencia: '{{base}}, national reference [{{fuente}}]. No regional price was found: it does not move sales.',
+    precioRegion: '{{base}}, regional price [{{fuente}}]. The national reference is {{referencia}}: {{efecto}} in sales for this crop.',
     avisos: 'Notes: ',
     chatCultivo: 'Crop: {{cultivo}}{{semana}}{{etapa}}.',
     chatSemana: ', week {{n}}',
@@ -319,6 +456,7 @@ What is still unknown.
     aumentar: 'Increase {{etiqueta}}',
   },
   suCultivo: {
+    permanente: 'Permanent crop',
     edadTitulo: 'How long ago did you plant?',
     semanasDesde: 'weeks since planting',
     enEtapa: 'It is in the {{etapa}} stage',
@@ -360,6 +498,21 @@ What is still unknown.
     oElija: 'Or choose the nearest place:',
   },
   rotacion: {
+    cosechas: {
+      titulo: 'How did it go?',
+      apoyo: 'Tell us how your harvest turned out. The plan is corrected with what happened on your plot.',
+      anio: 'Harvest year',
+      fila: '{{cultivo}} in {{temporada}}',
+      buena: 'Good',
+      regular: 'Fair',
+      mala: 'Bad',
+      usadas_one: 'This plan already uses {{count}} harvest of yours.',
+      usadas_other: 'This plan already uses {{count}} harvests of yours.',
+      ajuste: 'With your harvests and similar years: {{signo}}{{n}} points.',
+      guardadas: 'Your saved harvests',
+      item: '{{cultivo}}, {{temporada}} {{anio}}: {{resultado}}',
+      borrar: 'Delete {{cultivo}} {{temporada}} {{anio}}',
+    },
     baseComparar: 'This is what you do today. It is the baseline for comparing.',
     masQueHoy: '{{n}} points more than what you do today',
     menosQueHoy: '{{n}} points less than what you do today',
@@ -437,22 +590,41 @@ What is still unknown.
     elijaLista: 'Choose your place from the list.',
     fueraHonduras: 'You are outside Honduras',
     dondeParcela: 'Where is your plot?',
-    toquePunto: 'Tap a point on the map or use your location.',
+    toquePunto: 'Tap your department on the map or use your location.',
     controles: 'Map controls',
     acercar: 'Zoom in',
     alejar: 'Zoom out',
     miUbicacion: 'My location',
+    capas: {
+      boton: 'Map layers',
+      tipo: 'Map type',
+      satelite: 'Satellite data',
+      bases: {
+        simple: { nombre: 'Simple' },
+        relieve: { nombre: 'Terrain', credito: 'Terrain: Esri and contributors' },
+        satelite: { nombre: 'Satellite', credito: 'Satellite imagery: Esri, Maxar and Earthstar Geographics' },
+      },
+      datos: {
+        lluvia: { nombre: 'Rain', descripcion: 'Where it is raining now', menos: 'Light', mas: 'Heavy', credito: 'Rain: NASA GPM IMERG' },
+        humedad: { nombre: 'Water in the soil', descripcion: 'How wet the soil is today', menos: 'Dry', mas: 'Wet', credito: 'Soil moisture: NASA SMAP' },
+        vegetacion: { nombre: 'Greenness', descripcion: 'How green the fields are (last 8 days)', menos: 'Low', mas: 'High', credito: 'Vegetation: NASA MODIS' },
+        calor: { nombre: 'Heat', descripcion: 'How hot the ground is during the day (last 8 days)', menos: 'Cool', mas: 'Hot', credito: 'Ground temperature: NASA MODIS' },
+      },
+    },
     lugarElegido: 'Chosen place',
     sinHumedad: 'No moisture reading',
     aguaTierra: '{{pct}} % water in the soil',
     verComoTierra: 'See how the soil is',
     sinLugar: 'You have not chosen a place yet.',
+    todosDepartamentos: 'All departments ({{n}})',
     todosLugares: 'All places ({{n}})',
     seDaBienEn: 'Does {{el}} grow well in {{departamento}}?',
     dondeSeDa: 'Where does {{el}} grow well?',
     puesto: '{{total}} out of 100. Rank {{puesto}} of {{de}} departments.',
     loQueCuesta: 'Its main limitation: {{limite}}.',
     comoAnio: 'How is the year looking?',
+    anioLluviaZona: 'Rain over the last month in {{lugar}}: {{pct}} % of normal (NASA, CHIRPS).',
+    anioLluviaPais: 'Rain over the last month in the country: {{pct}} % of normal (NASA, CHIRPS).',
     verPartes: 'See the score by parts',
     partesEn: 'Score by parts in {{departamento}}',
     toqueDepartamento: 'Tap a department on the map to see how it grows there.',
@@ -574,13 +746,55 @@ What is still unknown.
     hace4: '4 months ago',
     hoy: 'Today',
   },
+  explica: {
+    cultivo: {
+      nombre: 'Why {{el}}',
+      p1: '{{cultivo}} in {{lugar}} scores {{total}} out of 100: {{nivel}}.',
+      p2: 'What helps it most: {{factor}} ({{valor}} out of 100).',
+      p3: 'What holds it back most: {{limite}}.',
+    },
+    tierra: {
+      nombre: 'Your soil',
+      p1: 'The soil in {{lugar}} has {{arcilla}} % clay, {{limo}} % silt and {{arena}} % sand: it is {{textura}}.',
+      arcillosa: 'Clay holds water longer: it handles the midsummer drought better, but it waterlogs in heavy rain.',
+      arenosa: 'Sand lets water through fast: it does not waterlog, but it dries out quickly in the midsummer drought.',
+      franca: 'The mix holds water without waterlogging: it is one of the best soils for planting.',
+      acida: 'Its pH is {{ph}}: acidic. A little lime helps the plant use the fertilizer.',
+      neutra: 'Its pH is {{ph}}: nearly neutral, good for most crops.',
+      alcalina: 'Its pH is {{ph}}: alkaline. Some crops take up iron poorly; organic matter helps.',
+      texturas: { arcillosa: 'clayey', arenosa: 'sandy', franca: 'loam (well mixed)' },
+      arena: 'Sand',
+      limo: 'Silt',
+      arcilla: 'Clay',
+      escalaAcido: 'Acidic',
+      escalaNeutro: 'Neutral',
+      escalaAlcalino: 'Alkaline',
+    },
+    altura: {
+      nombre: 'Elevation',
+      p1: '{{lugar}} lies, on average, about {{alt}} m above sea level.',
+      p2: 'Every 100 m of climb is about 0.6 °C cooler: the average temperature there is {{temp}} °C.',
+      alto: 'Coffee, beans and temperate vegetables grow best in the cool highlands.',
+      medio: 'At mid elevation corn, beans, tobacco and sugarcane do well.',
+      bajo: 'Oil palm, bananas, rice and melon grow best in the hot lowlands.',
+    },
+  },
   fenomeno: {
     titulo: 'Why does this happen?',
-    reservado: 'Reserved space: the visual explanation of a phenomenon will go here',
+    elegir: 'Choose a phenomenon',
+    repetir: 'Play again',
+    pausar: 'Pause',
+    seguir: 'Resume',
+    paso: 'Step {{n}} of {{total}}',
+    anterior: 'Previous step',
+    siguiente: 'Next step',
+    nino: { nombre: 'El Niño and La Niña', pasos: ['The Pacific Ocean gets warmer (El Niño) or cooler (La Niña) than normal.', 'That shift moves winds and clouds: El Niño brings less rain to Central America; La Niña, more.', 'With El Niño, plant drought-tolerant varieties and store water; with La Niña, look after drainage.'] },
+    canicula: { nombre: 'Midsummer drought', pasos: ['In the middle of the rainy season come dry, hot weeks: the canícula.', 'The sun dries the soil and the plant loses more water than it draws from the ground.', 'Plant so flowering does not fall in the canícula and cover the soil with crop residue.'] },
+    lluvias: { nombre: 'Extreme rain', pasos: ['A lot of rain falls in a few hours, more than the soil can soak up.', 'Water runs over the top, washes away good soil and floods the roots.', 'Dig contour ditches and living barriers and never leave the soil bare.'] },
+    huracan: { nombre: 'Hurricanes', pasos: ['Over warm sea a swirl of clouds forms, spins and grows.', 'It arrives with winds that knock plants down and days of nonstop rain.', 'Follow COPECO alerts, harvest what you can beforehand and tie or stake what remains.'] },
   },
+
   chat: {
-    demoTitulo: 'Demo mode',
-    demoDescripcion: 'Answers are local: the real assistant will connect to the backend.',
     errorRed: 'Check your connection and try again.',
     errorServidor: 'The server could not answer right now.',
     errorRespuesta: 'The server sent a response that cannot be understood.',
@@ -600,8 +814,26 @@ What is still unknown.
     conversacion: 'Conversation with the assistant',
     asistente: 'Assistant',
     escribiendo: 'The assistant is typing',
-    modoPrueba: 'Test mode: not yet connected to the real assistant',
     mensaje: 'Message',
+    adjuntarFoto: 'Attach photo',
+    tomarFoto: 'Take photo',
+    quitarFoto: 'Remove photo',
+    fotoAdjunta: 'Crop photo you sent',
+    fotoVista: 'Photo ready to send',
+    fotoError: 'That image could not be read',
+    fotoErrorDetalle: 'Try another photo in JPG or PNG.',
+    pistaTeclas: 'Tab fills in a suggestion · Up arrow brings back your last message',
+    paraSeguir: 'Follow up',
+    seguir: {
+      simple: 'Explain it more simply',
+      estaSemana: 'What should I do this week?',
+      sinLluvia: 'What if it does not rain for two weeks?',
+      plagas: 'Which pests should I watch for in {{cultivo}}?',
+      costo: 'How much would it cost me?',
+      fotoTratamiento: 'How do I treat it without spending much?',
+      fotoEvitar: 'How do I keep it from happening again?',
+      fenomeno: 'How does El Niño affect me this year?',
+    },
     sugerencias: {
       humedadPara: 'How is the moisture in {{zona}} for {{cultivo}}?',
       masSeca: 'Is {{zona}} drier than normal?',
@@ -616,10 +848,12 @@ What is still unknown.
       queEsRotacion: 'What is crop rotation?',
       leerMapa: 'How do I read the area map?',
     },
-    demo: {
-      prefijo: 'Demo answer.',
-      ve: 'This is what the assistant sees now:',
-      real: 'The real assistant will connect to the backend.',
+    respaldo: {
+      foto: 'The photo could not be analyzed right now; send it again in a moment.',
+      intro: 'The assistant could not answer right now. Meanwhile, this is what your data says:',
+      cierre: 'Ask again in a moment for a full answer.',
+    },
+    datos: {
       cultivo: 'Crop: {{cultivo}}{{semana}}{{etapa}}.',
       semana: ', week {{n}}',
       sinCultivo: 'Crop: none chosen.',
@@ -630,6 +864,9 @@ What is still unknown.
     },
   },
   plan: {
+    perenneTitulo: '{{cultivo}} is a permanent crop',
+    perenneTexto: 'It is not rotated each season: it occupies the land all year. Above you can see where {{el}} grows best; in Ask, the assistant tells you how to care for it with the weather ahead.',
+    volverInicio: 'Back to the start',
     queSembrarDespues: 'What to plant next?',
     suCultivo: 'Your crop',
     sinObjetivos: 'No goals',
@@ -713,12 +950,14 @@ What is still unknown.
 The climate of the area this season (rain, heat, water each crop needs, engine signals).
 Why the first one is the best.
 What the second and third offer, and where they fall behind.
+What they pay: the price per quintal of the crops harvested in all three.
 What to check with their extension agent.
 220 words at most.`,
-    piezasVisuales: `Besides text, you can ask for two visual pieces, each on its own line and written exactly like this:
+    piezasVisuales: `Besides text, you can ask for three visual pieces, each on its own line and written exactly like this:
 [[mapa:ID]] shows the map of Honduras with how well that crop grows. ID is one of: maiz, frijol, sorgo, arroz, tomate, frijol-terciopelo.
+[[fenomeno:ID]] shows an animated explanation of a climate phenomenon. ID is one of: nino (El Niño and La Niña), canicula (midsummer drought), lluvias (extreme rain), huracan (hurricanes). Use it when they ask about those phenomena.
 [[animacion:Short title|Step one|Step two|Step three]] shows an animated, step-by-step explanation (2 to 5 short steps). A step may end in =NUMBER (0 to 100) to draw a bar, for example "Rain covering what corn needs=72"; use only numbers that are in the data.
-Use the map when they ask where a crop grows or ask to see the map. Use the animation when they ask for an animated, step-by-step explanation. If they do not ask, answer with text only. Do not use other tags and do not translate the words "mapa" and "animacion" inside the brackets.`,
+Use the map when they ask where a crop grows or ask to see the map. Use the animation when they ask for an animated, step-by-step explanation. If they do not ask, answer with text only. Do not use other tags and do not translate the words "mapa", "animacion" and "fenomeno" inside the brackets.`,
   },
   siembra: {
     titulo: 'Planting recommendation',

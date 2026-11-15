@@ -176,13 +176,17 @@
   }
 }
 
-@media (min-width: 840px) {
+/* Desde tableta los lugares pasan de linea en vez de deslizarse: ninguno queda cortado en el borde. */
+@media (min-width: 600px) {
   .selector {
     flex-wrap: wrap;
     overflow-x: visible;
     margin-inline: 0;
     padding-inline: 0;
   }
+}
+
+@media (min-width: 840px) {
 
   .hoja {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);

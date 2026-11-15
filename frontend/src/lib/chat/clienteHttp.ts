@@ -1,3 +1,4 @@
+import { recortarImagenes } from './imagen'
 import { ErrorChat, type ClienteChat } from './tipos'
 
 /** Cliente del backend: POST {urlBase}/chat con { mensajes, contexto }; responde { texto }. */
@@ -10,7 +11,7 @@ export function crearClienteHttp(urlBase: string): ClienteChat {
         respuesta = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mensajes, contexto }),
+          body: JSON.stringify({ mensajes: recortarImagenes(mensajes), contexto }),
           signal,
         })
       } catch (e) {

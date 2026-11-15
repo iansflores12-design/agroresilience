@@ -177,6 +177,80 @@ const REQUISITOS: Record<string, Requisitos> = {
     riesgos: ['No da cosecha para vender ni para comer'],
     falta: ['Si puede dejar la parcela una temporada sin cosecha'],
   },
+  // Rangos de Ecocrop (FAO) y de las guias de IHCAFE, FHIA y SAG para Honduras; APROXIMADOS, pendientes
+  // de validar con el equipo agronomico. La lluvia es la del ano; el melon se siembra en verano con riego.
+  cafe: {
+    lluvia: [900, 1400, 2500, 3500],
+    temp: [14, 17, 23, 27],
+    alt: [400, 900, 1700, 2100],
+    ph: [4.5, 5.0, 6.0, 6.8],
+    sensibilidad: 0.55,
+    mercado: 88,
+    confianza: 'media',
+    ventajas: ['Se da en las tierras altas y frescas', 'Tiene compradores seguros (IHCAFE y cooperativas)'],
+    riesgos: ['Sufre con el calor de las tierras bajas', 'La roya avanza con la humedad'],
+    falta: ['La variedad que tiene y la sombra de su finca'],
+  },
+  platano: {
+    lluvia: [900, 1500, 3000, 4500],
+    temp: [17, 23, 30, 34],
+    alt: [0, 0, 700, 1200],
+    ph: [4.5, 5.5, 7.0, 8.0],
+    sensibilidad: 0.85,
+    mercado: 70,
+    confianza: 'media',
+    ventajas: ['Se da en tierras bajas, calientes y lluviosas', 'Da cosecha todo el año'],
+    riesgos: ['Sufre con la canícula larga', 'Los huracanes lo tumban'],
+    falta: ['Si hay agua o riego en el verano'],
+  },
+  palma: {
+    lluvia: [1300, 2000, 3500, 4500],
+    temp: [20, 24, 29, 33],
+    alt: [0, 0, 350, 700],
+    ph: [4.0, 4.8, 6.5, 7.5],
+    sensibilidad: 0.8,
+    mercado: 78,
+    confianza: 'media',
+    ventajas: ['Se da en la costa norte, caliente y lluviosa'],
+    riesgos: ['No se da en tierras altas ni secas'],
+    falta: ['La extractora más cercana y lo que paga'],
+  },
+  cana: {
+    lluvia: [700, 1100, 2000, 3200],
+    temp: [17, 22, 30, 35],
+    alt: [0, 0, 900, 1500],
+    ph: [4.5, 5.5, 7.5, 8.5],
+    sensibilidad: 0.5,
+    mercado: 75,
+    confianza: 'media',
+    ventajas: ['Aguanta el calor y algo de sequía'],
+    riesgos: ['Rinde menos sin agua en la canícula'],
+    falta: ['El contrato con el ingenio más cercano'],
+  },
+  melon: {
+    lluvia: [300, 500, 1800, 2600],
+    temp: [18, 22, 30, 35],
+    alt: [0, 0, 500, 1000],
+    ph: [5.8, 6.2, 7.5, 8.2],
+    sensibilidad: 0.6,
+    mercado: 72,
+    confianza: 'media',
+    ventajas: ['Se da en el sur, seco y caliente, con riego'],
+    riesgos: ['La mucha lluvia trae hongos'],
+    falta: ['Si hay riego en su parcela'],
+  },
+  tabaco: {
+    lluvia: [500, 800, 1500, 2300],
+    temp: [16, 20, 27, 32],
+    alt: [0, 300, 1200, 1700],
+    ph: [5.0, 5.5, 6.5, 7.5],
+    sensibilidad: 0.6,
+    mercado: 72,
+    confianza: 'baja',
+    ventajas: ['Se da en los valles templados del oriente (Danlí, Jamastrán)'],
+    riesgos: ['La mucha lluvia daña la hoja'],
+    falta: ['Un contrato con una fábrica de puros'],
+  },
 }
 
 /** Hay puntaje para este cultivo. */
@@ -360,11 +434,12 @@ export interface RotacionPuntuada {
 export function rotacionesPara(departamentoId: string | null, cultivoId: string | null, escenario: Escenario): RotacionPuntuada[] {
   const d = buscarDepartamento(departamentoId)
   const primera = buscarCultivo(cultivoId)
-  if (!d || !primera || !tieneAptitud(cultivoId)) return []
+  // Un cultivo permanente no tiene "que sembrar de postrera": ocupa la tierra todo el ano.
+  if (!d || !primera || primera.perenne || !tieneAptitud(cultivoId)) return []
 
   const lista = Object.keys(REQUISITOS).flatMap((id) => {
     const postrera = buscarCultivo(id)
-    if (!postrera) return []
+    if (!postrera || postrera.perenne) return []
     const r = REQUISITOS[id]
     const p = puntaje(d, id, escenario)
     const actual = id === primera.id

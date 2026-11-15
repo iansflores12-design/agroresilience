@@ -17,6 +17,12 @@ export function SelectorIdioma({ className }: { className?: string }) {
         {t('app.idioma')}
       </label>
       <Icono nombre="translate" tamano={20} className={estilos.icono} />
+      {/* Lo que se ve: el nombre del idioma (o su codigo en el telefono). El select va encima, invisible,
+          asi el boton mide siempre lo mismo y la lista sigue siendo la nativa de cada telefono. */}
+      <span className={estilos.visible} aria-hidden="true">
+        <span className={estilos.nombre}>{t(`app.idiomas.${idioma}`)}</span>
+        <span className={estilos.codigo}>{idioma.toUpperCase()}</span>
+      </span>
       <select
         id={id}
         className={estilos.lista}

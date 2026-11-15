@@ -1,0 +1,12 @@
+punto,celda_lat,celda_lon,elevacion_m,pendiente_grados,orientacion_grados
+choluteca,13.3,-87.19,53.0,1.68,82.1
+nacaome,13.53,-87.49,33.0,2.1,173.5
+tegucigalpa,14.07,-87.19,999.0,9.7,145.9
+comayagua,14.45,-87.64,584.0,2.64,265.0
+danli,14.03,-86.58,755.0,2.08,332.7
+juticalpa,14.66,-86.22,399.0,1.47,341.0
+catacamas,14.87,-85.88,681.0,10.75,163.4
+santa_rosa_copan,14.77,-88.78,1150.0,1.33,46.0
+la_esperanza,14.3,-88.18,1779.0,13.03,110.4
+yoro,15.13,-87.13,664.0,2.67,314.0
+san_pedro_sula,15.5,-88.03,97.0,3.95,65.8

@@ -3,6 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { aptitud, rotacionesPara } from '../../datos/aptitud'
 import { humedadPorcentaje, zonas } from '../../datos/zonas'
 import { avisar } from '../../lib/avisos'
+import { detectarAnio } from '../../componentes/mapa/escenario'
+import { departamentosConDatos, zonaDeDepartamento } from '../../datos/lugarDepartamento'
+
+const anioCholuteca = () => detectarAnio(zonas.find((z) => z.id === 'choluteca') ?? null).escenario
 import { renderizarApp } from '../../pruebas/renderizar'
 
 vi.mock('../../lib/avisos', () => ({
@@ -16,38 +20,53 @@ describe('Mapa', () => {
     vi.clearAllMocks()
   })
 
-  it('muestra el mapa, un boton por zona y la invitacion a elegir', () => {
+  it('muestra el mapa, un boton por departamento y la invitacion a elegir', () => {
     renderizarApp('/mapa')
     expect(screen.getByRole('region', { name: 'Mapa' })).toBeInTheDocument()
-    for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toBeInTheDocument()
-    expect(screen.getByText('Toque un punto del mapa o use su ubicación.')).toBeInTheDocument()
+    const lista = departamentosConDatos()
+    expect(lista).toHaveLength(18)
+    for (const d of lista) expect(screen.getByRole('button', { name: new RegExp(`^${d.nombre}`) })).toBeInTheDocument()
+    // Ya no hay un boton por municipio sobre el mapa.
+    expect(screen.queryByRole('button', { name: 'Nacaome (Valle)' })).not.toBeInTheDocument()
+    expect(screen.getByText('Toque su departamento en el mapa o use su ubicación.')).toBeInTheDocument()
     expect(screen.getByText('Todavía no eligió un lugar.')).toBeInTheDocument()
-    // En telefono (jsdom no es ancho) la lista de lugares empieza plegada.
-    expect(screen.getByText(`Todos los lugares (${zonas.length})`).closest('details')).not.toHaveAttribute('open')
+    // En telefono (jsdom no es ancho) la lista de departamentos empieza plegada.
+    expect(screen.getByText('Todos los departamentos (18)').closest('details')).not.toHaveAttribute('open')
     // Sin cultivo no hay puntajes: se invita a elegirlo.
     expect(screen.getByRole('button', { name: 'Departamento de Olancho' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Elegir cultivo' })).toHaveAttribute('href', '/')
   })
 
-  it('elegir un punto cambia la zona del estado, avisa y muestra la tarjeta', async () => {
+  it('elegir un departamento cambia el lugar del estado, avisa y muestra la tarjeta', async () => {
     const usuario = userEvent.setup()
-    const zona = zonas[2]
+    const zona = zonas.find((z) => z.id === 'tegucigalpa')!
     renderizarApp('/mapa')
-    await usuario.click(screen.getByRole('button', { name: zona.nombre }))
-    expect(screen.getByRole('button', { name: zona.nombre })).toHaveAttribute('aria-pressed', 'true')
-    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: `Lugar: ${zona.nombre}` }))
+    await usuario.click(screen.getByRole('button', { name: /^Francisco Morazán/ }))
+    expect(screen.getByRole('button', { name: /^Francisco Morazán/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(avisar.exito).toHaveBeenCalledWith(expect.objectContaining({ titulo: 'Lugar: Francisco Morazán' }))
     const tarjeta = screen.getByRole('complementary', { name: 'Lugar elegido' })
-    expect(within(tarjeta).getByText(zona.nombre)).toBeInTheDocument()
+    expect(within(tarjeta).getByText('Francisco Morazán')).toBeInTheDocument()
     expect(within(tarjeta).getByText(`${humedadPorcentaje(zona)?.toFixed(1)} % de agua en la tierra`)).toBeInTheDocument()
     expect(within(tarjeta).getByRole('link', { name: 'Ver cómo está la tierra' })).toHaveAttribute('href', '/zona')
     // El estado compartido llega a la tira de contexto.
-    expect(within(screen.getByRole('group', { name: 'Contexto elegido' })).getByText(zona.nombre)).toBeInTheDocument()
+    expect(within(screen.getByRole('group', { name: 'Contexto elegido' })).getByText('Francisco Morazán')).toBeInTheDocument()
+  })
+
+  it('un departamento sin punto propio usa el mas cercano sin decirlo; tocarlo en el mapa tambien lo elige', async () => {
+    const usuario = userEvent.setup()
+    renderizarApp('/mapa')
+    await usuario.click(screen.getByRole('button', { name: /^Departamento de Atlántida/ }))
+    const cercana = zonaDeDepartamento('HN-AT')!
+    const tarjeta = screen.getByRole('complementary', { name: 'Lugar elegido' })
+    expect(within(tarjeta).getByText('Atlántida')).toBeInTheDocument()
+    // No se dice de qué punto salen los datos.
+    expect(within(tarjeta).queryByText(new RegExp(cercana.nombre))).not.toBeInTheDocument()
   })
 
   it('la accion "Ver la tierra" del aviso lleva a /zona', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/mapa')
-    await usuario.click(screen.getByRole('button', { name: zonas[0].nombre }))
+    await usuario.click(screen.getByRole('button', { name: /^Choluteca/ }))
     const aviso = vi.mocked(avisar.exito).mock.calls[0][0]
     expect(aviso.accion?.texto).toBe('Ver la tierra')
     aviso.accion?.alPulsar()
@@ -75,7 +94,7 @@ describe('Mapa', () => {
 
     it('pinta cada departamento con su puntaje y muestra el del lugar elegido', () => {
       renderizarApp('/mapa')
-      const esperado = aptitud('HN-CH', 'maiz', 'normal')!
+      const esperado = aptitud('HN-CH', 'maiz', anioCholuteca())!
       const choluteca = screen.getByRole('button', {
         name: new RegExp(`^Departamento de Choluteca: .* para maíz, ${esperado.total} de 100$`),
       })
@@ -98,21 +117,41 @@ describe('Mapa', () => {
       expect(screen.getByRole('heading', { level: 2, name: 'Qué sembrar después en Olancho' })).toBeInTheDocument()
     })
 
-    it('cambiar el tipo de año cambia el puntaje', async () => {
+    it('el tipo de año sale solo de la lluvia del último mes', () => {
+      renderizarApp('/mapa')
+      const seccion = screen.getByRole('region', { name: '¿Se da bien el maíz en Choluteca?' })
+      expect(within(seccion).queryByRole('button', { name: 'Seco' })).not.toBeInTheDocument()
+      const nombre = { seco: 'Seco', normal: 'Normal', lluvioso: 'Lluvioso' }[anioCholuteca()]
+      expect(within(seccion).getByText(nombre)).toBeInTheDocument()
+      expect(within(seccion).getByText(/Lluvia del último mes en Choluteca/)).toBeInTheDocument()
+    })
+
+    it('el chip de cultivo lo cambia sin salir del mapa', async () => {
       const usuario = userEvent.setup()
       renderizarApp('/mapa')
-      const seco = aptitud('HN-CH', 'maiz', 'seco')!
-      expect(seco.total).not.toBe(aptitud('HN-CH', 'maiz', 'normal')!.total)
-      const anio = screen.getByRole('group', { name: '¿Cómo viene el año?' })
-      await usuario.click(within(anio).getByRole('button', { name: 'Seco' }))
-      expect(within(anio).getByRole('button', { name: 'Seco' })).toHaveAttribute('aria-pressed', 'true')
-      expect(screen.getByText(`${seco.total} de 100. Puesto ${seco.puesto} de 18 departamentos.`)).toBeInTheDocument()
+      await usuario.click(screen.getByRole('button', { name: /^Cultivo: / }))
+      // Abre la misma pregunta del cuestionario, a pantalla completa.
+      expect(screen.getByRole('heading', { level: 1, name: /siembra ahora/ })).toBeInTheDocument()
+      await usuario.click(screen.getByRole('button', { name: /^Sorgo \(maicillo\)/ }))
+      await usuario.click(screen.getByRole('button', { name: 'Guardar' }))
+      expect(screen.queryByRole('button', { name: 'Guardar' })).not.toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el sorgo (maicillo) en Choluteca?' })).toBeInTheDocument()
+    })
+
+    it('el chip de lugar abre la pregunta del lugar y la cambia sin salir del mapa', async () => {
+      const usuario = userEvent.setup()
+      renderizarApp('/mapa')
+      await usuario.click(screen.getByRole('button', { name: /^Lugar: / }))
+      const pagina = screen.getByRole('dialog')
+      expect(within(pagina).getByRole('searchbox')).toBeInTheDocument()
+      await usuario.click(within(pagina).getByRole('button', { name: /^Comayagua/ }))
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el maíz en Comayagua?' })).toBeInTheDocument()
     })
 
     it('lista que sembrar despues y abre y cierra el detalle de una opcion', async () => {
       const usuario = userEvent.setup()
       renderizarApp('/mapa')
-      const opciones = rotacionesPara('HN-CH', 'maiz', 'normal')
+      const opciones = rotacionesPara('HN-CH', 'maiz', anioCholuteca())
       const seccion = screen.getByRole('region', { name: 'Qué sembrar después en Choluteca' })
       // El nombre accesible es "tipo, nombre, nivel, puntaje": se ancla en el nivel para no confundir
       // "frijol" con "frijol terciopelo".

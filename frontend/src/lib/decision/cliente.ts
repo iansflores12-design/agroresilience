@@ -1,5 +1,6 @@
 // Cliente del navegador para Gemini Decision y el analisis de Gemini.
 
+import { leerHistorico } from './historico'
 import { leerKharis } from './kharis'
 import { decidir } from './motor'
 import type { Decision, EntradaDecision } from './tipos'
@@ -14,7 +15,8 @@ function esDecision(x: unknown): x is Decision {
 /** Calcula la decision en el navegador con los mismos datos y el mismo codigo que el servidor. */
 export async function decidirLocal(entrada: EntradaDecision): Promise<Decision> {
   const { indice, punto, escala, distanciaKm } = await leerKharis(new URL(KHARIS, window.location.href).href, entrada)
-  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm })
+  const historico = await leerHistorico(new URL('/historico/', window.location.href).href, punto.punto)
+  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm, historico })
 }
 
 /**

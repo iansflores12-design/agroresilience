@@ -1,22 +1,22 @@
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Zona } from '../../datos/zonas'
+import { ExplicacionFenomeno } from './ExplicacionFenomeno'
+import { useTemasLugar } from './temasLugar'
 import estilos from './EspacioFenomeno.module.css'
 
 export interface PropsFenomeno {
   zona: Zona | null
   cultivoId: string | null
+  /** Departamento elegido: da la altura y el nombre en las explicaciones del lugar. */
+  departamentoId?: string | null
 }
 
-/**
- * PLACEHOLDER(fenomeno): para integrar la explicacion grafica real, reemplazar el contenido de
- * `.lienzo` (el <div> con la proporcion reservada) por el componente definitivo, que recibe
- * `zona` y `cultivoId`. Conservar la <section data-placeholder="fenomeno"> y su titulo, y hacer
- * que el componente llene el 100 % del lienzo: la proporcion es 16:9 (4:3 en ventana compacta).
- */
-export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
+/** Explicaciones gráficas en la pantalla de la tierra: el porqué del cultivo, la tierra, la altura y el clima. */
+export function EspacioFenomeno({ zona, cultivoId, departamentoId = null }: PropsFenomeno) {
   const idTitulo = useId()
   const { t } = useTranslation()
+  const temasLugar = useTemasLugar({ zona, departamentoId, cultivoId })
   return (
     <section
       data-placeholder="fenomeno"
@@ -28,9 +28,7 @@ export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
       <h2 id={idTitulo} className="tipo-titulo">
         {t('fenomeno.titulo')}
       </h2>
-      <div className={estilos.lienzo}>
-        <p className="tipo-nota">{t('fenomeno.reservado')}</p>
-      </div>
+      <ExplicacionFenomeno key={departamentoId ?? 'sin-lugar'} temasExtra={temasLugar} />
     </section>
   )
 }

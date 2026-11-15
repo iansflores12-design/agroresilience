@@ -11,12 +11,18 @@
 //   tomate L10-20/lb, muy variable; sorgo sobre todo para alimento animal, pocos compradores. Se debe revisar en
 //   el mercado local de cada productor.
 // - Forraje, tolerancia a la sequia y encharcamiento: criterio agronomico general, PENDIENTE de validar.
+// - Cultivos de exportacion (Atlas of Economic Complexity, Harvard, exportaciones de Honduras en 2024):
+//   cafe, palma africana, banano y platano, cana de azucar, melon y tabaco. Kc de FAO-56, Tabla 12:
+//   cafe 0.90 / 0.95 / 0.95; banano (primer ano) 0.50 / 1.10 / 1.00; palma 0.95 / 1.00 / 1.00; cana
+//   0.40 / 1.25 / 0.75; melon 0.50 / 0.85 / 0.60. Tabaco: sin valor propio, se usa el de solanacea (APROXIMADO).
 
 import type { ClaveFactor, Objetivo, Temporada, Terreno } from './tipos.js'
 
 export interface ParametrosCultivo {
   nombre: string
-  familia: 'gramínea' | 'leguminosa' | 'hortaliza' | 'cobertura'
+  familia: 'gramínea' | 'leguminosa' | 'hortaliza' | 'cobertura' | 'perenne'
+  /** Cultivo permanente: no entra en las rotaciones por temporada. */
+  perenne?: boolean
   cicloSemanas: number
   /** Kc inicial, medio y final (FAO-56). */
   kc: [number, number, number]
@@ -81,6 +87,48 @@ export const CULTIVOS: Record<string, ParametrosCultivo> = {
     beneficios: ['Cubre y protege la tierra de la lluvia fuerte', 'Deja abono natural para lo que siembre después', 'Ahoga las malezas'],
     riesgos: ['No da cosecha para vender ni para comer', 'Hay que cortarlo a tiempo para que no se enrede'],
     falta: ['Si puede dejar la parcela una temporada sin cosecha'],
+  },
+  cafe: {
+    nombre: 'Café', familia: 'perenne', perenne: true, cicloSemanas: 156, kc: [0.9, 0.95, 0.95], tCalor: 30, tolerancia: 0.4,
+    encharca: true, riego: false, mercado: 88, forraje: 0, cosecha: true,
+    beneficios: ['Es el cultivo que más vende Honduras afuera', 'Da cosecha cada año sin volver a sembrar', 'Con sombra protege la tierra de la ladera'],
+    riesgos: ['Tarda unos tres años en dar la primera cosecha', 'La roya y la broca lo atacan', 'El precio cambia mucho de un año a otro'],
+    falta: ['El precio del café esta cosecha en su beneficio o cooperativa'],
+  },
+  platano: {
+    nombre: 'Banano y plátano', familia: 'perenne', perenne: true, cicloSemanas: 52, kc: [0.5, 1.1, 1.0], tCalor: 35, tolerancia: 0.3,
+    encharca: true, riego: false, mercado: 70, forraje: 35, cosecha: true,
+    beneficios: ['Da comida para la casa todo el año', 'Sus hojas y tallos cubren la tierra', 'Se vende en el mercado local'],
+    riesgos: ['Necesita agua todo el año', 'El viento fuerte lo tumba', 'La sigatoka negra daña las hojas'],
+    falta: ['Si hay agua o riego en el verano'],
+  },
+  palma: {
+    nombre: 'Palma africana', familia: 'perenne', perenne: true, cicloSemanas: 156, kc: [0.95, 1.0, 1.0], tCalor: 38, tolerancia: 0.35,
+    encharca: false, riego: false, mercado: 78, forraje: 10, cosecha: true,
+    beneficios: ['Tiene compradores seguros en las extractoras', 'Da cosecha muchos años'],
+    riesgos: ['Tarda unos tres años en producir', 'Ocupa la tierra por más de 20 años', 'Necesita mucha lluvia bien repartida'],
+    falta: ['La extractora más cercana y lo que paga'],
+  },
+  cana: {
+    nombre: 'Caña de azúcar', familia: 'gramínea', perenne: true, cicloSemanas: 52, kc: [0.4, 1.25, 0.75], tCalor: 38, tolerancia: 0.5,
+    encharca: false, riego: false, mercado: 75, forraje: 65, cosecha: true,
+    beneficios: ['Los ingenios compran la cosecha', 'Retoña varios años sin volver a sembrar', 'Sus hojas sirven de comida para el ganado'],
+    riesgos: ['Ocupa la tierra todo el año', 'La quema daña la tierra y el aire'],
+    falta: ['El contrato con el ingenio más cercano'],
+  },
+  melon: {
+    nombre: 'Melón', familia: 'hortaliza', cicloSemanas: 12, kc: [0.5, 0.85, 0.6], tCalor: 35, tolerancia: 0.4,
+    encharca: true, riego: true, mercado: 72, forraje: 10, cosecha: true,
+    beneficios: ['Se exporta y se paga bien con contrato', 'Es corto: unas 12 semanas', 'Cambia de familia y corta las plagas del grano'],
+    riesgos: ['Necesita riego seguro', 'La lluvia en la cosecha pudre la fruta'],
+    falta: ['Si hay riego en su parcela', 'Un comprador o contrato antes de sembrar'],
+  },
+  tabaco: {
+    nombre: 'Tabaco', familia: 'hortaliza', cicloSemanas: 16, kc: [0.5, 1.05, 0.9], tCalor: 35, tolerancia: 0.45,
+    encharca: true, riego: false, mercado: 72, forraje: 0, cosecha: true,
+    beneficios: ['Las fábricas de puros compran la hoja', 'Se siembra en verano, fuera de los granos'],
+    riesgos: ['Es de la familia del tomate: comparte sus plagas', 'Pide mucha mano de obra y secado en galera'],
+    falta: ['Un contrato con una fábrica de puros'],
   },
 }
 

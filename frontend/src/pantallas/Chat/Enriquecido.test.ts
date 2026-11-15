@@ -21,9 +21,18 @@ describe('partirMensaje', () => {
   })
 
   it('descarta etiquetas de cultivos desconocidos o animaciones sin pasos, sin mostrarlas en crudo', () => {
-    expect(partirMensaje('Hola [[mapa:cafe]] [[animacion:Solo título]] adiós')).toEqual([
+    expect(partirMensaje('Hola [[mapa:cacao]] [[animacion:Solo título]] adiós')).toEqual([
       { tipo: 'texto', texto: 'Hola' },
       { tipo: 'texto', texto: 'adiós' },
+    ])
+  })
+})
+
+describe('partirMensaje con fenomenos', () => {
+  it('reconoce [[fenomeno:ID]] y descarta los desconocidos', () => {
+    expect(partirMensaje('Mire:\n[[fenomeno:nino]]\n[[fenomeno:volcan]]')).toEqual([
+      { tipo: 'texto', texto: 'Mire:' },
+      { tipo: 'fenomeno', fenomeno: 'nino' },
     ])
   })
 })

@@ -90,9 +90,10 @@ describe('Cuestionario previo', () => {
   it('se puede escribir el lugar para encontrarlo', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
-    await usuario.type(screen.getByRole('searchbox', { name: 'Escriba su lugar' }), 'danli')
-    expect(screen.getByRole('button', { name: 'Danlí' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Choluteca' })).not.toBeInTheDocument()
+    // Se elige por departamento: Danlí esta en El Paraíso.
+    await usuario.type(screen.getByRole('searchbox', { name: 'Escriba su lugar' }), 'paraiso')
+    expect(screen.getByRole('button', { name: /^El Paraíso/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Choluteca/ })).not.toBeInTheDocument()
   })
 
   it('al elegir el cultivo se abre debajo el selector de semanas; después se eligen los objetivos', async () => {

@@ -1,0 +1,14 @@
+# Dependencias de los scripts de datos. Instalar en .venv: pip install -r scripts/requirements.txt
+# El motor Kharis tiene las suyas en kharis_engine/requirements.txt (va en .venv_kharis, lleva PyTorch).
+pandas
+numpy
+requests
+pyproj
+rasterio
+netCDF4
+xarray
+psutil
+pystac-client
+planetary-computer
+cdsapi
+psycopg[binary]

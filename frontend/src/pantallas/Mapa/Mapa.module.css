@@ -168,10 +168,20 @@
   gap: var(--esp-3);
 }
 
-.escenarios {
+.anioDetectado {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--esp-1);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.anioTipo {
+  display: inline-flex;
+  align-items: center;
   gap: var(--esp-2);
+  font: var(--tipo-cuerpo-fuerte);
+  color: var(--md-sys-color-on-surface);
 }
 
 .puntos {
@@ -211,4 +221,43 @@
     flex: none;
     width: 24rem;
   }
+}
+
+/* ---------- Capas del mapa ---------- */
+
+/* El selector va debajo del mapa, no encima: asi no tapa lo que se esta mirando. */
+.capas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.grupoCapas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.leyendaDatos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2) var(--esp-4);
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.escala {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font: var(--tipo-etiqueta);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.barraEscala {
+  width: 6rem;
+  height: 12px;
+  border-radius: var(--forma-sm);
 }
