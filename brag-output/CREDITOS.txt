@@ -1,0 +1,10 @@
+Música
+"Lucky Acoustic" de Jesse Keller, con licencia CC BY 3.0
+https://creativecommons.org/licenses/by/3.0/
+Encontrada en Openverse (fuente: Jamendo): https://www.jamendo.com/track/1540859
+Cambios: se usa el tramo final de la pista (unos 33 s), con el tempo reducido un 3 % (de 93 a 90 pulsos por minuto), los primeros 4 s filtrados y un desvanecido al cierre.
+
+Imagen
+Pantallas reales de AgroResilience capturadas en Chrome.
+Mapa: límites departamentales de geoBoundaries y OpenStreetMap (ODbL), los mismos del proyecto.
+Tipografía Google Sans Flex (OFL). Iconos Material Symbols (Apache 2.0).

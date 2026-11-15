@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AgroResilience.app</title>
+<style>
+  @font-face {
+    font-family: 'Google Sans Flex';
+    src: url('../frontend/node_modules/@fontsource-variable/google-sans-flex/files/google-sans-flex-latin-wght-normal.woff2') format('woff2');
+    font-weight: 100 1000;
+  }
+  html, body { margin: 0; }
+  body {
+    width: 1920px; height: 1080px; overflow: hidden;
+    background: #004019; /* primary */
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Google Sans Flex', system-ui, sans-serif;
+  }
+  .marca { display: flex; align-items: center; gap: 48px; }
+  .icono { width: 184px; height: 184px; flex: none; }
+  .nombre {
+    font-size: 148px; font-weight: 500; letter-spacing: -0.02em;
+    line-height: 1; color: #ffffff; white-space: nowrap;
+  }
+  .nombre span { color: #96f0a4; font-weight: 400; } /* primary del tema oscuro */
+</style>
+</head>
+<body>
+  <div class="marca">
+    <svg class="icono" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="16" fill="#1E7B3C"/>
+      <path fill="#fff" transform="translate(10 10) scale(0.0458) translate(0 960)" d="M110-160q-13 0-21.5-8.5T80-190q0-13 8.5-21.5T110-220h210q-16-72-62-129.5T151-441q-23-13-20-26t29-13q134 0 227 93t93 227H110Zm430 0q0-42-8-73.5T512-296q40-88 120-136t168-48q26 0 29 13t-20 26q-63 35-109 93.5T640-220h210q13 0 21.5 8.5T880-190q0 13-8.5 21.5T850-160H540Zm-58-193q-14-128 51.5-223.5T704-705q25-8 33.5 4t-9.5 29q-38 36-67.5 82T621-494q-44 21-80 58.5T482-353Zm-61-76q-16-15-35-30t-32-23q3-12 4.5-26.5T360-532q0-55-13-106t-37-97q-13-23-1-31t33 8q45 34 77.5 81T468-573q-18 32-30.5 69.5T421-429Z"/>
+    </svg>
+    <div class="nombre">AgroResilience<span>.app</span></div>
+  </div>
+</body>
+</html>
