@@ -453,6 +453,11 @@
   font: var(--tipo-cuerpo);
 }
 
+/* En telefono el texto del aviso conserva un ancho legible: el boton baja a otra fila. */
+.aviso .textoElemento {
+  flex: 1 1 12rem;
+}
+
 .aviso > svg {
   flex: none;
 }

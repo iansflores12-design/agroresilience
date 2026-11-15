@@ -12,7 +12,20 @@ const SUGERENCIAS = ['¿Qué necesito para empezar?', '¿Y si llueve menos de lo
 let siguienteId = 0
 
 /** Chat de seguimiento sobre una rotacion. Gemini recibe el ranking y la evidencia de la consulta. */
-export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat; cliente?: ClienteChat }) {
+export function ChatSeguimiento({
+  contexto,
+  cliente,
+  titulo = 'Pregunte sobre esta rotación',
+  sugerencias = SUGERENCIAS,
+  respaldo,
+}: {
+  contexto: ContextoChat
+  cliente?: ClienteChat
+  titulo?: string
+  sugerencias?: string[]
+  /** Respuesta preparada de antemano con los datos de la decisión, por si Gemini no contesta. */
+  respaldo?: (pregunta: string) => string
+}) {
   const [mensajes, fijarMensajes] = useState<MensajeChat[]>([])
   const [texto, fijarTexto] = useState('')
   const [esperando, fijarEsperando] = useState(false)
@@ -38,6 +51,11 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
       fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: r.texto, fecha: new Date().toISOString() }])
     } catch (e) {
       if (c.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
+      if (respaldo) {
+        fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: respaldo(limpio), fecha: new Date().toISOString() }])
+        fijarError('Gemini no contestó. Le dejamos un resumen rápido con los datos de su consulta.')
+        return
+      }
       fijarError('Gemini no pudo responder. Su pregunta quedó escrita: puede reintentar.')
       fijarMensajes(lista)
       fijarTexto(limpio)
@@ -56,18 +74,18 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
   return (
     <section className={estilos.chat} aria-labelledby="titulo-chat">
       <h2 id="titulo-chat" className={estilos.tituloTarjeta}>
-        Pregunte sobre esta rotación
+        {titulo}
       </h2>
       {mensajes.length === 0 && (
         <div className={estilos.sugerencias} role="group" aria-label="Sugerencias">
-          {SUGERENCIAS.map((s) => (
+          {sugerencias.map((s) => (
             <Chip key={s} onClick={() => void enviar(s)}>
               {s}
             </Chip>
           ))}
         </div>
       )}
-      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label="Conversación sobre la rotación">
+      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={`Conversación: ${titulo}`}>
         {mensajes.map((m) => (
           <p key={m.id} className={m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}>
             {m.texto}
