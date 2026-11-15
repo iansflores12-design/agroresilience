@@ -48,6 +48,8 @@ describe('Estructura', () => {
     await usuario.click(screen.getByRole('button', { name: 'Choluteca' }))
     await usuario.click(screen.getByRole('button', { name: /^Plano/ }))
     await usuario.click(screen.getByRole('button', { name: new RegExp(`^${cultivo.nombre}\\s*Unas`) }))
+    expect(screen.getByRole('slider', { name: 'Edad del cultivo' })).toBeInTheDocument()   // se abre abajo
+    await usuario.click(screen.getByRole('button', { name: 'Siguiente' }))
     await usuario.click(screen.getByRole('button', { name: /^De primera/ }))
     expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
 

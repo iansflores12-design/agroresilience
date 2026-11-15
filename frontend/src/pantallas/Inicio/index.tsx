@@ -110,6 +110,7 @@ export default function Inicio() {
               cultivoId: estado.cultivoId && CULTIVOS[estado.cultivoId] ? estado.cultivoId : undefined,
               temporada: estado.temporada ?? undefined,
               parcela: estado.parcela,
+              edadSemanas: estado.edadSemanas,
             }}
             alCancelar={entrada ? () => fijarEditando(false) : undefined}
             alTerminar={(p: Perfil) => {
