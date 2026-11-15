@@ -25,10 +25,10 @@ export function TiraContexto() {
   if (zona && parcela) {
     return (
       <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-        <Chip to="/" icono="grass" aria-label={cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : ariaCultivo}>
+        <Chip to="/?pregunta=cultivoId" icono="grass" aria-label={cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : ariaCultivo}>
           {textoCultivo}
         </Chip>
-        <Chip to="/" icono="my_location" aria-label={t('contexto.suParcelaAria', { lugar: zona.nombre })}>
+        <Chip to="/?pregunta=zonaId" icono="my_location" aria-label={t('contexto.suParcelaAria', { lugar: zona.nombre })}>
           {t('contexto.suParcela')}
         </Chip>
       </div>
@@ -36,7 +36,7 @@ export function TiraContexto() {
   }
   return (
     <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-      <Chip to="/" icono="grass" aria-label={ariaCultivo}>
+      <Chip to="/?pregunta=cultivoId" icono="grass" aria-label={ariaCultivo}>
         {textoCultivo}
       </Chip>
       <Chip

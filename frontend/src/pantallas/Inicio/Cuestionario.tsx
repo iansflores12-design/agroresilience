@@ -96,15 +96,18 @@ export function Cuestionario({
   alTerminar,
   alCancelar,
   soloPaso,
+  pasoInicial,
 }: {
   inicial: Respuestas
   alTerminar: (p: Perfil) => void
   alCancelar?: () => void
   soloPaso?: ClavePregunta
+  /** Pregunta con la que abre el cuestionario completo (desde los chips de la barra superior). */
+  pasoInicial?: ClavePregunta
 }) {
   const { t } = useTranslation()
   const PREGUNTAS = useMemo(() => preguntas(t), [t])
-  const [paso, fijarPaso] = useState(() => (soloPaso ? Math.max(0, CLAVES.indexOf(soloPaso)) : 0))
+  const [paso, fijarPaso] = useState(() => (Math.max(0, CLAVES.indexOf(soloPaso ?? pasoInicial ?? 'zonaId'))))
   const [respuestas, fijarRespuestas] = useState<Respuestas>(inicial)
   // 'listo', 'buscando' o la clave de traduccion del error.
   const [gps, fijarGps] = useState<'listo' | 'buscando' | string>('listo')

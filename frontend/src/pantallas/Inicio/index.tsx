@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useIdioma, useLocale } from '../../i18n'
@@ -267,6 +268,8 @@ function Rotaciones({ d }: { d: Decision }) {
   )
 }
 
+const PREGUNTAS_CHIP: ClavePregunta[] = ['zonaId', 'cultivoId']
+
 export default function Inicio() {
   const { t } = useTranslation()
   const idioma = useIdioma()
@@ -278,6 +281,19 @@ export default function Inicio() {
   const [editando, fijarEditando] = useState<ClavePregunta | 'todo' | null>(null)
   const [intento, fijarIntento] = useState(0)
   const decision = useDecision(editando ? null : entrada, intento)
+  // Los chips de la barra superior abren aquí una pregunta: /?pregunta=cultivoId o zonaId.
+  const [params, fijarParams] = useSearchParams()
+  const pedida = params.get('pregunta')
+  const [pasoInicial, fijarPasoInicial] = useState<ClavePregunta | undefined>()
+  const hayEntrada = Boolean(entrada)
+  useEffect(() => {
+    if (!pedida) return
+    if (PREGUNTAS_CHIP.includes(pedida as ClavePregunta)) {
+      if (hayEntrada) fijarEditando(pedida as ClavePregunta)
+      else fijarPasoInicial(pedida as ClavePregunta)
+    }
+    fijarParams({}, { replace: true })
+  }, [pedida, hayEntrada, fijarParams])
 
   if (!entrada || editando) {
     const cultivoValido = estado.cultivoId && CULTIVOS[estado.cultivoId] ? estado.cultivoId : undefined
@@ -285,7 +301,8 @@ export default function Inicio() {
       <div className="pantalla">
         <div className={estilos.medio}>
           <Cuestionario
-            key={editando ?? 'nuevo'}
+            key={`${editando ?? 'nuevo'}-${pasoInicial ?? ''}`}
+            pasoInicial={pasoInicial}
             soloPaso={entrada && editando && editando !== 'todo' ? editando : undefined}
             inicial={{
               zonaId: estado.zonaId && LUGARES[estado.zonaId] ? estado.zonaId : undefined,
