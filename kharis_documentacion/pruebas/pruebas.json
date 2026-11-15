@@ -1,0 +1,284 @@
+{
+ "resumen": {
+  "fecha": "2026-11-15 04:14:20",
+  "python": "3.15.2",
+  "torch": "2.14.1+cu130",
+  "numpy": "2.5.4",
+  "pandas": "3.1.1",
+  "gpu": "NVIDIA GeForce RTX 3070",
+  "pruebas": 38,
+  "fallos": 0,
+  "errores": 0,
+  "omitidas": 0,
+  "segundos_total": 33.0,
+  "todo_bien": true
+ },
+ "pruebas": [
+  {
+   "clase": "PruebasDatos",
+   "nombre": "test_alias_y_formatos",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.194
+  },
+  {
+   "clase": "PruebasDatos",
+   "nombre": "test_carpeta_processed_y_causalidad",
+   "doc": "Lee una carpeta con el formato processed/ del proyecto. ONI y NDVI entran sin mirar al futuro.",
+   "estado": "ok",
+   "segundos": 0.094
+  },
+  {
+   "clase": "PruebasDatos",
+   "nombre": "test_centinelas_a_nan_nunca_cero",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.009
+  },
+  {
+   "clase": "PruebasDatos",
+   "nombre": "test_orden_cronologico_y_duplicados",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.03
+  },
+  {
+   "clase": "PruebasDatos",
+   "nombre": "test_poda_de_datos",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_acople_fisico",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_balance_hidrico_conserva_masa",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.01
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_balance_un_dia_coincide_con_el_paso_determinista",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_et0_hargreaves_fao56",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_et0_penman_fao56",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_gdd_y_calendario",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.01
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_racha_seca",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFisica",
+   "nombre": "test_radiacion_extraterrestre_fao56",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_backtest_walk_forward_sin_fuga",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.007
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_datos_nuevos_actualizan_y_rollback",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 1.145
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_entrenamiento_aprende",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_estres_marca_muestra_y_sin_datos",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.166
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_lote_corto_se_acumula",
+   "doc": "Pocos dias nuevos: no se crea version ni se pierden. El pronostico parte de ellos y entran en el lote siguiente.",
+   "estado": "ok",
+   "segundos": 1.22
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_pronostico_largo_no_deriva",
+   "doc": "Pasada la rampa, la media y la dispersion del conjunto son las de la climatologia del punto; sin ancla se apartan.",
+   "estado": "ok",
+   "segundos": 2.061
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_pronostico_reproducible",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.62
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_pronostico_y_contrato_de_salida",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.306
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_prueba_congelada_no_ve_el_futuro",
+   "doc": "La proyeccion libre desde el fin del entrenamiento no cambia aunque se altere todo lo posterior.",
+   "estado": "ok",
+   "segundos": 5.175
+  },
+  {
+   "clase": "PruebasFlujo",
+   "nombre": "test_rollback_automatico_si_empeora",
+   "doc": "Con una tolerancia imposible, la candidata siempre pierde y los pesos se quedan como estaban.",
+   "estado": "ok",
+   "segundos": 1.074
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_calibrador",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.008
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_convolucion_causal",
+   "doc": "Rellenar a ambos lados y recortar la cola equivale a rellenar solo a la izquierda (causal).",
+   "estado": "ok",
+   "segundos": 0.011
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_formas_cuantiles_y_anomalia",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.023
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_muestreo_conserva_la_media",
+   "doc": "Sortear de los cuantiles no debe inflar la media: la lluvia muestreada promedia lo que dice la media calibrada.",
+   "estado": "ok",
+   "segundos": 0.29
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_onnx_igual_a_pytorch",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.723
+  },
+  {
+   "clase": "PruebasModelo",
+   "nombre": "test_perdida_ignora_nan_y_pesa_extremos",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.003
+  },
+  {
+   "clase": "PruebasReproducibilidad",
+   "nombre": "test_misma_semilla_mismo_resultado_cpu",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 3.887
+  },
+  {
+   "clase": "PruebasReproducibilidad",
+   "nombre": "test_misma_semilla_mismo_resultado_gpu",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 2.413
+  },
+  {
+   "clase": "PruebasSenales",
+   "nombre": "test_inicio_de_lluvias_construido",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.004
+  },
+  {
+   "clase": "PruebasSenales",
+   "nombre": "test_referencia_solo_periodo_base",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.0
+  },
+  {
+   "clase": "PruebasSenales",
+   "nombre": "test_senales_p1_a_p10",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.474
+  },
+  {
+   "clase": "PruebasSinFuga",
+   "nombre": "test_escalado_y_linea_base_no_ven_el_futuro",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.21
+  },
+  {
+   "clase": "PruebasSinFuga",
+   "nombre": "test_escalador_invertible",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.101
+  },
+  {
+   "clase": "PruebasSinFuga",
+   "nombre": "test_features_causales",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.218
+  },
+  {
+   "clase": "PruebasSinFuga",
+   "nombre": "test_ventanas_alineadas",
+   "doc": "",
+   "estado": "ok",
+   "segundos": 0.105
+  }
+ ]
+}

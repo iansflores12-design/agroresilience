@@ -1,0 +1,301 @@
+punto,latitud,longitud,cultivo,agua,nivel_insumos,co2,periodo,clase_aptitud,indice_aptitud,rendimiento_alcanzable_kg_ha
+comayagua,14.45,-87.64,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4099.0,435.0
+choluteca,13.3,-87.19,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,3268.0,292.0
+danli,14.03,-86.58,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,5262.0,616.0
+juticalpa,14.66,-86.22,Coffee,secano,Low,With CO2 Fertilization,1981-2010,2.0,7720.0,582.0
+sula,15.5,-88.03,Coffee,secano,Low,With CO2 Fertilization,1981-2010,6.0,1332.0,431.0
+olanchito,15.48,-86.57,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4836.0,735.0
+santa_rosa,14.77,-88.78,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,2970.0,320.0
+la_esperanza,14.32,-88.17,Coffee,secano,Low,With CO2 Fertilization,1981-2010,1.0,8910.0,554.0
+la_ceiba,15.78,-86.8,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,5102.0,401.0
+trujillo,15.92,-85.95,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,2760.0,372.0
+tegucigalpa,14.07,-87.19,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4749.0,403.0
+puerto_lempira,15.26,-83.78,Coffee,secano,Low,With CO2 Fertilization,1981-2010,9.0,4551.0,344.0
+roatan,16.32,-86.54,Coffee,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4511.0,447.0
+gracias,14.58,-88.58,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4370.0,555.0
+ocotepeque,14.43,-89.18,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,3813.0,465.0
+santa_barbara,14.92,-88.23,Coffee,secano,Low,With CO2 Fertilization,1981-2010,6.0,1595.0,255.0
+nacaome,13.53,-87.49,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,2806.0,288.0
+marcala,14.15,-88.03,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4687.0,374.0
+copan_ruinas,14.84,-89.15,Coffee,secano,Low,With CO2 Fertilization,1981-2010,6.0,1387.0,70.0
+siguatepeque,14.6,-87.83,Coffee,secano,Low,With CO2 Fertilization,1981-2010,6.0,1884.0,261.0
+lago_yojoa,14.87,-88.0,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4641.0,810.0
+el_progreso,15.4,-87.81,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4054.0,501.0
+tela,15.78,-87.46,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4140.0,402.0
+tocoa,15.68,-86.0,Coffee,secano,Low,With CO2 Fertilization,1981-2010,7.0,751.0,377.0
+catacamas,14.87,-85.88,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,2954.0,332.0
+yoro,15.13,-87.13,Coffee,secano,Low,With CO2 Fertilization,1981-2010,1.0,8600.0,725.0
+san_marcos_colon,13.43,-86.82,Coffee,secano,Low,With CO2 Fertilization,1981-2010,5.0,3939.0,427.0
+zamorano,13.99,-87.02,Coffee,secano,Low,With CO2 Fertilization,1981-2010,4.0,4221.0,429.0
+brus_laguna,15.77,-84.53,Coffee,secano,Low,With CO2 Fertilization,1981-2010,9.0,5556.0,460.0
+comayagua,14.45,-87.64,Cassava,secano,Low,With CO2 Fertilization,1981-2010,4.0,4470.0,3125.0
+choluteca,13.3,-87.19,Cassava,secano,Low,With CO2 Fertilization,1981-2010,2.0,7514.0,3053.0
+danli,14.03,-86.58,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,6941.0,3705.0
+juticalpa,14.66,-86.22,Cassava,secano,Low,With CO2 Fertilization,1981-2010,1.0,8725.0,3514.0
+sula,15.5,-88.03,Cassava,secano,Low,With CO2 Fertilization,1981-2010,6.0,1035.0,2175.0
+olanchito,15.48,-86.57,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,3933.0,3338.0
+santa_rosa,14.77,-88.78,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,3969.0,2369.0
+la_esperanza,14.32,-88.17,Cassava,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_ceiba,15.78,-86.8,Cassava,secano,Low,With CO2 Fertilization,1981-2010,4.0,5102.0,2091.0
+trujillo,15.92,-85.95,Cassava,secano,Low,With CO2 Fertilization,1981-2010,6.0,1941.0,2104.0
+tegucigalpa,14.07,-87.19,Cassava,secano,Low,With CO2 Fertilization,1981-2010,2.0,7210.0,3514.0
+puerto_lempira,15.26,-83.78,Cassava,secano,Low,With CO2 Fertilization,1981-2010,9.0,2931.0,1939.0
+roatan,16.32,-86.54,Cassava,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,6385.0,2879.0
+gracias,14.58,-88.58,Cassava,secano,Low,With CO2 Fertilization,1981-2010,4.0,4650.0,3084.0
+ocotepeque,14.43,-89.18,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,5712.0,2668.0
+santa_barbara,14.92,-88.23,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,2634.0,2288.0
+nacaome,13.53,-87.49,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,5767.0,3085.0
+marcala,14.15,-88.03,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,5949.0,2996.0
+copan_ruinas,14.84,-89.15,Cassava,secano,Low,With CO2 Fertilization,1981-2010,6.0,1387.0,403.0
+siguatepeque,14.6,-87.83,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,2814.0,2465.0
+lago_yojoa,14.87,-88.0,Cassava,secano,Low,With CO2 Fertilization,1981-2010,4.0,4422.0,4034.0
+el_progreso,15.4,-87.81,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,2813.0,2227.0
+tela,15.78,-87.46,Cassava,secano,Low,With CO2 Fertilization,1981-2010,5.0,2538.0,1610.0
+tocoa,15.68,-86.0,Cassava,secano,Low,With CO2 Fertilization,1981-2010,7.0,732.0,1854.0
+catacamas,14.87,-85.88,Cassava,secano,Low,With CO2 Fertilization,1981-2010,4.0,4205.0,2721.0
+yoro,15.13,-87.13,Cassava,secano,Low,With CO2 Fertilization,1981-2010,1.0,8600.0,3627.0
+san_marcos_colon,13.43,-86.82,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,6713.0,3617.0
+zamorano,13.99,-87.02,Cassava,secano,Low,With CO2 Fertilization,1981-2010,3.0,6328.0,3532.0
+brus_laguna,15.77,-84.53,Cassava,secano,Low,With CO2 Fertilization,1981-2010,9.0,3889.0,1734.0
+comayagua,14.45,-87.64,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4425.0,1941.0
+choluteca,13.3,-87.19,Maize,secano,Low,With CO2 Fertilization,1981-2010,2.0,7514.0,2736.0
+danli,14.03,-86.58,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,3583.0,1952.0
+juticalpa,14.66,-86.22,Maize,secano,Low,With CO2 Fertilization,1981-2010,3.0,5501.0,1887.0
+sula,15.5,-88.03,Maize,secano,Low,With CO2 Fertilization,1981-2010,7.0,514.0,1247.0
+olanchito,15.48,-86.57,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,2501.0,1486.0
+santa_rosa,14.77,-88.78,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,3694.0,2181.0
+la_esperanza,14.32,-88.17,Maize,secano,Low,With CO2 Fertilization,1981-2010,1.0,8595.0,3282.0
+la_ceiba,15.78,-86.8,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,2990.0,1205.0
+trujillo,15.92,-85.95,Maize,secano,Low,With CO2 Fertilization,1981-2010,6.0,1638.0,1005.0
+tegucigalpa,14.07,-87.19,Maize,secano,Low,With CO2 Fertilization,1981-2010,3.0,6095.0,3217.0
+puerto_lempira,15.26,-83.78,Maize,secano,Low,With CO2 Fertilization,1981-2010,9.0,2931.0,1755.0
+roatan,16.32,-86.54,Maize,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4569.0,2027.0
+gracias,14.58,-88.58,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,2533.0,2155.0
+ocotepeque,14.43,-89.18,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,3485.0,1671.0
+santa_barbara,14.92,-88.23,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,3425.0,2123.0
+nacaome,13.53,-87.49,Maize,secano,Low,With CO2 Fertilization,1981-2010,2.0,7670.0,3115.0
+marcala,14.15,-88.03,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4439.0,2296.0
+copan_ruinas,14.84,-89.15,Maize,secano,Low,With CO2 Fertilization,1981-2010,6.0,1055.0,521.0
+siguatepeque,14.6,-87.83,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,2797.0,2093.0
+lago_yojoa,14.87,-88.0,Maize,secano,Low,With CO2 Fertilization,1981-2010,5.0,3008.0,2568.0
+el_progreso,15.4,-87.81,Maize,secano,Low,With CO2 Fertilization,1981-2010,6.0,1612.0,1267.0
+tela,15.78,-87.46,Maize,secano,Low,With CO2 Fertilization,1981-2010,6.0,2462.0,1105.0
+tocoa,15.68,-86.0,Maize,secano,Low,With CO2 Fertilization,1981-2010,7.0,442.0,1211.0
+catacamas,14.87,-85.88,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4798.0,2781.0
+yoro,15.13,-87.13,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4642.0,1460.0
+san_marcos_colon,13.43,-86.82,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,4421.0,2705.0
+zamorano,13.99,-87.02,Maize,secano,Low,With CO2 Fertilization,1981-2010,4.0,5161.0,3205.0
+brus_laguna,15.77,-84.53,Maize,secano,Low,With CO2 Fertilization,1981-2010,9.0,3333.0,911.0
+comayagua,14.45,-87.64,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,4.0,4026.0,668.0
+choluteca,13.3,-87.19,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,2.0,7514.0,855.0
+danli,14.03,-86.58,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,5.0,3583.0,744.0
+juticalpa,14.66,-86.22,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,3.0,5501.0,687.0
+sula,15.5,-88.03,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,7.0,318.0,160.0
+olanchito,15.48,-86.57,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1565.0,304.0
+santa_rosa,14.77,-88.78,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1611.0,382.0
+la_esperanza,14.32,-88.17,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,4.0,4534.0,896.0
+la_ceiba,15.78,-86.8,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1589.0,191.0
+trujillo,15.92,-85.95,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,7.0,962.0,159.0
+tegucigalpa,14.07,-87.19,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,3.0,6095.0,1119.0
+puerto_lempira,15.26,-83.78,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,9.0,1365.0,205.0
+roatan,16.32,-86.54,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,3.0,5651.0,839.0
+gracias,14.58,-88.58,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1336.0,415.0
+ocotepeque,14.43,-89.18,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,5.0,3485.0,663.0
+santa_barbara,14.92,-88.23,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1368.0,294.0
+nacaome,13.53,-87.49,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,3.0,5767.0,979.0
+marcala,14.15,-88.03,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,5.0,3034.0,716.0
+copan_ruinas,14.84,-89.15,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,7.0,873.0,81.0
+siguatepeque,14.6,-87.83,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1376.0,219.0
+lago_yojoa,14.87,-88.0,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1281.0,479.0
+el_progreso,15.4,-87.81,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,7.0,866.0,218.0
+tela,15.78,-87.46,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,6.0,1401.0,185.0
+tocoa,15.68,-86.0,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,7.0,227.0,212.0
+catacamas,14.87,-85.88,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,5.0,3615.0,673.0
+yoro,15.13,-87.13,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,5.0,2740.0,408.0
+san_marcos_colon,13.43,-86.82,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,4.0,4421.0,907.0
+zamorano,13.99,-87.02,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,3.0,6328.0,1123.0
+brus_laguna,15.77,-84.53,Phaseolus bean,secano,Low,With CO2 Fertilization,1981-2010,9.0,1667.0,163.0
+comayagua,14.45,-87.64,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,5.0,3806.0,1246.0
+choluteca,13.3,-87.19,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,4.0,5390.0,1324.0
+danli,14.03,-86.58,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,5.0,3583.0,1209.0
+juticalpa,14.66,-86.22,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,3.0,5501.0,1125.0
+sula,15.5,-88.03,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,7.0,308.0,199.0
+olanchito,15.48,-86.57,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1565.0,531.0
+santa_rosa,14.77,-88.78,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1606.0,678.0
+la_esperanza,14.32,-88.17,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,1.0,8595.0,2210.0
+la_ceiba,15.78,-86.8,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1589.0,292.0
+trujillo,15.92,-85.95,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,7.0,962.0,236.0
+tegucigalpa,14.07,-87.19,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,4.0,5296.0,1805.0
+puerto_lempira,15.26,-83.78,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,9.0,0.0,0.0
+roatan,16.32,-86.54,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,4.0,5391.0,1476.0
+gracias,14.58,-88.58,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1336.0,731.0
+ocotepeque,14.43,-89.18,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,5.0,3485.0,1002.0
+santa_barbara,14.92,-88.23,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1368.0,524.0
+nacaome,13.53,-87.49,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,3.0,6187.0,1750.0
+marcala,14.15,-88.03,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,4.0,4629.0,1894.0
+copan_ruinas,14.84,-89.15,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1055.0,217.0
+siguatepeque,14.6,-87.83,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1233.0,329.0
+lago_yojoa,14.87,-88.0,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1281.0,578.0
+el_progreso,15.4,-87.81,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,7.0,866.0,300.0
+tela,15.78,-87.46,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,6.0,1401.0,266.0
+tocoa,15.68,-86.0,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,7.0,227.0,271.0
+catacamas,14.87,-85.88,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,4.0,4798.0,1431.0
+yoro,15.13,-87.13,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,5.0,2740.0,662.0
+san_marcos_colon,13.43,-86.82,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,5.0,3610.0,1220.0
+zamorano,13.99,-87.02,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,3.0,6328.0,1861.0
+brus_laguna,15.77,-84.53,Sorghum,secano,Low,With CO2 Fertilization,1981-2010,9.0,0.0,0.0
+comayagua,14.45,-87.64,Coffee,secano,High,With CO2 Fertilization,1981-2010,4.0,5166.0,1958.0
+choluteca,13.3,-87.19,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3197.0,932.0
+danli,14.03,-86.58,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3200.0,1864.0
+juticalpa,14.66,-86.22,Coffee,secano,High,With CO2 Fertilization,1981-2010,2.0,7487.0,1935.0
+sula,15.5,-88.03,Coffee,secano,High,With CO2 Fertilization,1981-2010,4.0,4101.0,2571.0
+olanchito,15.48,-86.57,Coffee,secano,High,With CO2 Fertilization,1981-2010,3.0,6030.0,2385.0
+santa_rosa,14.77,-88.78,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,2370.0,1265.0
+la_esperanza,14.32,-88.17,Coffee,secano,High,With CO2 Fertilization,1981-2010,3.0,6922.0,1965.0
+la_ceiba,15.78,-86.8,Coffee,secano,High,With CO2 Fertilization,1981-2010,2.0,7126.0,1877.0
+trujillo,15.92,-85.95,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3616.0,2444.0
+tegucigalpa,14.07,-87.19,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3573.0,1226.0
+puerto_lempira,15.26,-83.78,Coffee,secano,High,With CO2 Fertilization,1981-2010,9.0,7778.0,2092.0
+roatan,16.32,-86.54,Coffee,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,2498.0,1710.0
+gracias,14.58,-88.58,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3438.0,2034.0
+ocotepeque,14.43,-89.18,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,2411.0,991.0
+santa_barbara,14.92,-88.23,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,1368.0,1124.0
+nacaome,13.53,-87.49,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,2477.0,855.0
+marcala,14.15,-88.03,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,2744.0,1127.0
+copan_ruinas,14.84,-89.15,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,1055.0,338.0
+siguatepeque,14.6,-87.83,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,1634.0,1080.0
+lago_yojoa,14.87,-88.0,Coffee,secano,High,With CO2 Fertilization,1981-2010,4.0,4272.0,2963.0
+el_progreso,15.4,-87.81,Coffee,secano,High,With CO2 Fertilization,1981-2010,4.0,4410.0,1983.0
+tela,15.78,-87.46,Coffee,secano,High,With CO2 Fertilization,1981-2010,3.0,5602.0,1996.0
+tocoa,15.68,-86.0,Coffee,secano,High,With CO2 Fertilization,1981-2010,2.0,7971.0,2509.0
+catacamas,14.87,-85.88,Coffee,secano,High,With CO2 Fertilization,1981-2010,6.0,2459.0,1342.0
+yoro,15.13,-87.13,Coffee,secano,High,With CO2 Fertilization,1981-2010,4.0,5472.0,2290.0
+san_marcos_colon,13.43,-86.82,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,3610.0,1224.0
+zamorano,13.99,-87.02,Coffee,secano,High,With CO2 Fertilization,1981-2010,5.0,2997.0,1232.0
+brus_laguna,15.77,-84.53,Coffee,secano,High,With CO2 Fertilization,1981-2010,2.0,7778.0,2186.0
+comayagua,14.45,-87.64,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,6853.0,11701.0
+choluteca,13.3,-87.19,Cassava,secano,High,With CO2 Fertilization,1981-2010,2.0,7438.0,7821.0
+danli,14.03,-86.58,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4098.0,11897.0
+juticalpa,14.66,-86.22,Cassava,secano,High,With CO2 Fertilization,1981-2010,1.0,9582.0,11254.0
+sula,15.5,-88.03,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,3873.0,11634.0
+olanchito,15.48,-86.57,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,6486.0,11010.0
+santa_rosa,14.77,-88.78,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,2521.0,5240.0
+la_esperanza,14.32,-88.17,Cassava,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_ceiba,15.78,-86.8,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,6737.0,8510.0
+trujillo,15.92,-85.95,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,3564.0,10263.0
+tegucigalpa,14.07,-87.19,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,5713.0,9820.0
+puerto_lempira,15.26,-83.78,Cassava,secano,High,With CO2 Fertilization,1981-2010,9.0,10000.0,10052.0
+roatan,16.32,-86.54,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4193.0,9966.0
+la_paz,14.32,-87.68,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4558.0,11778.0
+gracias,14.58,-88.58,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,2959.0,7470.0
+ocotepeque,14.43,-89.18,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,2825.0,6559.0
+santa_barbara,14.92,-88.23,Cassava,secano,High,With CO2 Fertilization,1981-2010,6.0,1816.0,6623.0
+nacaome,13.53,-87.49,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,5683.0,7762.0
+marcala,14.15,-88.03,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,2968.0,9375.0
+copan_ruinas,14.84,-89.15,Cassava,secano,High,With CO2 Fertilization,1981-2010,7.0,968.0,926.0
+siguatepeque,14.6,-87.83,Cassava,secano,High,With CO2 Fertilization,1981-2010,6.0,1812.0,5836.0
+lago_yojoa,14.87,-88.0,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,3871.0,11873.0
+el_progreso,15.4,-87.81,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4264.0,9078.0
+tela,15.78,-87.46,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,5478.0,8901.0
+tocoa,15.68,-86.0,Cassava,secano,High,With CO2 Fertilization,1981-2010,2.0,7964.0,11353.0
+catacamas,14.87,-85.88,Cassava,secano,High,With CO2 Fertilization,1981-2010,5.0,3540.0,8915.0
+yoro,15.13,-87.13,Cassava,secano,High,With CO2 Fertilization,1981-2010,3.0,6938.0,11527.0
+san_marcos_colon,13.43,-86.82,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4500.0,9751.0
+zamorano,13.99,-87.02,Cassava,secano,High,With CO2 Fertilization,1981-2010,4.0,4752.0,9630.0
+brus_laguna,15.77,-84.53,Cassava,secano,High,With CO2 Fertilization,1981-2010,1.0,10000.0,9744.0
+comayagua,14.45,-87.64,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,6377.0,8707.0
+choluteca,13.3,-87.19,Maize,secano,High,With CO2 Fertilization,1981-2010,1.0,9586.0,10029.0
+danli,14.03,-86.58,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,3200.0,8509.0
+juticalpa,14.66,-86.22,Maize,secano,High,With CO2 Fertilization,1981-2010,2.0,7487.0,8369.0
+sula,15.5,-88.03,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,2361.0,5677.0
+olanchito,15.48,-86.57,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,3875.0,5305.0
+santa_rosa,14.77,-88.78,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,2263.0,4818.0
+la_esperanza,14.32,-88.17,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,6922.0,9507.0
+la_ceiba,15.78,-86.8,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,2924.0,4291.0
+trujillo,15.92,-85.95,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1430.0,3943.0
+tegucigalpa,14.07,-87.19,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,6992.0,9978.0
+puerto_lempira,15.26,-83.78,Maize,secano,High,With CO2 Fertilization,1981-2010,9.0,5289.0,4551.0
+roatan,16.32,-86.54,Maize,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,5702.0,9194.0
+gracias,14.58,-88.58,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1825.0,5687.0
+ocotepeque,14.43,-89.18,Maize,secano,High,With CO2 Fertilization,1981-2010,4.0,4668.0,8673.0
+santa_barbara,14.92,-88.23,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1999.0,5639.0
+nacaome,13.53,-87.49,Maize,secano,High,With CO2 Fertilization,1981-2010,2.0,7686.0,10445.0
+marcala,14.15,-88.03,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,3156.0,6240.0
+copan_ruinas,14.84,-89.15,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1011.0,1365.0
+siguatepeque,14.6,-87.83,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1740.0,4964.0
+lago_yojoa,14.87,-88.0,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,2150.0,5876.0
+el_progreso,15.4,-87.81,Maize,secano,High,With CO2 Fertilization,1981-2010,6.0,1976.0,3960.0
+tela,15.78,-87.46,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,3893.0,4466.0
+tocoa,15.68,-86.0,Maize,secano,High,With CO2 Fertilization,1981-2010,4.0,5102.0,5608.0
+catacamas,14.87,-85.88,Maize,secano,High,With CO2 Fertilization,1981-2010,4.0,4750.0,10132.0
+yoro,15.13,-87.13,Maize,secano,High,With CO2 Fertilization,1981-2010,5.0,3798.0,5732.0
+san_marcos_colon,13.43,-86.82,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,5632.0,9765.0
+zamorano,13.99,-87.02,Maize,secano,High,With CO2 Fertilization,1981-2010,3.0,5953.0,10391.0
+brus_laguna,15.77,-84.53,Maize,secano,High,With CO2 Fertilization,1981-2010,9.0,3333.0,3396.0
+comayagua,14.45,-87.64,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,2.0,7250.0,3578.0
+choluteca,13.3,-87.19,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,1.0,9586.0,3550.0
+danli,14.03,-86.58,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,4264.0,3564.0
+juticalpa,14.66,-86.22,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,1.0,9661.0,3291.0
+sula,15.5,-88.03,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,4128.0,3352.0
+olanchito,15.48,-86.57,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6632.0,3539.0
+santa_rosa,14.77,-88.78,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3675.0,2645.0
+la_esperanza,14.32,-88.17,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6922.0,4381.0
+la_ceiba,15.78,-86.8,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6913.0,2782.0
+trujillo,15.92,-85.95,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3113.0,2588.0
+tegucigalpa,14.07,-87.19,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6992.0,3781.0
+puerto_lempira,15.26,-83.78,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,9.0,5556.0,2019.0
+roatan,16.32,-86.54,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,5229.0,3677.0
+gracias,14.58,-88.58,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3230.0,3654.0
+ocotepeque,14.43,-89.18,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6349.0,3291.0
+santa_barbara,14.92,-88.23,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3065.0,2528.0
+nacaome,13.53,-87.49,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,2.0,7323.0,3517.0
+marcala,14.15,-88.03,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3156.0,2484.0
+copan_ruinas,14.84,-89.15,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,6.0,1423.0,906.0
+siguatepeque,14.6,-87.83,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,5.0,3023.0,2764.0
+lago_yojoa,14.87,-88.0,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,4249.0,3677.0
+el_progreso,15.4,-87.81,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,4339.0,3247.0
+tela,15.78,-87.46,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,5602.0,2865.0
+tocoa,15.68,-86.0,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,2.0,7149.0,3179.0
+catacamas,14.87,-85.88,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,4.0,4387.0,3069.0
+yoro,15.13,-87.13,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,2.0,7146.0,3424.0
+san_marcos_colon,13.43,-86.82,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,6567.0,3955.0
+zamorano,13.99,-87.02,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,3.0,5953.0,3804.0
+brus_laguna,15.77,-84.53,Phaseolus bean,secano,High,With CO2 Fertilization,1981-2010,9.0,5556.0,1874.0
+comayagua,14.45,-87.64,Sorghum,secano,High,With CO2 Fertilization,1981-2010,3.0,5841.0,5871.0
+choluteca,13.3,-87.19,Sorghum,secano,High,With CO2 Fertilization,1981-2010,2.0,7446.0,5844.0
+danli,14.03,-86.58,Sorghum,secano,High,With CO2 Fertilization,1981-2010,5.0,3200.0,6335.0
+juticalpa,14.66,-86.22,Sorghum,secano,High,With CO2 Fertilization,1981-2010,2.0,7487.0,6229.0
+sula,15.5,-88.03,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1529.0,1920.0
+olanchito,15.48,-86.57,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,2283.0,3056.0
+santa_rosa,14.77,-88.78,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1494.0,1450.0
+la_esperanza,14.32,-88.17,Sorghum,secano,High,With CO2 Fertilization,1981-2010,3.0,6922.0,4920.0
+la_ceiba,15.78,-86.8,Sorghum,secano,High,With CO2 Fertilization,1981-2010,5.0,2924.0,1824.0
+trujillo,15.92,-85.95,Sorghum,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+tegucigalpa,14.07,-87.19,Sorghum,secano,High,With CO2 Fertilization,1981-2010,3.0,6063.0,7025.0
+puerto_lempira,15.26,-83.78,Sorghum,secano,High,With CO2 Fertilization,1981-2010,9.0,0.0,0.0
+roatan,16.32,-86.54,Sorghum,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+la_paz,14.32,-87.68,Sorghum,secano,High,With CO2 Fertilization,1981-2010,4.0,4403.0,6598.0
+gracias,14.58,-88.58,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1235.0,2944.0
+ocotepeque,14.43,-89.18,Sorghum,secano,High,With CO2 Fertilization,1981-2010,5.0,3100.0,5024.0
+santa_barbara,14.92,-88.23,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1290.0,2284.0
+nacaome,13.53,-87.49,Sorghum,secano,High,With CO2 Fertilization,1981-2010,2.0,7323.0,7109.0
+marcala,14.15,-88.03,Sorghum,secano,High,With CO2 Fertilization,1981-2010,4.0,4215.0,3495.0
+copan_ruinas,14.84,-89.15,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1011.0,837.0
+siguatepeque,14.6,-87.83,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1253.0,1103.0
+lago_yojoa,14.87,-88.0,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1328.0,2173.0
+el_progreso,15.4,-87.81,Sorghum,secano,High,With CO2 Fertilization,1981-2010,6.0,1820.0,1907.0
+tela,15.78,-87.46,Sorghum,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+tocoa,15.68,-86.0,Sorghum,secano,High,With CO2 Fertilization,1981-2010,8.0,0.0,0.0
+catacamas,14.87,-85.88,Sorghum,secano,High,With CO2 Fertilization,1981-2010,5.0,3965.0,5923.0
+yoro,15.13,-87.13,Sorghum,secano,High,With CO2 Fertilization,1981-2010,5.0,3798.0,3598.0
+san_marcos_colon,13.43,-86.82,Sorghum,secano,High,With CO2 Fertilization,1981-2010,4.0,4001.0,5695.0
+zamorano,13.99,-87.02,Sorghum,secano,High,With CO2 Fertilization,1981-2010,4.0,5064.0,7416.0
+brus_laguna,15.77,-84.53,Sorghum,secano,High,With CO2 Fertilization,1981-2010,9.0,0.0,0.0

@@ -6,9 +6,50 @@
   padding: var(--esp-4);
 }
 
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
 .pregunta {
   font: var(--tipo-pregunta);
   letter-spacing: -0.01em;
+}
+
+/* Secciones plegables: la flecha gira al abrir. */
+.plegable > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  min-height: var(--alto-accion);
+  cursor: pointer;
+  list-style: none;
+}
+
+.plegable > summary::-webkit-details-marker {
+  display: none;
+}
+
+.plegable > summary > :last-child {
+  flex: none;
+  transition: transform var(--mov-efecto) var(--curva-efecto);
+}
+
+.plegable[open] > summary > :last-child {
+  transform: rotate(180deg);
+}
+
+.plegable[open] > summary {
+  margin-block-end: var(--esp-3);
+}
+
+.anio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  width: 100%;
 }
 
 .cuerpo {
@@ -21,9 +62,10 @@
 /* El mapa lleva su propio alto: en compacta ocupa buena parte de la pantalla. */
 .mapa {
   position: relative;
-  min-height: 22rem;
-  height: 52dvh;
-  max-height: 40rem;
+  /* Honduras es ancha: en telefono el mapa es apaisado para no dejar franjas vacias. */
+  aspect-ratio: 5 / 4;
+  min-height: 20rem; /* el mismo minimo que ContenedorMapa */
+  max-height: 55dvh;
 }
 
 .mapa > section {
@@ -37,16 +79,6 @@
   min-width: 0;
 }
 
-.anio {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-}
-
-.pregunta2 {
-  font: var(--tipo-cuerpo-fuerte);
-}
-
 .controles {
   position: absolute;
   inset-block-start: var(--esp-3);
@@ -58,12 +90,6 @@
   flex-direction: column;
   gap: var(--esp-4);
   min-width: 0;
-}
-
-.lugares {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-3);
 }
 
 .lista {
@@ -170,22 +196,19 @@
     align-items: stretch;
   }
 
-  /* El mapa se queda a la vista mientras se recorre la columna de la derecha. */
   .columnaMapa {
-    position: sticky;
-    inset-block-start: var(--esp-4);
     flex: 1;
-    align-self: flex-start;
   }
 
   .mapa {
-    height: calc(100dvh - 15rem);
+    flex: 1;
+    height: auto;
     max-height: none;
-    min-height: 28rem;
+    min-height: 32rem;
   }
 
   .lateral {
     flex: none;
-    width: 28rem;
+    width: 24rem;
   }
 }

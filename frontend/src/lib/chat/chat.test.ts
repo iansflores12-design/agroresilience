@@ -33,22 +33,6 @@ describe('armarContexto', () => {
   })
 })
 
-describe('armarContexto con recomendacion y perspectiva', () => {
-  it('las agrega solo si vienen y el cliente demo las resume', async () => {
-    const recomendacion = { rotacion: { id: 'frijol', nombre: 'Maíz y después frijol' }, enfoques: ['agua' as const], escenario: 'normal' as const, origen: 'motor' as const }
-    const perspectiva = { temporada: 'Primera 2027', prob: { seco: 0.2, normal: 0.5, lluvioso: 0.3 }, conteo: { seco: 2, normal: 5, lluvioso: 3 }, usable: false }
-    const c = armarContexto({ vista: 'cultivos', cultivoId: 'maiz', edadSemanas: 1, zonaId: 'choluteca', recomendacion, perspectiva })
-    expect(c.recomendacion).toEqual(recomendacion)
-    expect(c.perspectiva).toEqual(perspectiva)
-    const sin = armarContexto({ vista: 'cultivos', cultivoId: 'maiz', edadSemanas: 1, zonaId: 'choluteca' })
-    expect('recomendacion' in sin).toBe(false)
-    expect('perspectiva' in sin).toBe(false)
-    const r = await crearClienteDemo(1).enviar({ mensajes: [], contexto: c })
-    expect(r.texto).toContain('Maíz y después frijol')
-    expect(r.texto).toContain('sin señal clara')
-  })
-})
-
 describe('clienteHttp', () => {
   afterEach(() => vi.unstubAllGlobals())
   const peticion = { mensajes: [], contexto: contextoVacio }

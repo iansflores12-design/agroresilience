@@ -1,0 +1,157 @@
+.texto {
+  white-space: pre-wrap;
+}
+
+/* Cursor de escritura: una barra que late al final del texto que va saliendo. */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: text-bottom;
+  background-color: currentColor;
+  animation: latir 900ms steps(2, start) infinite;
+}
+
+@keyframes latir {
+  to {
+    visibility: hidden;
+  }
+}
+
+.texto + .texto,
+.texto + .figura,
+.figura + .texto,
+.figura + .figura {
+  margin-block-start: var(--esp-3);
+}
+
+.figura {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-2);
+  margin: 0;
+  width: 100%;
+}
+
+/* ---------- Mapa ---------- */
+
+.mapa {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+}
+
+.mapa > section {
+  height: 100%;
+  min-height: 0;
+  border-radius: var(--forma-lg);
+  clip-path: inset(0 round var(--forma-lg));
+}
+
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ---------- Explicación animada ---------- */
+
+.tituloAnimacion {
+  font: var(--tipo-cuerpo-fuerte);
+}
+
+.pasos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  width: 100%;
+}
+
+/* Cada paso entra medio segundo después del anterior: se lee al ritmo en que aparece. */
+.paso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  animation: entrar var(--mov-lento) var(--curva-efecto) both;
+  animation-delay: calc(var(--i) * 500ms);
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.numero {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-on-surface);
+  color: var(--md-sys-color-surface);
+  font: var(--tipo-nota);
+  font-weight: 700;
+}
+
+.textoPaso {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+  padding-block-start: 2px;
+}
+
+.medida {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.barra {
+  flex: 1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+/* La barra crece desde la izquierda hasta su valor, justo después de que entra su paso. */
+.barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--agro-color-agua);
+  transform-origin: left center;
+  transform: scaleX(var(--valor));
+  animation: crecer 700ms var(--curva-efecto) both;
+  animation-delay: calc(var(--i) * 500ms + 200ms);
+}
+
+@keyframes crecer {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.cifra {
+  flex: none;
+  font: var(--tipo-nota);
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paso,
+  .barra > span {
+    animation: none;
+  }
+}

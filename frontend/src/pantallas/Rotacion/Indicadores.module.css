@@ -1,0 +1,196 @@
+/* ---------- Indicador circular ---------- */
+
+.anillo {
+  position: relative;
+  flex: none;
+}
+
+.anillo > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pista {
+  stroke: var(--md-sys-color-surface-container-highest);
+}
+
+.activo {
+  stroke: var(--md-sys-color-on-surface);
+  transition: stroke-dasharray var(--mov-espacial-lento) var(--curva-estandar);
+}
+
+.centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.numero {
+  font-size: 3.25rem;
+  font-weight: 700;
+  font-stretch: 100%;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.deCien {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Indicador lineal (M3 Expressive: 8 px, hueco y punto de parada) ---------- */
+
+.lineal {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  height: 8px;
+}
+
+.linealActivo,
+.linealPista {
+  flex-basis: 0;
+  min-width: 4px;
+  border-radius: var(--forma-completa);
+}
+
+.linealPista {
+  position: relative;
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.parada {
+  position: absolute;
+  inset-block: 2px;
+  inset-inline-end: 2px;
+  width: 4px;
+  border-radius: var(--forma-completa);
+}
+
+.tinta .linealActivo,
+.tinta .parada {
+  background-color: var(--md-sys-color-on-surface);
+}
+
+.agua .linealActivo,
+.agua .parada {
+  background-color: var(--agro-color-agua);
+}
+
+/* ---------- Indicador circular indeterminado ---------- */
+
+.girando {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--md-sys-color-surface-container-highest);
+  border-block-start-color: var(--md-sys-color-on-surface);
+  border-radius: var(--forma-completa);
+  animation: girar 0.9s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Pestanas principales ---------- */
+
+.pestanas {
+  display: flex;
+  flex-direction: column;
+}
+
+.listaPestanas {
+  display: flex;
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.pestana {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 64px;
+  padding: 0 var(--esp-2);
+  border: 0;
+  background: none;
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--tipo-nota);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pestanaActiva {
+  color: var(--md-sys-color-primary);
+}
+
+.contenidoPestana {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  min-height: 64px;
+  text-align: center;
+}
+
+.etiquetaPestana {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  white-space: nowrap;
+}
+
+/* Insignia de M3 con el numero de elementos. */
+.cuenta {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 4px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Indicador activo: tan ancho como el contenido, esquinas de arriba redondas. */
+.indicador {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background-color: var(--md-sys-color-primary);
+  transform: scaleX(0);
+  transition: transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.pestanaActiva .indicador {
+  transform: scaleX(1);
+}
+
+.panel {
+  padding-block-start: var(--esp-4);
+  outline: none;
+}
+
+.panel:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+  border-radius: var(--forma-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .girando {
+    animation-duration: 3s;
+  }
+}

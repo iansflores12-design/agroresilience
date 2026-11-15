@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kharis 2021–2026</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f3f0;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --band: rgba(235,104,52,0.14); --ref: #898781;
+  --good: #006300; --bad: #d03b3b;
+  --accent-bg: #0b0b0b; --accent-ink: #fcfcfb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --band: rgba(217,89,38,0.14); --ref: #898781;
+    --good: #0ca30c; --bad: #e66767;
+    --accent-bg: #f0efec; --accent-ink: #1a1a19;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --band: rgba(217,89,38,0.14); --ref: #898781;
+  --good: #0ca30c; --bad: #e66767;
+  --accent-bg: #f0efec; --accent-ink: #1a1a19;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-size: 26px; line-height: 1.25; margin: 0; font-weight: 600; }
+h2 { font-size: 18px; margin: 0; font-weight: 600; }
+p { margin: 0; }
+.sub { color: var(--ink-2); }
+.nota { font-size: 13px; color: var(--muted); }
+.tarjeta { background: var(--surface); border-radius: 14px; box-shadow: 0 0 0 1px var(--ring); padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.controles { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; position: sticky; top: 0; z-index: 2; background: var(--page); padding: 8px 0; }
+select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 10px; padding: 8px 10px; min-height: 40px; max-width: 100%; }
+.botones { display: flex; flex-wrap: wrap; gap: 6px; }
+.botones button, .seg button { font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 999px; padding: 6px 12px; min-height: 36px; cursor: pointer; }
+.botones button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent-ink); border-color: var(--accent-bg); }
+.seg { display: inline-flex; gap: 6px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border-radius: 12px; box-shadow: 0 0 0 1px var(--ring); padding: 12px 14px; }
+.tile .k { font-size: 13px; color: var(--ink-2); }
+.tile .v { font-size: 24px; font-weight: 500; }
+.tile .d { font-size: 12px; color: var(--muted); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; }
+.leyenda i.cuadro { width: 12px; height: 12px; border: 0; border-radius: 3px; }
+.leyenda label { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
+.lienzo { position: relative; width: 100%; height: 320px; }
+.lienzo.bajo { height: 260px; }
+.cabeza { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+details summary { cursor: pointer; color: var(--ink-2); font-size: 14px; }
+.tabla { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 13px; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; }
+.mejor { color: var(--good); font-weight: 600; }
+.peor { color: var(--bad); }
+.usa { font-size: 12px; color: var(--ink-2); }
+.dos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (min-width: 900px) { .dos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .lienzo { height: 260px; } h1 { font-size: 22px; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Kharis 2021–2026: real contra predicho, motor reforzado</h1>
+    <p class="sub">Motor congelado el 31 de diciembre de 2020: nada de 2021 en adelante ajustó nada. Ahora con mezcla con la climatología por día de adelanto y El Niño en la temporada.</p>
+  </header>
+
+  <div class="controles" role="group" aria-label="Lugar y variable">
+    <label class="sr" for="lugar">Lugar</label>
+    <select id="lugar"></select>
+    <div class="botones" id="variables" role="group" aria-label="Variable"></div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">Error a 1 día</div><div class="v" id="t1">–</div><div class="d">promedio diario, 2021–2026</div></div>
+    <div class="tile"><div class="k">Error de la climatología</div><div class="v" id="t2">–</div><div class="d">lo normal 1996–2020</div></div>
+    <div class="tile"><div class="k">Mejora de Kharis a 1 día</div><div class="v" id="t3">–</div><div class="d">puntaje de banda frente a la climatología</div></div>
+    <div class="tile"><div class="k">Proyección de 6 años, error mensual</div><div class="v" id="t4">–</div><div class="d" id="t4d">–</div></div>
+  </div>
+
+  <section class="tarjeta" aria-labelledby="h-mes">
+    <div class="cabeza"><h2 id="h-mes">Mes a mes, 2021–2026</h2><p class="nota" id="u-mes"></p></div>
+    <div class="leyenda" id="ley-mes"></div>
+    <div class="lienzo"><canvas id="c-mes" role="img" aria-label="Serie mensual de 2021 a 2026: valor real, predicción a 1 día, proyección libre con su banda y climatología.">Serie mensual real contra predicha.</canvas></div>
+    <details><summary>Ver como tabla</summary><div class="tabla" id="tb-mes"></div></details>
+  </section>
+
+  <div class="dos">
+    <section class="tarjeta" aria-labelledby="h-h">
+      <div class="cabeza"><h2 id="h-h">Escala diaria: de 1 a 7 días</h2>
+        <div class="seg" role="group" aria-label="Medida"><button data-m="cuantiles" aria-pressed="true">Banda</button><button data-m="rmse" aria-pressed="false">Media</button></div></div>
+      <p class="nota">Mejora frente a la climatología en cada día de adelanto. Sobre 0 % le gana; bajo 0 %, pierde. Banda = puntaje de cuantiles (aproxima el CRPS); Media = RMSE.</p>
+      <div class="leyenda" id="ley-h"></div>
+      <div class="lienzo bajo"><canvas id="c-h" role="img" aria-label="Mejora frente a la climatología por día de adelanto, sin y con la mezcla.">Mejora por día de adelanto.</canvas></div>
+      <details><summary>Ver como tabla</summary><div class="tabla" id="tb-h"></div></details>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="h-a">
+      <div class="cabeza"><h2 id="h-a">Multianual: cada año frente a lo normal</h2></div>
+      <p class="nota" id="n-a"></p>
+      <div class="leyenda" id="ley-a"></div>
+      <div class="lienzo bajo"><canvas id="c-a" role="img" aria-label="Anomalía anual frente a la climatología, real y proyectada, de 2021 a 2026.">Anomalía anual.</canvas></div>
+      <details><summary>Ver como tabla</summary><div class="tabla" id="tb-a"></div></details>
+    </section>
+  </div>
+
+  <div class="dos">
+    <section class="tarjeta" aria-labelledby="h-ll">
+      <h2 id="h-ll">Lluvia: ¿acierta si llueve?</h2>
+      <p class="nota">Mejora del puntaje de Brier frente a la climatología (sobre 0 % es mejor), promedio de los 30 puntos. Antes = la red sola; ahora = con la mezcla.</p>
+      <div class="tabla" id="tb-ll"></div>
+      <p class="nota" id="n-ll"></p>
+    </section>
+    <section class="tarjeta" aria-labelledby="h-en">
+      <h2 id="h-en">El Niño en la temporada</h2>
+      <p class="nota">Mejora del promedio mensual frente a la climatología al usar el ONI del día de emisión. Se usa solo donde la validación cruzada 1996–2020 lo respaldó (marcado).</p>
+      <div class="tabla" id="tb-en"></div>
+    </section>
+  </div>
+
+  <p class="nota" id="pie"></p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const DATOS = /*__DATOS__*/null;
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let lugar = 'honduras', vi = 0, medida = 'cuantiles', verAntes = true;
+const graf = {};
+
+const fmt = (x, d = 2) => (x === null || x === undefined || !isFinite(x)) ? '–' : Number(x).toFixed(d);
+const pct = (x, d = 1) => (x === null || x === undefined || !isFinite(x)) ? '–' : (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d) + ' %';
+
+// Linea vertical de mira en el punto bajo el cursor
+const mira = { id: 'mira', afterDraw(c) {
+  const a = c.tooltip && c.tooltip.getActiveElements();
+  if (!a || !a.length) return;
+  const x = a[0].element.x, { top, bottom } = c.chartArea, g = c.ctx;
+  g.save(); g.strokeStyle = css('--axis'); g.lineWidth = 1; g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
+} };
+
+function ejes(extra = {}) {
+  return {
+    x: { grid: { display: false }, border: { color: css('--axis') }, ticks: { color: css('--muted'), maxRotation: 0 }, ...extra.x },
+    y: { grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--muted') }, ...extra.y },
+  };
+}
+
+function leyenda(id, items, control) {
+  $(id).innerHTML = items.map(([t, color, tipo]) =>
+    `<span><i ${tipo === 'cuadro' ? 'class="cuadro"' : ''} style="${tipo === 'cuadro' ? 'background:' + color : 'border-top:2px ' + (tipo || 'solid') + ' ' + color}"></i>${t}</span>`).join('') + (control || '');
+}
+
+function tabla(id, cab, filas) {
+  $(id).innerHTML = '<table><thead><tr>' + cab.map((c) => `<th scope="col">${c}</th>`).join('') + '</tr></thead><tbody>' +
+    filas.map((f) => '<tr>' + f.map((c, i) => i === 0 ? `<th scope="row">${c}</th>` : `<td>${c}</td>`).join('') + '</tr>').join('') + '</tbody></table>';
+}
+
+function nuevo(id, cfg) {
+  if (graf[id]) graf[id].destroy();
+  graf[id] = new Chart($(id), cfg);
+}
+
+function pintarMes() {
+  const [v, nombre, u, dec] = DATOS.vars[vi];
+  const s = DATOS.serie[v][lugar], antes = lugar === 'honduras' ? DATOS.antes[v] : null;
+  const real = css('--ink'), azul = css('--s1'), nar = css('--s2'), ref = css('--ref');
+  const ds = [
+    { label: 'p10', data: s.p10, borderWidth: 0, pointRadius: 0, fill: false },
+    { label: 'p90', data: s.p90, borderWidth: 0, pointRadius: 0, fill: '-1', backgroundColor: css('--band') },
+    { label: 'Climatología 1996–2020', data: s.clim, borderColor: ref, borderWidth: 1.5, borderDash: [2, 3], pointRadius: 0, pointHoverRadius: 3 },
+  ];
+  if (antes && verAntes) ds.push({ label: 'Proyección libre anterior', data: antes, borderColor: ref, borderWidth: 2, borderDash: [8, 4], pointRadius: 0, pointHoverRadius: 3 });
+  ds.push({ label: 'Proyección libre desde 2020', data: s.libre, borderColor: nar, backgroundColor: nar, borderWidth: 2, borderDash: [6, 4], pointRadius: 0, pointHoverRadius: 4 });
+  ds.push({ label: 'Predicción a 1 día', data: s.pred, borderColor: azul, backgroundColor: azul, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 });
+  ds.push({ label: 'Valor real', data: s.real, borderColor: real, backgroundColor: real, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 });
+  const items = [['Valor real', real], ['Predicción a 1 día', azul], ['Proyección libre desde 2020 (banda p10–p90)', nar, 'dashed'], ['Climatología', ref, 'dotted']];
+  if (antes) items.push(['Proyección anterior (sin El Niño ni mezcla)', ref, 'dashed']);
+  leyenda('ley-mes', items, antes ? `<label><input type="checkbox" id="ck-antes" ${verAntes ? 'checked' : ''}>Mostrar la anterior</label>` : '');
+  if (antes) $('ck-antes').onchange = (e) => { verAntes = e.target.checked; pintarMes(); };
+  $('u-mes').textContent = `${nombre} en ${u} · ${DATOS.lugares.find((l) => l[0] === lugar)[1]}` +
+    (v === 'PRECTOTCORR' ? ' · la banda es la de un día cualquiera del mes, no la del promedio' : '');
+  const M = DATOS.meses;
+  nuevo('c-mes', { type: 'line', data: { labels: M, datasets: ds }, plugins: [mira], options: {
+    responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { filter: (it) => !['p10', 'p90'].includes(it.dataset.label),
+      callbacks: { title: (it) => it[0].label, label: (it) => ` ${it.dataset.label}: ${fmt(it.parsed.y, dec)} ${u}`,
+        afterBody: (it) => { const i = it[0].dataIndex; return s.p10[i] === null ? '' : ` Banda: ${fmt(s.p10[i], dec)} a ${fmt(s.p90[i], dec)} ${u}`; } } } },
+    scales: ejes({ x: { ticks: { color: css('--muted'), autoSkip: false, maxRotation: 0, callback: (val) => M[val].endsWith('-01') ? M[val].slice(0, 4) : '' } } }),
+  } });
+  tabla('tb-mes', ['Mes', 'Real', 'A 1 día', 'Libre', 'p10', 'p90', 'Climatología'],
+    M.map((m, i) => [m, fmt(s.real[i], dec), fmt(s.pred[i], dec), fmt(s.libre[i], dec), fmt(s.p10[i], dec), fmt(s.p90[i], dec), fmt(s.clim[i], dec)]));
+}
+
+function pintarTiles() {
+  const [v, , u] = DATOS.vars[vi], st = DATOS.stats[v][lugar];
+  $('t1').textContent = `${fmt(st.mae1)} ${u}`;
+  $('t2').textContent = `${fmt(st.maeclim)} ${u}`;
+  // La mejora se mide con el puntaje de cuantiles (aproxima el CRPS): es justo para todas las variables.
+  // Con el MAE la lluvia sale castigada porque premia predecir poca lluvia.
+  $('t3').textContent = pct(DATOS.horizonte[v][lugar].con.cuantiles[0]);
+  $('t4').textContent = `${fmt(st.libre_mes)} ${u}`;
+  $('t4d').textContent = `climatología: ${fmt(st.clim_mes)} ${u}`;
+}
+
+function pintarHorizonte() {
+  const [v, nombre] = DATOS.vars[vi], h = DATOS.horizonte[v][lugar];
+  const azul = css('--s1'), ref = css('--ref');
+  const dias = [1, 2, 3, 4, 5, 6, 7].map((d) => d === 1 ? '1 día' : d + ' días');
+  leyenda('ley-h', [['Con la mezcla (ahora)', azul], ['La red sola (antes)', ref, 'dashed']]);
+  nuevo('c-h', { type: 'line', data: { labels: dias, datasets: [
+    { label: 'La red sola (antes)', data: h.sin[medida], borderColor: ref, backgroundColor: ref, borderWidth: 2, borderDash: [6, 4], pointRadius: 4, pointHoverRadius: 6 },
+    { label: 'Con la mezcla (ahora)', data: h.con[medida], borderColor: azul, backgroundColor: azul, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6 },
+  ] }, plugins: [mira, { id: 'cero', beforeDatasetsDraw(c) { const y = c.scales.y.getPixelForValue(0), { left, right } = c.chartArea, g = c.ctx;
+      g.save(); g.strokeStyle = css('--axis'); g.lineWidth = 1.5; g.beginPath(); g.moveTo(left, y); g.lineTo(right, y); g.stroke(); g.restore(); } }],
+  options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (it) => ` ${it.dataset.label}: ${pct(it.parsed.y)}` } } },
+    scales: ejes({ y: { grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--muted'), callback: (x) => x + ' %' } } }) } });
+  tabla('tb-h', ['Adelanto', 'Antes', 'Ahora'], dias.map((d, i) => [d, pct(h.sin[medida][i]), pct(h.con[medida][i])]));
+}
+
+function pintarAnual() {
+  const [v, nombre, u, dec] = DATOS.vars[vi], a = DATOS.anual[v][lugar], tol = DATOS.tol[v];
+  const azul = css('--s1'), nar = css('--s2'), ref = css('--ref');
+  const unidad = v === 'PRECTOTCORR' ? u : u;
+  const conTol = lugar === 'honduras' && tol;
+  leyenda('ley-a', [['Real', azul, 'cuadro'], ['Proyección libre', nar, 'cuadro']].concat(conTol ? [['Tolerancia de deriva (±½ σ entre años)', ref, 'dashed']] : []));
+  $('n-a').textContent = conTol
+    ? `Diferencia del promedio de cada año con lo normal (${unidad}). La proyección no debe salirse de la tolerancia: índice de deriva ${fmt(DATOS.deriva.indice, 2)} (${DATOS.deriva.fuera} de ${DATOS.deriva.casos} casos fuera).`
+    : `Diferencia del promedio de cada año con lo normal en este lugar (${unidad}). La tolerancia de deriva se mide con el promedio de Honduras.`;
+  const planos = conTol ? [{ id: 'tol', beforeDatasetsDraw(c) { const g = c.ctx, { left, right } = c.chartArea;
+    [tol, -tol].forEach((t) => { const y = c.scales.y.getPixelForValue(t); g.save(); g.strokeStyle = ref; g.setLineDash([6, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(left, y); g.lineTo(right, y); g.stroke(); g.restore(); }); } }] : [];
+  const lim = conTol ? Math.max(tol * 1.4, ...a.real.map(Math.abs), ...a.libre.map(Math.abs)) : undefined;
+  nuevo('c-a', { type: 'bar', data: { labels: DATOS.anios.map(String), datasets: [
+    { label: 'Real', data: a.real, backgroundColor: azul, borderRadius: 4, borderSkipped: false, barPercentage: 0.8, categoryPercentage: 0.7 },
+    { label: 'Proyección libre', data: a.libre, backgroundColor: nar, borderRadius: 4, borderSkipped: false, barPercentage: 0.8, categoryPercentage: 0.7 },
+  ] }, plugins: planos, options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (it) => ` ${it.dataset.label}: ${it.parsed.y > 0 ? '+' : ''}${fmt(it.parsed.y, dec)} ${unidad}` } } },
+    scales: ejes({ y: { grid: { color: css('--grid') }, border: { display: false }, ticks: { color: css('--muted') }, ...(lim ? { min: -lim, max: lim } : {}) } }) } });
+  tabla('tb-a', ['Año', 'Real', 'Proyección', ...(conTol ? ['Tolerancia'] : [])],
+    DATOS.anios.map((y, i) => [y, fmt(a.real[i], dec + 1), fmt(a.libre[i], dec + 1), ...(conTol ? ['±' + fmt(tol, dec + 1)] : [])]));
+}
+
+function pintarFijas() {
+  const L = DATOS.lluvia, hs = ['1 dia', '1 a 7 dias', '7 dias'], nom = { '1 dia': '1 día', '1 a 7 dias': '1 a 7 días', '7 dias': '7 días' };
+  const umb = Object.keys(L.ahora.por_horizonte['1 dia']).filter((k) => k.startsWith('>='));
+  const celda = (a, b) => { const c = b > 0 ? 'mejor' : b < 0 ? 'peor' : ''; return `${pct(100 * a)} → <span class="${c}">${pct(100 * b)}</span>`; };
+  const filas = umb.map((k) => [k.replace('>=', '≥'), ...hs.map((h) => celda(L.antes.por_horizonte[h][k].BSS, L.ahora.por_horizonte[h][k].BSS))]);
+  filas.push(['Cuantiles (CRPS)', ...hs.map((h) => celda(L.antes.por_horizonte[h].puntaje_cuantiles.skill, L.ahora.por_horizonte[h].puntaje_cuantiles.skill))]);
+  tabla('tb-ll', ['Lluvia', ...hs.map((h) => nom[h])], filas);
+  const a1 = L.ahora.por_horizonte['1 dia']['>= 1 mm'];
+  $('n-ll').textContent = `A 1 día distingue los días con lluvia mejor que la climatología: AUC ${fmt(a1.AUC_kharis, 3)} contra ${fmt(a1.AUC_climatologia, 3)} (1 = perfecto, 0.5 = azar).`;
+
+  const E = DATOS.enso, plazos = ['1-3 meses', '4-6 meses', '7-12 meses'];
+  const usa = (v, p) => ['T2M_MAX', 'T2M_MIN', 'T2M'].includes(v) && p !== '7-12 meses';
+  const fe = DATOS.vars.map(([v, n]) => [n, ...plazos.map((p) => {
+    const cv = E.validacion_cruzada_1996_2020[v][p], cg = E.congelada_2021_2026 ? E.congelada_2021_2026[v][p] : null;
+    const c = cg > 0 ? 'mejor' : cg < 0 ? 'peor' : '';
+    return `${pct(100 * cv)} · <span class="${c}">${pct(100 * cg)}</span>${usa(v, p) ? ' <span class="usa">✓ se usa</span>' : ''}`;
+  })]);
+  tabla('tb-en', ['Variable', ...plazos.map((p) => p + '<br><span class="usa">1996–2020 · 2021–2026</span>')], fe);
+
+  const cob = Object.entries(DATOS.cobertura).map(([k, x]) => `${DATOS.vars.find((z) => z[0] === k)?.[1] || k} ${Math.round(100 * x)} %`).join(', ');
+  $('pie').textContent = `Banda p10–p90 de la proyección libre, cobertura real (lo esperado es 80 %): ${cob}. Mezcla ajustada con un motor entrenado hasta 2016 y validado en 2017–2020. Generado ${DATOS.generado}. Fuente: Kharis Engine, datos de NASA POWER y otros en processed/.`;
+}
+
+function pintar() {
+  [...$('variables').children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === vi)));
+  pintarTiles(); pintarMes(); pintarHorizonte(); pintarAnual();
+}
+
+DATOS.lugares.forEach(([id, n]) => { const o = document.createElement('option'); o.value = id; o.textContent = n; $('lugar').appendChild(o); });
+$('lugar').onchange = (e) => { lugar = e.target.value; pintar(); };
+DATOS.vars.forEach(([, n], i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.onclick = () => { vi = i; pintar(); }; $('variables').appendChild(b); });
+document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => {
+  medida = b.dataset.m; document.querySelectorAll('.seg button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); pintarHorizonte();
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', pintar);
+new MutationObserver(pintar).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+pintarFijas();
+pintar();
+</script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+/* Detalle de una rotacion, con patrones de Material 3: barra superior pequena, tarjeta heroe,
+   tarjetas rellenas con listas de una y dos lineas, indicadores, pestanas y tarjeta expandible.
+   Lo que no se toca va en tinta; el color de senal queda para lo tocable. */
+
+.medio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding: var(--esp-2) var(--esp-4) var(--esp-12);
+}
+
+.estado {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Barra superior pequena ---------- */
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+  min-height: 64px;
+  margin-inline-start: calc(-1 * var(--esp-1));
+}
+
+.barraTitulo {
+  font: var(--tipo-titulo);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ---------- Tarjeta heroe ---------- */
+
+.heroe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-6);
+  padding: var(--esp-8) var(--esp-6);
+  border-radius: var(--forma-xxl);
+  background-color: var(--md-sys-color-surface-container);
+  text-align: center;
+}
+
+.heroeTexto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+}
+
+.sobretitulo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font: var(--tipo-nota);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.titular {
+  font: var(--tipo-pregunta);
+  letter-spacing: -0.01em;
+  color: var(--md-sys-color-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.heroeFila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+}
+
+.diferencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 40px;
+  padding-inline: var(--esp-3) var(--esp-4);
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+  font: var(--tipo-etiqueta);
+  font-variant-numeric: tabular-nums;
+}
+
+.apoyo {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Tarjetas rellenas ---------- */
+
+.rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--esp-4);
+}
+
+.tarjeta,
+.analisis,
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  min-width: 0;
+  padding: var(--esp-6) var(--esp-4);
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-low);
+}
+
+.tituloTarjeta {
+  font: var(--tipo-titulo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.apoyoTarjeta {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Listas M3 (una y dos lineas) ---------- */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.elemento,
+.elementoCompacto {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-4);
+  padding-block: var(--esp-3);
+}
+
+.elementoCompacto {
+  align-items: center;
+  padding-block: var(--esp-2);
+}
+
+.elemento + .elemento {
+  border-block-start: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.iconoLista,
+.iconoListaSuave,
+.iconoTemporada,
+.iconoAnalisis {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.iconoListaSuave {
+  width: 32px;
+  height: 32px;
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.textoElemento {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.elemento .textoElemento {
+  padding-block-start: var(--esp-2);
+}
+
+.titularElemento {
+  font: var(--tipo-cuerpo-fuerte);
+}
+
+.sobrelinea,
+.apoyoElemento {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Calendario: linea de tiempo vertical ---------- */
+
+.linea {
+  display: flex;
+  flex-direction: column;
+}
+
+.temporada {
+  position: relative;
+  display: flex;
+  gap: var(--esp-4);
+  padding-block-end: var(--esp-4);
+}
+
+/* Trazo que une las temporadas. */
+.temporada:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  inset-block: 44px 0;
+  inset-inline-start: 19px;
+  width: 2px;
+  border-radius: 1px;
+  background-color: var(--md-sys-color-outline-variant);
+}
+
+.iconoTemporada {
+  background-color: var(--agro-color-agua-container);
+  color: var(--agro-color-on-agua-container);
+}
+
+.temporadaVacia .iconoTemporada {
+  background-color: var(--agro-color-tierra-container);
+  color: var(--agro-color-on-tierra-container);
+}
+
+.temporada .textoElemento {
+  gap: var(--esp-2);
+  padding-block-start: 0;
+}
+
+/* ---------- Partes del puntaje ---------- */
+
+.partes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.parte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.parteCabeza {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.parteCabeza > svg {
+  flex: none;
+}
+
+.parteNombre {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-1) var(--esp-2);
+  min-width: 0;
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+}
+
+.parteValor {
+  flex: none;
+  font: var(--tipo-cuerpo-fuerte);
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface);
+}
+
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--esp-2);
+  border-radius: var(--forma-sm);
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  font: var(--tipo-nota);
+  font-weight: 600;
+}
+
+/* ---------- Tarjeta expandible ---------- */
+
+.expandible {
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-low);
+}
+
+.expandible > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  min-height: 72px;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--forma-xl);
+  cursor: pointer;
+  list-style: none;
+}
+
+.expandible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.expandible > summary > svg:last-child {
+  flex: none;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform var(--mov-espacial-rapido) var(--curva-resorte);
+}
+
+.expandible[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.expandible > .lista {
+  padding-inline: var(--esp-4);
+}
+
+.avisos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin: var(--esp-2) var(--esp-4) var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-highest);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.avisos > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-2);
+}
+
+.avisos svg {
+  flex: none;
+  margin-block-start: 1px;
+}
+
+/* ---------- Analisis ---------- */
+
+.analisis {
+  scroll-margin-block-start: calc(var(--alto-barra-superior) + var(--esp-4));
+}
+
+.cabezaAnalisis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3) var(--esp-4);
+}
+
+.iconoAnalisis {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--forma-lg);
+}
+
+.cabezaAnalisis > .textoElemento {
+  flex: 1 1 12rem;
+  gap: 0;
+}
+
+.chipEstado {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-height: 32px;
+  padding-inline: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--forma-sm);
+  font: var(--tipo-nota);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.marcaPaso {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.pasoHecho {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.pasoActivo {
+  font: var(--tipo-cuerpo-fuerte);
+  color: var(--md-sys-color-on-surface);
+}
+
+.textoGemini {
+  max-width: var(--ancho-lectura);
+  padding: var(--esp-4);
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: text-bottom;
+  background-color: var(--md-sys-color-on-surface);
+  animation: parpadeo 1s steps(1) infinite;
+}
+
+@keyframes parpadeo {
+  50% {
+    opacity: 0;
+  }
+}
+
+.nota {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Aviso en linea (como un banner de M3): icono, texto y accion. */
+.aviso,
+.fallo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--forma-lg);
+  background-color: var(--agro-color-tierra-container);
+  color: var(--agro-color-on-tierra-container);
+  font: var(--tipo-cuerpo);
+}
+
+/* En telefono el texto del aviso conserva un ancho legible: el boton baja a otra fila. */
+.aviso .textoElemento {
+  flex: 1 1 12rem;
+}
+
+.aviso > svg {
+  flex: none;
+}
+
+.aviso .apoyoElemento {
+  color: inherit;
+}
+
+/* ---------- Chat de seguimiento ---------- */
+
+.sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.mensajes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.burbujaUsuario,
+.burbujaAsistente {
+  max-width: min(36rem, 88%);
+  padding: var(--esp-3) var(--esp-4);
+  font: var(--tipo-cuerpo);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.burbujaUsuario {
+  align-self: flex-end;
+  border-radius: var(--forma-lg-mas) var(--forma-lg-mas) var(--forma-xs) var(--forma-lg-mas);
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.burbujaAsistente {
+  align-self: flex-start;
+  border-radius: var(--forma-lg-mas) var(--forma-lg-mas) var(--forma-lg-mas) var(--forma-xs);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.redactor {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--esp-2);
+}
+
+/* Campo de texto relleno de M3: fondo de superficie y linea inferior. */
+.campo {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--alto-accion);
+  padding: var(--esp-3) var(--esp-4);
+  border: 0;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  font: var(--tipo-cuerpo);
+  resize: vertical;
+}
+
+.campo:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
+
+/* ---------- Ventanas medianas y grandes ---------- */
+
+@media (min-width: 600px) {
+  .medio {
+    padding-inline: var(--esp-6);
+  }
+
+  .heroe {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--esp-8);
+    padding: var(--esp-8);
+    text-align: start;
+  }
+
+  .heroeTexto,
+  .heroeFila {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .tarjeta,
+  .analisis,
+  .chat {
+    padding: var(--esp-6);
+  }
+}
+
+@media (min-width: 840px) {
+  .rejilla {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .titular {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+  }
+}

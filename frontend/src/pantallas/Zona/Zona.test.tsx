@@ -29,7 +29,7 @@ describe('Zona (pantalla)', () => {
     const { container } = renderizarApp('/zona')
     expect(screen.getByText('Aún no eligió un lugar')).toBeInTheDocument()
     for (const z of zonas) expect(screen.getByRole('button', { name: z.nombre })).toHaveAttribute('aria-pressed', 'false')
-    expect(container.querySelector('[data-fenomeno="sequia"]')).toBeInTheDocument()
+    expect(container.querySelector('[data-placeholder="fenomeno"]')).toBeInTheDocument()
   })
 
   it('muestra la humedad de la zona elegida y cambia al cambiar de chip', async () => {

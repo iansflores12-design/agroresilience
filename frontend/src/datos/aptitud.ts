@@ -305,16 +305,11 @@ export function aptitud(departamentoId: string | null, cultivoId: string | null,
 
 /* ---------- Rotaciones de primera a postrera ---------- */
 
-export type ClaveParteRotacion = 'agua' | 'suelo' | 'clima' | 'venta'
-
-/** Pesos por defecto de las partes de una rotacion. */
-export const PESOS_ROTACION: Record<ClaveParteRotacion, number> = { agua: 0.3, suelo: 0.25, clima: 0.25, venta: 0.2 }
-
 const partesRotacion = [
-  { clave: 'agua', nombre: 'Agua' },
-  { clave: 'suelo', nombre: 'Tierra' },
-  { clave: 'clima', nombre: 'Clima' },
-  { clave: 'venta', nombre: 'Venta' },
+  { clave: 'agua', nombre: 'Agua', peso: 0.3 },
+  { clave: 'suelo', nombre: 'Tierra', peso: 0.25 },
+  { clave: 'clima', nombre: 'Clima', peso: 0.25 },
+  { clave: 'venta', nombre: 'Venta', peso: 0.2 },
 ] as const
 
 function cuidadoDeLaTierra(primera: Cultivo, postrera: Cultivo): number {
@@ -357,13 +352,7 @@ export interface RotacionPuntuada {
  * Que sembrar de postrera despues del cultivo elegido, en un departamento. Devuelve primero
  * repetir el mismo cultivo y despues las otras opciones, de la mejor a la peor.
  */
-export function rotacionesPara(
-  departamentoId: string | null,
-  cultivoId: string | null,
-  escenario: Escenario,
-  opciones?: { pesos?: Record<ClaveParteRotacion, number> },
-): RotacionPuntuada[] {
-  const pesos = opciones?.pesos ?? PESOS_ROTACION
+export function rotacionesPara(departamentoId: string | null, cultivoId: string | null, escenario: Escenario): RotacionPuntuada[] {
   const d = buscarDepartamento(departamentoId)
   const primera = buscarCultivo(cultivoId)
   if (!d || !primera || !tieneAptitud(cultivoId)) return []
@@ -380,8 +369,8 @@ export function rotacionesPara(
       clima: p.total,
       venta: limitar(r.mercado + (actual ? 0 : 8), 0, 100),
     }
-    const partes: ParteAptitud[] = partesRotacion.map((f) => ({ ...f, peso: pesos[f.clave], valor: Math.round(valores[f.clave]) }))
-    const total = Math.round(partesRotacion.reduce((s, f) => s + pesos[f.clave] * valores[f.clave], 0))
+    const partes: ParteAptitud[] = partesRotacion.map((f) => ({ ...f, valor: Math.round(valores[f.clave]) }))
+    const total = Math.round(partesRotacion.reduce((s, f) => s + f.peso * valores[f.clave], 0))
     const rotacion: RotacionPuntuada = {
       id,
       nombre: actual

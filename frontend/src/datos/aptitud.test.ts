@@ -1,4 +1,4 @@
-import { PESOS_ROTACION, aptitud, departamentoDeZona, departamentos, factores, nivelDePuntaje, ranking, rotacionesPara, tieneAptitud } from './aptitud'
+import { aptitud, departamentoDeZona, departamentos, factores, nivelDePuntaje, ranking, rotacionesPara, tieneAptitud } from './aptitud'
 import { cultivos } from './cultivos'
 import limites from './departamentos.geo.json'
 import { zonas } from './zonas'
@@ -56,17 +56,5 @@ describe('aptitud', () => {
     expect(opciones.find((r) => r.mejor)!.total).toBe(Math.max(...opciones.map((r) => r.total)))
     expect(rotacionesPara(null, 'maiz', 'seco')).toEqual([])
     expect(rotacionesPara('HN-CH', null, 'seco')).toEqual([])
-  })
-
-  it('rotacionesPara con pesos propios cambia el total y reordena; sin pesos es igual', () => {
-    const base = rotacionesPara('HN-CH', 'maiz', 'normal')
-    expect(rotacionesPara('HN-CH', 'maiz', 'normal', { pesos: PESOS_ROTACION })).toEqual(base)
-    expect(rotacionesPara('HN-CH', 'maiz', 'normal', {})).toEqual(base)
-    const soloVenta = rotacionesPara('HN-CH', 'maiz', 'normal', { pesos: { agua: 0, suelo: 0, clima: 0, venta: 1 } })
-    expect(soloVenta[0].partes.find((p) => p.clave === 'venta')!.peso).toBe(1)
-    for (const r of soloVenta) expect(r.total).toBe(r.partes.find((p) => p.clave === 'venta')!.valor)
-    const otras = soloVenta.slice(1)
-    for (const [i, r] of otras.entries()) if (i > 0) expect(otras[i - 1].total).toBeGreaterThanOrEqual(r.total)
-    expect(soloVenta.map((r) => r.id)).not.toEqual(base.map((r) => r.id))
   })
 })

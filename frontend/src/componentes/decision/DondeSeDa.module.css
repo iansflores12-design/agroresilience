@@ -1,0 +1,36 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+/* Honduras es el doble de ancha que alta: con esa proporción el mapa no deja aire arriba ni abajo. */
+.mapa {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  max-height: 22rem;
+}
+
+.mapa > section {
+  height: 100%;
+  min-height: 0;
+}
+
+/* El puntaje del departamento enfocado, en una sola línea bajo el mapa. */
+.resultado {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font: var(--tipo-cuerpo-fuerte);
+  color: var(--md-sys-color-on-surface);
+}
+
+.resultado > span:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.ejemplo {
+  font: var(--tipo-nota);
+  color: var(--md-sys-color-on-surface-variant);
+}

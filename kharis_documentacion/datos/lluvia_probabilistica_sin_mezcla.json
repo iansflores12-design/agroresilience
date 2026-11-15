@@ -1,0 +1,315 @@
+{
+  "version": "v001",
+  "entrenado_hasta": "2020-12-31",
+  "periodo": [
+    "2021-01-01",
+    "2026-11-10"
+  ],
+  "n_origenes": 64020,
+  "referencia": "climatologia 1996-2020 del punto, +-15 dias",
+  "por_horizonte": {
+    "1 dia": {
+      ">= 1 mm": {
+        "frecuencia": 0.5896,
+        "brier_kharis": 0.16066,
+        "brier_climatologia": 0.18023,
+        "BSS": 0.1086,
+        "AUC_kharis": 0.8736,
+        "AUC_climatologia": 0.7994
+      },
+      ">= 10 mm": {
+        "frecuencia": 0.1438,
+        "brier_kharis": 0.1088,
+        "brier_climatologia": 0.11586,
+        "BSS": 0.0609,
+        "AUC_kharis": 0.8322,
+        "AUC_climatologia": 0.7077
+      },
+      ">= 20 mm": {
+        "frecuencia": 0.0527,
+        "brier_kharis": 0.04959,
+        "brier_climatologia": 0.04881,
+        "BSS": -0.0158,
+        "AUC_kharis": 0.8373,
+        "AUC_climatologia": 0.6906,
+        "fiabilidad": [
+          {
+            "prob_pronosticada": 0.025,
+            "frecuencia_real": 0.015,
+            "n": 45445
+          },
+          {
+            "prob_pronosticada": 0.151,
+            "frecuencia_real": 0.066,
+            "n": 6640
+          },
+          {
+            "prob_pronosticada": 0.239,
+            "frecuencia_real": 0.11,
+            "n": 5177
+          },
+          {
+            "prob_pronosticada": 0.349,
+            "frecuencia_real": 0.159,
+            "n": 2785
+          },
+          {
+            "prob_pronosticada": 0.447,
+            "frecuencia_real": 0.226,
+            "n": 2089
+          },
+          {
+            "prob_pronosticada": 0.546,
+            "frecuencia_real": 0.335,
+            "n": 1100
+          },
+          {
+            "prob_pronosticada": 0.645,
+            "frecuencia_real": 0.479,
+            "n": 609
+          },
+          {
+            "prob_pronosticada": 0.732,
+            "frecuencia_real": 0.645,
+            "n": 152
+          }
+        ]
+      },
+      ">= 50 mm": {
+        "frecuencia": 0.0126,
+        "brier_kharis": 0.01251,
+        "brier_climatologia": 0.01243,
+        "BSS": -0.0061,
+        "AUC_kharis": 0.7854,
+        "AUC_climatologia": 0.5925
+      },
+      "puntaje_cuantiles": {
+        "kharis": 1.5222,
+        "climatologia": 1.724,
+        "skill": 0.1171
+      }
+    },
+    "1 a 7 dias": {
+      ">= 1 mm": {
+        "frecuencia": 0.5906,
+        "brier_kharis": 0.18883,
+        "brier_climatologia": 0.18032,
+        "BSS": -0.0472,
+        "AUC_kharis": 0.8159,
+        "AUC_climatologia": 0.7991
+      },
+      ">= 10 mm": {
+        "frecuencia": 0.1442,
+        "brier_kharis": 0.13251,
+        "brier_climatologia": 0.11618,
+        "BSS": -0.1405,
+        "AUC_kharis": 0.74,
+        "AUC_climatologia": 0.7073
+      },
+      ">= 20 mm": {
+        "frecuencia": 0.0528,
+        "brier_kharis": 0.05957,
+        "brier_climatologia": 0.0489,
+        "BSS": -0.2183,
+        "AUC_kharis": 0.7174,
+        "AUC_climatologia": 0.6907
+      },
+      ">= 50 mm": {
+        "frecuencia": 0.0126,
+        "brier_kharis": 0.01343,
+        "brier_climatologia": 0.01245,
+        "BSS": -0.0789,
+        "AUC_kharis": 0.6202,
+        "AUC_climatologia": 0.5924
+      },
+      "puntaje_cuantiles": {
+        "kharis": 1.8301,
+        "climatologia": 1.7264,
+        "skill": -0.0601
+      }
+    },
+    "7 dias": {
+      ">= 1 mm": {
+        "frecuencia": 0.5916,
+        "brier_kharis": 0.19868,
+        "brier_climatologia": 0.18044,
+        "BSS": -0.1011,
+        "AUC_kharis": 0.7965,
+        "AUC_climatologia": 0.7987
+      },
+      ">= 10 mm": {
+        "frecuencia": 0.1446,
+        "brier_kharis": 0.13662,
+        "brier_climatologia": 0.11648,
+        "BSS": -0.1729,
+        "AUC_kharis": 0.7158,
+        "AUC_climatologia": 0.707
+      },
+      ">= 20 mm": {
+        "frecuencia": 0.0529,
+        "brier_kharis": 0.0606,
+        "brier_climatologia": 0.04898,
+        "BSS": -0.2371,
+        "AUC_kharis": 0.6878,
+        "AUC_climatologia": 0.6909
+      },
+      ">= 50 mm": {
+        "frecuencia": 0.0126,
+        "brier_kharis": 0.01344,
+        "brier_climatologia": 0.01246,
+        "BSS": -0.078,
+        "AUC_kharis": 0.584,
+        "AUC_climatologia": 0.5925
+      },
+      "puntaje_cuantiles": {
+        "kharis": 1.8843,
+        "climatologia": 1.7288,
+        "skill": -0.09
+      }
+    }
+  },
+  "mezcla": false,
+  "todas": {
+    "T2M_MAX": {
+      "1 dia": {
+        "skill_cuantiles": 0.4256,
+        "skill_rmse": 0.4229,
+        "MAE": 0.9403,
+        "MAE_clim": 1.6295
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": 0.2876,
+        "skill_rmse": 0.2713,
+        "MAE": 1.1688,
+        "MAE_clim": 1.6287
+      },
+      "7 dias": {
+        "skill_cuantiles": 0.2384,
+        "skill_rmse": 0.2211,
+        "MAE": 1.2548,
+        "MAE_clim": 1.6275
+      }
+    },
+    "T2M_MIN": {
+      "1 dia": {
+        "skill_cuantiles": 0.3701,
+        "skill_rmse": 0.37,
+        "MAE": 0.5938,
+        "MAE_clim": 0.9775
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": 0.2088,
+        "skill_rmse": 0.164,
+        "MAE": 0.7736,
+        "MAE_clim": 0.9777
+      },
+      "7 dias": {
+        "skill_cuantiles": 0.1463,
+        "skill_rmse": 0.1003,
+        "MAE": 0.8308,
+        "MAE_clim": 0.9783
+      }
+    },
+    "T2M": {
+      "1 dia": {
+        "skill_cuantiles": 0.4741,
+        "skill_rmse": 0.4615,
+        "MAE": 0.5655,
+        "MAE_clim": 1.0651
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": 0.2915,
+        "skill_rmse": 0.2554,
+        "MAE": 0.7674,
+        "MAE_clim": 1.0644
+      },
+      "7 dias": {
+        "skill_cuantiles": 0.2307,
+        "skill_rmse": 0.1942,
+        "MAE": 0.8361,
+        "MAE_clim": 1.0638
+      }
+    },
+    "PRECTOTCORR": {
+      "1 dia": {
+        "skill_cuantiles": 0.1171,
+        "skill_rmse": 0.0702,
+        "MAE": 4.9222,
+        "MAE_clim": 4.8676
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": -0.0601,
+        "skill_rmse": 0.0158,
+        "MAE": 5.4621,
+        "MAE_clim": 4.8735
+      },
+      "7 dias": {
+        "skill_cuantiles": -0.09,
+        "skill_rmse": 0.0058,
+        "MAE": 5.5458,
+        "MAE_clim": 4.8797
+      }
+    },
+    "WS2M": {
+      "1 dia": {
+        "skill_cuantiles": -0.0095,
+        "skill_rmse": 0.0738,
+        "MAE": 0.4036,
+        "MAE_clim": 0.4343
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": -0.0897,
+        "skill_rmse": -0.0007,
+        "MAE": 0.4364,
+        "MAE_clim": 0.4347
+      },
+      "7 dias": {
+        "skill_cuantiles": -0.1048,
+        "skill_rmse": -0.0148,
+        "MAE": 0.4438,
+        "MAE_clim": 0.4351
+      }
+    },
+    "RH2M": {
+      "1 dia": {
+        "skill_cuantiles": 0.4413,
+        "skill_rmse": 0.4771,
+        "MAE": 3.0037,
+        "MAE_clim": 5.7637
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": 0.3267,
+        "skill_rmse": 0.3579,
+        "MAE": 3.6782,
+        "MAE_clim": 5.7582
+      },
+      "7 dias": {
+        "skill_cuantiles": 0.2674,
+        "skill_rmse": 0.3068,
+        "MAE": 3.9764,
+        "MAE_clim": 5.7532
+      }
+    },
+    "ALLSKY_SFC_SW_DWN": {
+      "1 dia": {
+        "skill_cuantiles": 0.0632,
+        "skill_rmse": 0.0862,
+        "MAE": 2.4633,
+        "MAE_clim": 2.7601
+      },
+      "1 a 7 dias": {
+        "skill_cuantiles": -0.021,
+        "skill_rmse": 0.0085,
+        "MAE": 2.6906,
+        "MAE_clim": 2.7605
+      },
+      "7 dias": {
+        "skill_cuantiles": -0.0419,
+        "skill_rmse": -0.0095,
+        "MAE": 2.7474,
+        "MAE_clim": 2.7601
+      }
+    }
+  },
+  "segundos": 7.7
+}

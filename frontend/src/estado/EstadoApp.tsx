@@ -1,7 +1,9 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { dentroDeHonduras } from '../lib/decision/escala'
+import { OBJETIVOS } from '../lib/decision/parametros'
+import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
 import { configurarSonido } from '../lib/sonido'
-import type { Enfoque } from '../lib/recomendacion/tipos'
 
 export interface EstadoApp {
   cultivoId: string | null
@@ -9,8 +11,24 @@ export interface EstadoApp {
   /** Semanas desde la siembra. */
   edadSemanas: number
   sonido: boolean
-  /** Lo que mas le importa al productor, maximo 2. */
-  enfoques: Enfoque[]
+  /** Respuestas de Gemini Decision. */
+  terreno: Terreno | null
+  temporada: Temporada | null
+  objetivos: Objetivo[]
+  /** Ubicacion de la parcela (GPS), redondeada a ~100 m. Null = se usa el lugar elegido. */
+  parcela: { lat: number; lon: number } | null
+}
+
+export interface Perfil {
+  zonaId: string
+  terreno: Terreno
+  cultivoId: string
+  temporada: Temporada
+  parcela?: { lat: number; lon: number } | null
+  /** Semanas desde la siembra. Si falta, se conserva (o vuelve a 0 si cambio el cultivo). */
+  edadSemanas?: number
+  /** Si faltan, se conservan los que ya habia. */
+  objetivos?: Objetivo[]
 }
 
 interface AccionesEstadoApp {
@@ -19,16 +37,32 @@ interface AccionesEstadoApp {
   elegirZona(id: string): void
   fijarEdad(semanas: number): void
   alternarSonido(): void
-  /** Quita el enfoque si estaba; si no, lo agrega y descarta el mas antiguo si pasan de 2. */
-  alternarEnfoque(id: Enfoque): void
+  /** Guarda las respuestas del cuestionario de Gemini Decision. */
+  fijarPerfil(p: Perfil): void
+  alternarObjetivo(o: Objetivo): void
 }
 
 export const CLAVE_ESTADO = 'agroresilience.estado.v1'
 
-const porDefecto: EstadoApp = { cultivoId: null, zonaId: null, edadSemanas: 0, sonido: true, enfoques: [] }
+const porDefecto: EstadoApp = {
+  cultivoId: null,
+  zonaId: null,
+  edadSemanas: 0,
+  sonido: true,
+  terreno: null,
+  temporada: null,
+  objetivos: [],
+  parcela: null,
+}
 
-const ENFOQUES_VALIDOS: readonly string[] = ['agua', 'seguro', 'tierra', 'venta']
-const MAX_ENFOQUES = 2
+function leerParcela(x: unknown): { lat: number; lon: number } | null {
+  if (typeof x !== 'object' || x === null) return null
+  const { lat, lon } = x as { lat?: unknown; lon?: unknown }
+  return typeof lat === 'number' && typeof lon === 'number' && dentroDeHonduras(lat, lon) ? { lat, lon } : null
+}
+
+const TERRENOS: Terreno[] = ['plano', 'elevado', 'bajo', 'ondulado']
+const TEMPORADAS: Temporada[] = ['primera', 'postrera', 'verano']
 
 const Contexto = createContext<(EstadoApp & AccionesEstadoApp) | null>(null)
 
@@ -48,9 +82,12 @@ function leerEstadoGuardado(): EstadoApp {
           ? d.edadSemanas
           : 0,
       sonido: typeof d.sonido === 'boolean' ? d.sonido : true,
-      enfoques: Array.isArray(d.enfoques)
-        ? [...new Set(d.enfoques.filter((x): x is Enfoque => typeof x === 'string' && ENFOQUES_VALIDOS.includes(x)))].slice(0, MAX_ENFOQUES)
+      terreno: TERRENOS.includes(d.terreno as Terreno) ? (d.terreno as Terreno) : null,
+      temporada: TEMPORADAS.includes(d.temporada as Temporada) ? (d.temporada as Temporada) : null,
+      objetivos: Array.isArray(d.objetivos)
+        ? d.objetivos.filter((o): o is Objetivo => typeof o === 'string' && o in OBJETIVOS)
         : [],
+      parcela: leerParcela(d.parcela),
     }
   } catch {
     return porDefecto
@@ -84,16 +121,25 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   const alternarSonido = useCallback(() => {
     setEstado((e) => ({ ...e, sonido: !e.sonido }))
   }, [])
-  const alternarEnfoque = useCallback((id: Enfoque) => {
+  const fijarPerfil = useCallback((p: Perfil) => {
     setEstado((e) => ({
       ...e,
-      enfoques: e.enfoques.includes(id) ? e.enfoques.filter((x) => x !== id) : [...e.enfoques, id].slice(-MAX_ENFOQUES),
+      ...p,
+      parcela: p.parcela ?? null,
+      edadSemanas: Math.max(0, p.edadSemanas ?? (e.cultivoId === p.cultivoId ? e.edadSemanas : 0)),
+      objetivos: p.objetivos ?? e.objetivos,
+    }))
+  }, [])
+  const alternarObjetivo = useCallback((o: Objetivo) => {
+    setEstado((e) => ({
+      ...e,
+      objetivos: e.objetivos.includes(o) ? e.objetivos.filter((x) => x !== o) : [...e.objetivos, o],
     }))
   }, [])
 
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, alternarEnfoque }),
-    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, alternarEnfoque],
+    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo }),
+    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
@@ -102,4 +148,13 @@ export function useEstadoApp() {
   const valor = useContext(Contexto)
   if (!valor) throw new Error('useEstadoApp debe usarse dentro de ProveedorEstadoApp')
   return valor
+}
+
+/** Entrada completa para Gemini Decision, o null si falta contestar algo. */
+export function entradaDe(e: EstadoApp): EntradaDecision | null {
+  if (!e.zonaId || !e.cultivoId || !e.terreno || !e.temporada) return null
+  return {
+    zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos,
+    ...(e.parcela ? { parcela: e.parcela } : {}),
+  }
 }

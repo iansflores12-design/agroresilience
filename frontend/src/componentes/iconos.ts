@@ -13,6 +13,10 @@ import VolumeOff from '@material-symbols/svg-400/rounded/volume_off.svg?react'
 import Add from '@material-symbols/svg-400/rounded/add.svg?react'
 import Remove from '@material-symbols/svg-400/rounded/remove.svg?react'
 import Send from '@material-symbols/svg-400/rounded/send.svg?react'
+import Search from '@material-symbols/svg-400/rounded/search.svg?react'
+import Keep from '@material-symbols/svg-400/rounded/keep.svg?react'
+import Replay from '@material-symbols/svg-400/rounded/replay.svg?react'
+import MoreVert from '@material-symbols/svg-400/rounded/more_vert.svg?react'
 import ArrowForward from '@material-symbols/svg-400/rounded/arrow_forward.svg?react'
 import ArrowBack from '@material-symbols/svg-400/rounded/arrow_back.svg?react'
 import Layers from '@material-symbols/svg-400/rounded/layers.svg?react'
@@ -44,14 +48,23 @@ import RiceBowl from '@material-symbols/svg-400/rounded/rice_bowl.svg?react'
 import Nutrition from '@material-symbols/svg-400/rounded/nutrition.svg?react'
 import LocalFlorist from '@material-symbols/svg-400/rounded/local_florist.svg?react'
 import CheckCircle from '@material-symbols/svg-400/rounded/check_circle.svg?react'
-import Lightbulb from '@material-symbols/svg-400/rounded/lightbulb.svg?react'
 import WbSunny from '@material-symbols/svg-400/rounded/wb_sunny.svg?react'
-import PlayArrow from '@material-symbols/svg-400/rounded/play_arrow.svg?react'
-import Pause from '@material-symbols/svg-400/rounded/pause.svg?react'
-import BugReport from '@material-symbols/svg-400/rounded/bug_report.svg?react'
-import Microbiology from '@material-symbols/svg-400/rounded/microbiology.svg?react'
-import ImageIcono from '@material-symbols/svg-400/rounded/image.svg?react'
-import Agriculture from '@material-symbols/svg-400/rounded/agriculture.svg?react'
+import ThumbUp from '@material-symbols/svg-400/rounded/thumb_up.svg?react'
+import Savings from '@material-symbols/svg-400/rounded/savings.svg?react'
+import Compost from '@material-symbols/svg-400/rounded/compost.svg?react'
+import Landslide from '@material-symbols/svg-400/rounded/landslide.svg?react'
+import Pets from '@material-symbols/svg-400/rounded/pets.svg?react'
+import PestControl from '@material-symbols/svg-400/rounded/pest_control.svg?react'
+import HorizontalRule from '@material-symbols/svg-400/rounded/horizontal_rule.svg?react'
+import MountainFlag from '@material-symbols/svg-400/rounded/mountain_flag.svg?react'
+import Waves from '@material-symbols/svg-400/rounded/waves.svg?react'
+import WorkspacePremium from '@material-symbols/svg-400/rounded/workspace_premium.svg?react'
+import Edit from '@material-symbols/svg-400/rounded/edit.svg?react'
+import HourglassTop from '@material-symbols/svg-400/rounded/hourglass_top.svg?react'
+import TrendingUp from '@material-symbols/svg-400/rounded/trending_up.svg?react'
+import TrendingDown from '@material-symbols/svg-400/rounded/trending_down.svg?react'
+import Flag from '@material-symbols/svg-400/rounded/flag.svg?react'
+import Help from '@material-symbols/svg-400/rounded/help.svg?react'
 
 export const iconos = {
   grass: Grass,
@@ -63,6 +76,10 @@ export const iconos = {
   add: Add,
   remove: Remove,
   send: Send,
+  search: Search,
+  keep: Keep,
+  replay: Replay,
+  more_vert: MoreVert,
   arrow_forward: ArrowForward,
   arrow_back: ArrowBack,
   layers: Layers,
@@ -95,13 +112,22 @@ export const iconos = {
   local_florist: LocalFlorist,
   check_circle: CheckCircle,
   wb_sunny: WbSunny,
-  lightbulb: Lightbulb,
-  play_arrow: PlayArrow,
-  pause: Pause,
-  bug_report: BugReport,
-  microbiology: Microbiology,
-  image: ImageIcono,
-  agriculture: Agriculture,
+  thumb_up: ThumbUp,
+  savings: Savings,
+  compost: Compost,
+  landslide: Landslide,
+  pets: Pets,
+  pest_control: PestControl,
+  horizontal_rule: HorizontalRule,
+  mountain_flag: MountainFlag,
+  waves: Waves,
+  workspace_premium: WorkspacePremium,
+  edit: Edit,
+  hourglass_top: HourglassTop,
+  trending_up: TrendingUp,
+  trending_down: TrendingDown,
+  flag: Flag,
+  help: Help,
 } as const
 
 export type NombreIcono = keyof typeof iconos

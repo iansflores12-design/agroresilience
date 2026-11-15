@@ -1,0 +1,81 @@
+test_alias_y_formatos (test_kharis.PruebasDatos.test_alias_y_formatos) ... ok
+test_carpeta_processed_y_causalidad (test_kharis.PruebasDatos.test_carpeta_processed_y_causalidad)
+Lee una carpeta con el formato processed/ del proyecto. ONI y NDVI entran sin mirar al futuro. ... [datos] carpeta C:\Users\iansf\AppData\Local\Temp\tmptb1ce5r2: NASA POWER, topografia, GPM IMERG, NDVI (Sentinel-2/Landsat/MODIS), ONI
+ok
+test_centinelas_a_nan_nunca_cero (test_kharis.PruebasDatos.test_centinelas_a_nan_nunca_cero) ... ok
+test_orden_cronologico_y_duplicados (test_kharis.PruebasDatos.test_orden_cronologico_y_duplicados) ... ok
+test_poda_de_datos (test_kharis.PruebasDatos.test_poda_de_datos) ... ok
+test_acople_fisico (test_kharis.PruebasFisica.test_acople_fisico) ... ok
+test_balance_hidrico_conserva_masa (test_kharis.PruebasFisica.test_balance_hidrico_conserva_masa) ... ok
+test_balance_un_dia_coincide_con_el_paso_determinista (test_kharis.PruebasFisica.test_balance_un_dia_coincide_con_el_paso_determinista) ... ok
+test_et0_hargreaves_fao56 (test_kharis.PruebasFisica.test_et0_hargreaves_fao56) ... ok
+test_et0_penman_fao56 (test_kharis.PruebasFisica.test_et0_penman_fao56) ... ok
+test_gdd_y_calendario (test_kharis.PruebasFisica.test_gdd_y_calendario) ... ok
+test_racha_seca (test_kharis.PruebasFisica.test_racha_seca) ... ok
+test_radiacion_extraterrestre_fao56 (test_kharis.PruebasFisica.test_radiacion_extraterrestre_fao56) ... ok
+[entrenar] ventanas: 25,098 entrenamiento, 2,178 validacion | 25 pasos/epoca, lote 256 | CPU (16 hilos), precision fp32
+  epoca   1/2  train 0.7074  val 0.6381  cola(val) 0.5270  lr 1.20e-03  1.8s  *
+  epoca   2/2  train 0.5444  val 0.5969  cola(val) 0.4942  lr 2.74e-06  1.2s  *
+[backtest] 2021: 1,095 ventanas | deriva=no | calibracion aceptada, pesos aceptados -> v002
+[backtest] 2022: 1,095 ventanas | deriva=no | calibracion aceptada, pesos revertidos -> v003
+[backtest] 2023: 1,095 ventanas | deriva=si | calibracion aceptada, pesos revertidos -> v004
+[backtest] 2024: 1,098 ventanas | deriva=si | calibracion aceptada, pesos aceptados -> v005
+[backtest] 2025: 1,083 ventanas | deriva=si | calibracion aceptada, pesos revertidos -> v006
+test_backtest_walk_forward_sin_fuga (test_kharis.PruebasFlujo.test_backtest_walk_forward_sin_fuga) ... ok
+test_datos_nuevos_actualizan_y_rollback (test_kharis.PruebasFlujo.test_datos_nuevos_actualizan_y_rollback) ... [continuo] lote 2026-01-01 a 2026-06-30 (531 ventanas)
+[continuo] deriva: no (PSI max 0.1788, razon de error 0.841)
+[continuo] poda: 19,268 ventanas descartadas, 4,532 extremos conservados, 9,212 recientes
+[continuo] calibracion aceptada; pesos aceptados -> v002 activa
+[continuo] no hay dias nuevos despues de 2026-06-30: nada que actualizar
+ok
+test_entrenamiento_aprende (test_kharis.PruebasFlujo.test_entrenamiento_aprende) ... ok
+test_estres_marca_muestra_y_sin_datos (test_kharis.PruebasFlujo.test_estres_marca_muestra_y_sin_datos) ... ok
+test_lote_corto_se_acumula (test_kharis.PruebasFlujo.test_lote_corto_se_acumula)
+Pocos dias nuevos: no se crea version ni se pierden. El pronostico parte de ellos y entran en el lote siguiente. ... [continuo] 20 dias nuevos (2026-01-01 a 2026-01-20): todavia son pocos para recalibrar. Se acumulan para la proxima actualizacion; el pronostico ya parte del ultimo dia.
+[continuo] lote 2026-01-01 a 2026-06-30 (531 ventanas)
+[continuo] deriva: no (PSI max 0.1788, razon de error 0.841)
+[continuo] poda: 19,268 ventanas descartadas, 4,532 extremos conservados, 9,212 recientes
+[continuo] calibracion aceptada; pesos aceptados -> v002 activa
+ok
+test_pronostico_largo_no_deriva (test_kharis.PruebasFlujo.test_pronostico_largo_no_deriva)
+Pasada la rampa, la media y la dispersion del conjunto son las de la climatologia del punto; sin ancla se apartan. ... ok
+test_pronostico_reproducible (test_kharis.PruebasFlujo.test_pronostico_reproducible) ... ok
+test_pronostico_y_contrato_de_salida (test_kharis.PruebasFlujo.test_pronostico_y_contrato_de_salida) ... ok
+test_prueba_congelada_no_ve_el_futuro (test_kharis.PruebasFlujo.test_prueba_congelada_no_ve_el_futuro)
+La proyeccion libre desde el fin del entrenamiento no cambia aunque se altere todo lo posterior. ... ok
+test_rollback_automatico_si_empeora (test_kharis.PruebasFlujo.test_rollback_automatico_si_empeora)
+Con una tolerancia imposible, la candidata siempre pierde y los pesos se quedan como estaban. ... ok
+test_calibrador (test_kharis.PruebasModelo.test_calibrador) ... ok
+test_convolucion_causal (test_kharis.PruebasModelo.test_convolucion_causal)
+Rellenar a ambos lados y recortar la cola equivale a rellenar solo a la izquierda (causal). ... ok
+test_formas_cuantiles_y_anomalia (test_kharis.PruebasModelo.test_formas_cuantiles_y_anomalia) ... ok
+test_muestreo_conserva_la_media (test_kharis.PruebasModelo.test_muestreo_conserva_la_media)
+Sortear de los cuantiles no debe inflar la media: la lluvia muestreada promedia lo que dice la media calibrada. ... ok
+test_onnx_igual_a_pytorch (test_kharis.PruebasModelo.test_onnx_igual_a_pytorch) ... ok
+test_perdida_ignora_nan_y_pesa_extremos (test_kharis.PruebasModelo.test_perdida_ignora_nan_y_pesa_extremos) ... ok
+test_misma_semilla_mismo_resultado_cpu (test_kharis.PruebasReproducibilidad.test_misma_semilla_mismo_resultado_cpu) ... [entrenar] ventanas: 16,732 entrenamiento, 1,452 validacion | 15 pasos/epoca, lote 256 | CPU (16 hilos), precision fp32
+  epoca   1/2  train 0.7702  val 0.7613  cola(val) 0.6956  lr 1.15e-03  0.8s  *
+  epoca   2/2  train 0.6456  val 0.7092  cola(val) 0.6183  lr 7.59e-06  0.9s  *
+[entrenar] ventanas: 16,732 entrenamiento, 1,452 validacion | 15 pasos/epoca, lote 256 | CPU (16 hilos), precision fp32
+  epoca   1/2  train 0.7702  val 0.7613  cola(val) 0.6956  lr 1.15e-03  0.7s  *
+  epoca   2/2  train 0.6456  val 0.7092  cola(val) 0.6183  lr 7.59e-06  0.7s  *
+ok
+test_misma_semilla_mismo_resultado_gpu (test_kharis.PruebasReproducibilidad.test_misma_semilla_mismo_resultado_gpu) ... [entrenar] ventanas: 16,732 entrenamiento, 1,452 validacion | 15 pasos/epoca, lote 256 | CUDA (NVIDIA GeForce RTX 3070), precision bf16
+  epoca   1/2  train 0.7730  val 0.7557  cola(val) 0.6825  lr 1.15e-03  1.0s  *
+  epoca   2/2  train 0.6395  val 0.7043  cola(val) 0.6084  lr 7.59e-06  0.2s  *
+[entrenar] ventanas: 16,732 entrenamiento, 1,452 validacion | 15 pasos/epoca, lote 256 | CUDA (NVIDIA GeForce RTX 3070), precision bf16
+  epoca   1/2  train 0.7730  val 0.7557  cola(val) 0.6825  lr 1.15e-03  0.2s  *
+  epoca   2/2  train 0.6395  val 0.7043  cola(val) 0.6084  lr 7.59e-06  0.2s  *
+ok
+test_inicio_de_lluvias_construido (test_kharis.PruebasSenales.test_inicio_de_lluvias_construido) ... ok
+test_referencia_solo_periodo_base (test_kharis.PruebasSenales.test_referencia_solo_periodo_base) ... ok
+test_senales_p1_a_p10 (test_kharis.PruebasSenales.test_senales_p1_a_p10) ... ok
+test_escalado_y_linea_base_no_ven_el_futuro (test_kharis.PruebasSinFuga.test_escalado_y_linea_base_no_ven_el_futuro) ... ok
+test_escalador_invertible (test_kharis.PruebasSinFuga.test_escalador_invertible) ... ok
+test_features_causales (test_kharis.PruebasSinFuga.test_features_causales) ... ok
+test_ventanas_alineadas (test_kharis.PruebasSinFuga.test_ventanas_alineadas) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 32.953s
+
+OK

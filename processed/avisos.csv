@@ -1,0 +1,26 @@
+fecha_hora,archivo_o_destino,clave,motivo
+2026-11-14T21:31:32,meteomatics_estaticos.csv,"comayagua, choluteca, danli","8 clave(s) ya existian y se reemplazaron (0 con valores distintos); ej.: comayagua, choluteca, danli"
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261012_SMAP_L3_SM_P_E_20261012_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261015_SMAP_L3_SM_P_E_20261015_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261020_SMAP_L3_SM_P_E_20261020_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261021_SMAP_L3_SM_P_E_20261021_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261023_SMAP_L3_SM_P_E_20261023_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261025_SMAP_L3_SM_P_E_20261025_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:00:54,smap\SMAP_L3_SM_P_E_20261108_SMAP_L3_SM_P_E_20261108_R19240_001_subsetted_HND.nc4,,descartado: otro archivo del mismo dia gana en orden alfabetico
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\choluteca.json,,omitido: choluteca tiene suelo_alterno y se usa choluteca_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\comayagua.json,,omitido: comayagua tiene suelo_alterno y se usa comayagua_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\danli.json,,omitido: danli tiene suelo_alterno y se usa danli_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\el_progreso.json,,omitido: el_progreso tiene suelo_alterno y se usa el_progreso_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\la_ceiba.json,,omitido: la_ceiba tiene suelo_alterno y se usa la_ceiba_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\la_paz.json,,omitido: la_paz tiene suelo_alterno y se usa la_paz_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\nacaome.json,,omitido: nacaome tiene suelo_alterno y se usa nacaome_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\olanchito.json,,omitido: olanchito tiene suelo_alterno y se usa olanchito_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\roatan.json,,omitido: roatan tiene suelo_alterno y se usa roatan_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\santa_rosa.json,,omitido: santa_rosa tiene suelo_alterno y se usa santa_rosa_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\siguatepeque.json,,omitido: siguatepeque tiene suelo_alterno y se usa siguatepeque_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\sula.json,,omitido: sula tiene suelo_alterno y se usa sula_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\tegucigalpa.json,,omitido: tegucigalpa tiene suelo_alterno y se usa tegucigalpa_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\tela.json,,omitido: tela tiene suelo_alterno y se usa tela_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\trujillo.json,,omitido: trujillo tiene suelo_alterno y se usa trujillo_cercano.json
+2026-11-15T01:29:05,C:\Users\iansf\OneDrive\Desktop\agroresilience\raw\soilgrids\yoro.json,,omitido: yoro tiene suelo_alterno y se usa yoro_cercano.json
+2026-11-15T01:29:05,suelo_por_punto.csv,"brus_laguna, catacamas, choluteca","30 clave(s) ya existian y se reemplazaron (30 con valores distintos); ej.: brus_laguna, catacamas, choluteca"

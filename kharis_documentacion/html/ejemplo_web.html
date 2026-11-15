@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kharis Engine · ejemplo web</title>
+<style>
+  :root { --fondo:#f9f9f7; --tarjeta:#ffffff; --tinta:#0b0b0b; --tinta2:#52514e; --tenue:#898781; --linea:#e1e0d9;
+          --real:#0b0b0b; --pron:#2a78d6; --banda:rgba(42,120,214,.16); }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo:#0d0d0d; --tarjeta:#1a1a19; --tinta:#f0efec; --tinta2:#c3c2b7; --tenue:#898781; --linea:#2c2c2a;
+            --real:#f0efec; --pron:#3987e5; --banda:rgba(57,135,229,.22); }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px 16px 40px; background:var(--fondo); color:var(--tinta); font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:960px; margin:0 auto; }
+  h1 { font-size:20px; font-weight:600; margin:0 0 2px; }
+  p.sub { margin:0 0 16px; color:var(--tinta2); font-size:13px; }
+  .fila { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 14px; }
+  select { font:inherit; padding:7px 10px; border:1px solid var(--linea); border-radius:8px; background:var(--tarjeta); color:var(--tinta); }
+  .tarjeta { background:var(--tarjeta); border:1px solid var(--linea); border-radius:12px; padding:14px 16px; margin:0 0 14px; }
+  .leyenda { display:flex; flex-wrap:wrap; gap:16px; font-size:12px; color:var(--tinta2); margin:0 0 8px; }
+  .leyenda span { display:flex; align-items:center; gap:6px; }
+  .leyenda i { display:inline-block; width:18px; height:0; border-top:2px solid; }
+  .lienzo { position:relative; height:300px; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; padding:6px 10px 6px 0; border-bottom:1px solid var(--linea); white-space:nowrap; }
+  th { color:var(--tinta2); font-weight:500; }
+  td.n { font-variant-numeric:tabular-nums; }
+  .act { font-weight:600; }
+  #estado { color:var(--tinta2); font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kharis Engine · pronóstico por punto</h1>
+  <p class="sub" id="meta">Leyendo salidas/web/indice.json…</p>
+  <div class="fila">
+    <select id="punto" aria-label="Punto"></select>
+    <select id="variable" aria-label="Variable"></select>
+    <span id="estado"></span>
+  </div>
+  <div class="tarjeta">
+    <div class="leyenda">
+      <span><i style="border-color:var(--real)"></i>Observado (últimos 90 días)</span>
+      <span><i style="border-color:var(--pron)"></i>Pronóstico (media)</span>
+      <span><i style="border-top:8px solid var(--banda)"></i>Banda p10–p90</span>
+    </div>
+    <div class="lienzo"><canvas id="grafico" role="img" aria-label="Serie diaria observada y pronosticada del punto y la variable elegidos"></canvas></div>
+  </div>
+  <div class="tarjeta">
+    <div class="scroll"><table id="senales" aria-label="Señales de riesgo P1 a P10"></table></div>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// Carpeta donde el sitio publica la salida del motor. En este ejemplo, la del propio paquete.
+const BASE = "../web/";
+const NOMBRES = { T2M_MAX:"Temperatura máxima", T2M_MIN:"Temperatura mínima", T2M:"Temperatura media", PRECTOTCORR:"Lluvia",
+                  WS2M:"Viento", WS2M_MAX:"Viento máximo", RH2M:"Humedad relativa", ALLSKY_SFC_SW_DWN:"Radiación solar" };
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $ = id => document.getElementById(id);
+let indice, datos, grafico;
+
+const dia = (inicio, k) => { const d = new Date(inicio + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
+
+async function cargarIndice() {
+  indice = await (await fetch(BASE + "indice.json")).json();
+  $("meta").textContent = `Modelo ${indice.version_modelo} · datos hasta ${indice.fecha_base} · ${indice.dias_pronostico} días de pronóstico · ${indice.puntos.length} puntos`;
+  $("punto").innerHTML = indice.puntos.map(p => `<option value="${p.archivo}">${p.punto.replaceAll("_", " ")}</option>`).join("");
+  $("variable").innerHTML = indice.objetivos.map(v => `<option value="${v}">${NOMBRES[v] || v} (${indice.unidades[v] || ""})</option>`).join("");
+  await cargarPunto();
+}
+
+async function cargarPunto() {
+  const t0 = performance.now();
+  const r = await fetch(BASE + $("punto").value);
+  datos = await r.json();
+  $("estado").textContent = `${(+r.headers.get("content-length") / 1024 || 0).toFixed(0)} KB · ${(performance.now() - t0).toFixed(0)} ms`;
+  dibujar();
+  tabla();
+}
+
+function dibujar() {
+  const v = $("variable").value, h = datos.historia, p = datos.pronostico;
+  const nh = h[v].length, n = nh + p.dias;
+  const etiquetas = Array.from({ length: n }, (_, k) => k < nh ? dia(h.inicio, k) : dia(p.inicio, k - nh));
+  const vacio = Array(nh).fill(null);
+  const series = [
+    { label:"p10", data: vacio.concat(p[v].p10), borderWidth:0, pointRadius:0, fill:false },
+    { label:"p90", data: vacio.concat(p[v].p90), borderWidth:0, pointRadius:0, fill:"-1", backgroundColor: css("--banda") },
+    { label:"Pronóstico", data: vacio.concat(p[v].media), borderColor: css("--pron"), borderWidth:2, pointRadius:0 },
+    { label:"Observado", data: h[v].concat(Array(p.dias).fill(null)), borderColor: css("--real"), borderWidth:2, pointRadius:0 },
+  ];
+  if (grafico) grafico.destroy();
+  grafico = new Chart($("grafico"), { type:"line", data:{ labels: etiquetas, datasets: series },
+    options:{ responsive:true, maintainAspectRatio:false, animation:false, interaction:{ mode:"index", intersect:false },
+      plugins:{ legend:{ display:false }, tooltip:{ filter: i => i.dataset.label !== "p10" && i.dataset.label !== "p90" && i.parsed.y !== null,
+        callbacks:{ label: i => `${i.dataset.label}: ${i.parsed.y.toFixed(1)} ${indice.unidades[v] || ""}` } } },
+      scales:{ x:{ grid:{ display:false }, ticks:{ color: css("--tenue"), maxTicksLimit:8, maxRotation:0 } },
+               y:{ grid:{ color: css("--linea") }, border:{ display:false }, ticks:{ color: css("--tenue") } } } } });
+}
+
+function tabla() {
+  const s = datos.senales || [];
+  if (!s.length) { $("senales").innerHTML = "<tr><td>Sin señales en este paquete.</td></tr>"; return; }
+  const num = x => x === null || x === undefined ? "–" : (+x).toFixed(2);
+  let html = "<tr><th>Señal</th>" + s.map(t => `<th>${t.temporada} · valor</th><th>prob.</th>`).join("") + "</tr>";
+  for (const k of Object.keys(indice.patrones)) {
+    html += `<tr><td title="${indice.patrones[k]}">${k} · ${indice.patrones[k].split(" (")[0]}</td>` +
+      s.map(t => `<td class="n${t[k].activo ? " act" : ""}">${num(t[k].valor)}${t[k].activo ? " · activa" : ""}</td><td class="n">${num(t[k].probabilidad)}</td>`).join("") + "</tr>";
+  }
+  $("senales").innerHTML = html;
+}
+
+$("punto").onchange = cargarPunto;
+$("variable").onchange = dibujar;
+cargarIndice().catch(e => { $("meta").textContent = "No se pudo leer salidas/web/indice.json: " + e.message + ". Abre esta página desde un servidor web, no como archivo."; });
+</script>
+</body>
+</html>

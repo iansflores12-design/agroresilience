@@ -15,11 +15,6 @@
   overflow-wrap: anywhere;
 }
 
-.peso {
-  font: var(--tipo-nota);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
 .valor {
   font: var(--tipo-cuerpo-fuerte);
   font-variant-numeric: tabular-nums;

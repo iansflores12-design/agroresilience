@@ -27,7 +27,7 @@ src/
   tema/             colores.css (generado), tokens.css, base.css, sileo.css
   componentes/      componentes base (Boton, Chip, Fab, Tarjeta...), Estructura y navegación
     mapa/           ContenedorMapa y MapaHonduras (Leaflet, por departamento), leyenda y puntajes
-    fenomeno/       EspacioFenomeno.tsx, Sequia.tsx (explicación gráfica), escena.ts (dibujo SVG) y textos.ts
+    fenomeno/       EspacioFenomeno.tsx: espacio reservado del fenómeno (lo construye otro agente)
   estado/           EstadoApp (cultivo, zona, edad, sonido) y Conversacion (chat)
   lib/              avisos.ts (Sileo), sonido.ts (WebAudio), chat/ (cliente del asistente)
   datos/            cultivos, rotaciones, zonas (+ zonas.generado.json), aptitud (+ departamentos.geo.json)
@@ -35,13 +35,22 @@ src/
   pruebas/          configuración de Vitest y ayudantes
 ```
 
-## Explicación del fenómeno
+## Gemini Decision y backend
+
+`api/` tiene las funciones del backend (`decision`, `analisis`, `chat`). En local, `npm run dev`
+las sirve dentro de Vite; en Vercel corren como funciones. Para el análisis a fondo, crear
+`frontend/.env.local` con `GEMINI_API_KEY=...` (nunca se manda al navegador). Sin clave, el
+ranking funciona igual y el análisis muestra el resumen rápido con botón de reintento.
+
+`public/kharis/` es copia de `kharis_engine/salidas/web/`. Tras correr el motor, copiar de nuevo.
+Detalle del flujo en DISENO.md, sección 8, "Plan y Gemini Decision".
+
+## Espacios reservados
 
 - **Fenómeno:** `src/componentes/fenomeno/EspacioFenomeno.tsx`, con
-  `data-fenomeno="sequia"` y el contrato `PropsFenomeno`. Dibuja la sequía (escena SVG,
-  deslizador de intensidad y una frase por zona y nivel).
+  `data-placeholder="fenomeno"` y el contrato `PropsFenomeno`.
 
-El mapa está integrado en `src/componentes/mapa/`.
+El mapa ya está integrado (`src/componentes/mapa/`); queda reservado el espacio del fenómeno.
 
 ## Datos
 
