@@ -9,6 +9,7 @@ import { Medidor } from '../../componentes/Medidor'
 import { nivelDePercentil } from '../../componentes/nivelMedidor'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { clases } from '../../componentes/clases'
+import { BASES, DATOS, ORDEN_BASES, ORDEN_DATOS, type CapaBase, type CapaDatos } from '../../componentes/mapa/capas'
 import { ContenedorMapa } from '../../componentes/mapa/ContenedorMapa'
 import { useEscenario } from '../../componentes/mapa/escenario'
 import { Icono } from '../../componentes/Icono'
@@ -44,6 +45,21 @@ function esPantallaAncha() {
   return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 840px)').matches
 }
 
+/** Que significan los colores de la capa de satelite activa: una barra de menos a mas. */
+function LeyendaDatos({ capa }: { capa: CapaDatos }) {
+  const def = DATOS[capa]
+  return (
+    <p className={estilos.leyendaDatos}>
+      <span>{def.descripcion}</span>
+      <span className={estilos.escala}>
+        {def.menos}
+        <span className={estilos.barraEscala} style={{ backgroundImage: `linear-gradient(to right, ${def.colores.join(', ')})` }} aria-hidden="true" />
+        {def.mas}
+      </span>
+    </p>
+  )
+}
+
 export default function Mapa() {
   const { zonaId, cultivoId, elegirZona } = useEstadoApp()
   const navegar = useNavigate()
@@ -51,6 +67,9 @@ export default function Mapa() {
   const [departamentoTocado, fijarDepartamentoTocado] = useState<string | null>(null)
   const controlMapa = useRef<ControlMapa>(null)
   const [listaAbierta] = useState(esPantallaAncha)
+  const [capasAbiertas, fijarCapasAbiertas] = useState(false)
+  const [base, fijarBase] = useState<CapaBase>('simple')
+  const [datos, fijarDatos] = useState<CapaDatos | null>(null)
 
   const zona = buscarZona(zonaId)
   const humedad = zona ? humedadPorcentaje(zona) : null
@@ -116,14 +135,42 @@ export default function Mapa() {
               departamentoId={departamentoId}
               alSeleccionarDepartamento={fijarDepartamentoTocado}
               escenario={escenario}
+              base={base}
+              datos={datos}
             />
             <BarraFlotante className={estilos.controles} role="group" aria-label="Controles del mapa">
               <BotonIcono icono="add" etiqueta="Acercar" onClick={() => controlMapa.current?.acercar()} />
               <BotonIcono icono="remove" etiqueta="Alejar" onClick={() => controlMapa.current?.alejar()} />
               <BotonIcono icono="my_location" etiqueta="Mi ubicación" onClick={buscarMiUbicacion} />
+              <BotonIcono
+                icono="layers"
+                etiqueta="Capas del mapa"
+                seleccionado={capasAbiertas}
+                aria-expanded={capasAbiertas}
+                aria-controls="capas-mapa"
+                onClick={() => fijarCapasAbiertas((a) => !a)}
+              />
             </BarraFlotante>
           </div>
-          {cultivo && <LeyendaAptitud />}
+          {capasAbiertas && (
+            <div id="capas-mapa" className={estilos.capas}>
+              <div className={estilos.grupoCapas} role="group" aria-label="Tipo de mapa">
+                {ORDEN_BASES.map((b) => (
+                  <Chip key={b} variante="filtro" seleccionado={b === base} onClick={() => fijarBase(b)}>
+                    {BASES[b].nombre}
+                  </Chip>
+                ))}
+              </div>
+              <div className={estilos.grupoCapas} role="group" aria-label="Datos de satélite">
+                {ORDEN_DATOS.map((c) => (
+                  <Chip key={c} variante="filtro" seleccionado={c === datos} onClick={() => fijarDatos(c === datos ? null : c)}>
+                    {DATOS[c].nombre}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
+          {datos ? <LeyendaDatos capa={datos} /> : cultivo && <LeyendaAptitud />}
         </div>
 
         <div className={estilos.lateral}>
@@ -229,6 +276,7 @@ export default function Mapa() {
       <p className="tipo-nota">
         {cultivo && 'Puntajes de ejemplo, todavía sin validar. Consulte a su técnico. '}
         Límites: geoBoundaries y OpenStreetMap.
+        {[BASES[base].credito, datos && DATOS[datos].credito].filter(Boolean).map((c) => ` ${c}.`)}
       </p>
     </div>
   )

@@ -5,6 +5,7 @@ import { useEffect, useImperativeHandle, useRef } from 'react'
 import { buscarDepartamento, palabraNivel, ranking } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
 import limitesJson from '../../datos/departamentos.geo.json'
+import { BASES, DATOS } from './capas'
 import type { PropsMapa } from './ContenedorMapa'
 import { nombreCorto } from './formato'
 import estilos from './MapaHonduras.module.css'
@@ -51,8 +52,9 @@ function alActivar(el: Element, accion: () => void) {
 }
 
 /**
- * Honduras por departamento, con Leaflet y sin teselas de fondo: solo se dibujan los limites,
- * asi el mapa carga igual con conexion lenta. Cada departamento se pinta segun que tan bien se
+ * Honduras por departamento, con Leaflet. Por defecto va sin teselas de fondo: solo se dibujan los
+ * limites, asi el mapa carga igual con conexion lenta. Quien lo usa puede pedir un fondo (relieve o
+ * satelite) y una capa de datos de satelite encima. Cada departamento se pinta segun que tan bien se
  * da el cultivo elegido; al tocar uno aparece su puntaje encima. Cada lugar con datos es un punto.
  */
 export function MapaHonduras({
@@ -65,6 +67,8 @@ export function MapaHonduras({
   alSeleccionarDepartamento,
   escenario = 'normal',
   enfocar = false,
+  base = 'simple',
+  datos = null,
   ref,
 }: PropsMapa) {
   const raiz = useRef<HTMLDivElement>(null)
@@ -174,6 +178,21 @@ export function MapaHonduras({
     }
   }, [zonas, caja, seEligenDepartamentos])
 
+  // Fondo y capa de datos: teselas debajo de los departamentos. Se vuelven a poner si el mapa se crea de nuevo.
+  useEffect(() => {
+    const mapa = interno.current?.mapa
+    if (!mapa) return
+    const capas: L.TileLayer[] = []
+    const fondo = BASES[base].url
+    if (fondo) capas.push(L.tileLayer(fondo, { maxZoom: 10, zIndex: 1 }))
+    if (datos) {
+      const def = DATOS[datos]
+      capas.push(L.tileLayer(def.url, { maxNativeZoom: def.zoomNativo, maxZoom: 10, zIndex: 2, opacity: 0.75 }))
+    }
+    capas.forEach((c) => c.addTo(mapa))
+    return () => capas.forEach((c) => c.remove())
+  }, [base, datos, zonas, caja, seEligenDepartamentos])
+
   // Pinta la seleccion: color y puntaje de cada departamento, y el lugar elegido.
   useEffect(() => {
     const actual = interno.current
@@ -234,5 +253,13 @@ export function MapaHonduras({
     [],
   )
 
-  return <div ref={raiz} className={estilos.raiz} data-enfoque={enfocar && departamentoId ? '' : undefined} />
+  return (
+    <div
+      ref={raiz}
+      className={estilos.raiz}
+      data-enfoque={enfocar && departamentoId ? '' : undefined}
+      data-fondo={base === 'simple' ? undefined : base}
+      data-capa={datos ?? undefined}
+    />
+  )
 }

@@ -1,6 +1,7 @@
 import type { Ref } from 'react'
 import type { Escenario } from '../../datos/aptitud'
 import type { DatosZonas, Zona } from '../../datos/zonas'
+import type { CapaBase, CapaDatos } from './capas'
 import estilos from './ContenedorMapa.module.css'
 import { MapaHonduras, type ControlMapa } from './MapaHonduras'
 
@@ -18,6 +19,10 @@ export interface PropsMapa {
   escenario?: Escenario
   /** Atenua el resto del pais para que la mirada caiga en el departamento marcado. */
   enfocar?: boolean
+  /** Fondo del mapa. Por defecto, simple: solo los limites, sin teselas. */
+  base?: CapaBase
+  /** Capa de datos de satelite encima del fondo. Con ella el color del puntaje se apaga. */
+  datos?: CapaDatos | null
   /** Para acercar, alejar o centrar el mapa desde los botones de la pantalla. */
   ref?: Ref<ControlMapa>
 }
