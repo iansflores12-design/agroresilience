@@ -266,3 +266,16 @@
   font: var(--tipo-titulo);
   overflow-wrap: anywhere;
 }
+
+/* Chat vacío en pantalla ancha: la invitación y las sugerencias van centradas. */
+@media (min-width: 840px) {
+  .vacio {
+    align-items: center;
+    padding-block: var(--esp-12);
+    text-align: center;
+  }
+
+  .sugerencias {
+    justify-content: center;
+  }
+}

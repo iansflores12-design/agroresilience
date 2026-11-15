@@ -9,6 +9,8 @@ import { useConversacion, type ChatGuardado } from '../../estado/Conversacion'
 import { avisar } from '../../lib/avisos'
 import estilos from './Chats.module.css'
 
+const sinTildes = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
 /** Lo último que se dijo en el chat, en una línea. */
 function resumen(c: ChatGuardado): string {
   const ultimo = c.mensajes[c.mensajes.length - 1]
@@ -27,6 +29,13 @@ export function ListaChats({ abiertoId }: { abiertoId: string | null }) {
   const navegar = useNavigate()
   const [editando, fijarEditando] = useState<string | null>(null)
   const [borrador, fijarBorrador] = useState('')
+  const [busqueda, fijarBusqueda] = useState('')
+  // El chat cuyas opciones (fijar, nombre, borrar) están abiertas debajo de su fila.
+  const [opciones, fijarOpciones] = useState<string | null>(null)
+  const buscado = sinTildes(busqueda.trim())
+  const visibles = buscado
+    ? chats.filter((c) => sinTildes(c.titulo).includes(buscado) || c.mensajes.some((m) => sinTildes(m.texto).includes(buscado)))
+    : chats
   const Titulo = abiertoId ? 'h2' : 'h1'
 
   function guardarNombre(e: FormEvent, id: string) {
@@ -43,19 +52,34 @@ export function ListaChats({ abiertoId }: { abiertoId: string | null }) {
 
   return (
     <aside className={estilos.lista} aria-labelledby="titulo-chats">
-      <div className={estilos.cabezaLista}>
-        <Titulo id="titulo-chats" className={estilos.tituloLista}>
-          Sus chats
-        </Titulo>
-        <Boton icono="add" onClick={() => navegar(`/chat/${crear()}`)}>
-          Nuevo chat
-        </Boton>
-      </div>
+      <Titulo id="titulo-chats" className={estilos.tituloLista}>
+        Sus chats
+      </Titulo>
+      {chats.length > 0 && (
+        <label className={estilos.buscador}>
+          <Icono nombre="search" tamano={22} />
+          <span className="solo-lectores">Buscar en sus chats</span>
+          <input
+            type="search"
+            value={busqueda}
+            placeholder="Buscar en sus chats"
+            autoComplete="off"
+            onChange={(e) => fijarBusqueda(e.target.value)}
+          />
+        </label>
+      )}
+      <Boton icono="add" className={estilos.nuevo} onClick={() => navegar(`/chat/${crear()}`)}>
+        Nuevo chat
+      </Boton>
       {chats.length === 0 ? (
         <p className={estilos.vacioLista}>Todavía no tiene chats. Empiece uno para preguntarle al asistente.</p>
+      ) : visibles.length === 0 ? (
+        <p className={estilos.vacioLista} role="status">
+          Ningún chat tiene esas palabras.
+        </p>
       ) : (
         <ul className={estilos.chats}>
-          {chats.map((c) => (
+          {visibles.map((c) => (
             <li key={c.id} className={clases(estilos.filaChat, c.id === abiertoId && estilos.filaAbierta)}>
               {editando === c.id ? (
                 <form className={estilos.renombrar} onSubmit={(e) => guardarNombre(e, c.id)}>
@@ -79,29 +103,51 @@ export function ListaChats({ abiertoId }: { abiertoId: string | null }) {
                     className={clases(estilos.enlaceChat, 'capa-estado')}
                     aria-current={c.id === abiertoId ? 'page' : undefined}
                   >
-                    <span className={estilos.nombreChat}>
-                      {c.fijado && <Icono nombre="keep" tamano={18} />}
-                      {c.titulo}
+                    <span className={estilos.iconoChat}>
+                      <Icono nombre="forum" tamano={20} />
                     </span>
-                    <span className="tipo-nota">{resumen(c)}</span>
+                    <span className={estilos.textoChat}>
+                      <span className={estilos.nombreChat}>
+                        {c.titulo}
+                        {c.fijado && <Icono nombre="keep" tamano={16} />}
+                      </span>
+                      <span className="tipo-nota">{resumen(c)}</span>
+                    </span>
                   </Control>
-                  <span className={estilos.accionesChat}>
-                    <BotonIcono
-                      icono="keep"
-                      variante={c.fijado ? 'tonal' : 'estandar'}
-                      etiqueta={c.fijado ? `Quitar de fijados: ${c.titulo}` : `Fijar arriba: ${c.titulo}`}
-                      onClick={() => fijar(c.id, !c.fijado)}
-                    />
-                    <BotonIcono
-                      icono="edit"
-                      etiqueta={`Cambiar nombre: ${c.titulo}`}
-                      onClick={() => {
-                        fijarBorrador(c.titulo)
-                        fijarEditando(c.id)
-                      }}
-                    />
-                    <BotonIcono icono="delete" etiqueta={`Borrar: ${c.titulo}`} onClick={() => borrar(c)} />
-                  </span>
+                  <BotonIcono
+                    icono="more_vert"
+                    etiqueta={`Opciones de ${c.titulo}`}
+                    aria-expanded={opciones === c.id}
+                    onClick={() => fijarOpciones(opciones === c.id ? null : c.id)}
+                  />
+                  {opciones === c.id && (
+                    <span className={estilos.accionesChat}>
+                      <Boton
+                        variante="texto"
+                        icono="keep"
+                        onClick={() => {
+                          fijar(c.id, !c.fijado)
+                          fijarOpciones(null)
+                        }}
+                      >
+                        {c.fijado ? 'Quitar de fijados' : 'Fijar arriba'}
+                      </Boton>
+                      <Boton
+                        variante="texto"
+                        icono="edit"
+                        onClick={() => {
+                          fijarBorrador(c.titulo)
+                          fijarEditando(c.id)
+                          fijarOpciones(null)
+                        }}
+                      >
+                        Cambiar nombre
+                      </Boton>
+                      <Boton variante="texto" icono="delete" onClick={() => borrar(c)}>
+                        Borrar
+                      </Boton>
+                    </span>
+                  )}
                 </>
               )}
             </li>
