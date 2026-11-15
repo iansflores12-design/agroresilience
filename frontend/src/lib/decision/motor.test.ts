@@ -4,6 +4,7 @@ import gracias from '../../../public/kharis/gracias.json'
 import escalaFina from '../../../public/kharis/escala_fina.json'
 import { ajustarAParcela, alturaEn } from './escala'
 import { decidir, validarEntrada } from './motor'
+import { ajustePorPrecio, precioCreible, type PreciosRegion } from './precios'
 import { resumenRapido, datosParaGemini } from './textos'
 import type { EntradaDecision, EscalaFina, PuntoKharis } from './tipos'
 
@@ -134,4 +135,49 @@ it('ranking de ejemplo (Choluteca, maiz de primera, plano)', () => {
   console.log(tabla.join('\n'))
   console.log(resumenRapido(d, d.mejorId))
   expect(tabla.length).toBeGreaterThan(0)
+})
+
+describe('precios por region', () => {
+  const precios = (cultivos: PreciosRegion['cultivos']): PreciosRegion => ({ region: 'Choluteca', origen: 'busqueda', consultado: '2026-11-15', cultivos, fuentes: [] })
+  const frijol = (lempirasQq: number) => precios({ frijol: { lempirasQq, mercado: 'Choluteca', fecha: '2026-11-10', fuente: 'SIMPAH' } })
+  const venta = (d: ReturnType<typeof decidir>, id: string) => d.rotaciones.find((r) => r.id === id)!.factores.find((f) => f.clave === 'venta')!.valor
+
+  it('sin precio de la region la decision no cambia', () => {
+    const sin = decidir(base, pCholuteca, meta)
+    const con = decidir(base, pCholuteca, { ...meta, precios: precios({}) })
+    expect(con.rotaciones).toEqual(sin.rotaciones)
+  })
+
+  it('un precio mas alto que la referencia sube la venta de las rotaciones con ese cultivo, y uno mas bajo la baja', () => {
+    const sin = decidir(base, pCholuteca, meta)
+    const conFrijol = sin.rotaciones.find((r) => r.pasos.some((x) => x.cultivoId === 'frijol'))!
+    const caro = decidir(base, pCholuteca, { ...meta, precios: frijol(2600) })
+    const barato = decidir(base, pCholuteca, { ...meta, precios: frijol(1400) })
+    expect(venta(caro, conFrijol.id)).toBeGreaterThan(venta(sin, conFrijol.id))
+    expect(venta(barato, conFrijol.id)).toBeLessThan(venta(sin, conFrijol.id))
+    const actual = sin.rotaciones.find((r) => r.actual)!
+    expect(venta(caro, actual.id)).toBe(venta(sin, actual.id))
+    const r = caro.rotaciones.find((x) => x.id === conFrijol.id)!
+    expect(r.evidencia.some((x) => x.texto.includes('L2,600'))).toBe(true)
+    expect(r.faltaSaber.some((x) => /precio del frijol/i.test(x))).toBe(false)
+    expect(caro.precios?.origen).toBe('busqueda')
+  })
+
+  it('Gemini recibe el precio de cada cultivo: el de la region si lo hay y, si no, la referencia', () => {
+    const sin = datosParaGemini(decidir(base, pCholuteca, meta), 'top3')
+    expect(sin).toContain('Precios por cultivo')
+    expect(sin).toContain('Frijol: L2,000 en San Pedro Sula (24-08-2026), referencia nacional')
+    const con = datosParaGemini(decidir(base, pCholuteca, { ...meta, precios: frijol(2600) }), 'top3')
+    expect(con).toContain('Frijol: L2,600 en Choluteca (10-11-2026), precio de la región')
+    expect(con).toContain('suma 12 puntos')
+    expect(con).toContain('Maíz: L770')
+  })
+
+  it('el ajuste tiene tope y descarta precios fuera de rango', () => {
+    expect(ajustePorPrecio('frijol', frijol(2200))).toBe(4)
+    expect(ajustePorPrecio('frijol', frijol(3900))).toBe(15)
+    expect(ajustePorPrecio('frijol', frijol(1000))).toBe(-15)
+    expect(precioCreible('frijol', 20000)).toBe(false)
+    expect(ajustePorPrecio('frijol', frijol(20000))).toBe(0)
+  })
 })

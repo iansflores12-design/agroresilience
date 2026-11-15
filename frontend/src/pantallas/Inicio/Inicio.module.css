@@ -376,16 +376,21 @@
 .cuadros {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Todas las filas miden lo que la tarjeta mas alta: el texto largo nunca se sale. */
+  grid-auto-rows: 1fr;
   gap: var(--esp-3);
+}
+
+.cuadros > li {
+  display: grid;
 }
 
 .cuadro {
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 9.5rem;
   padding: var(--esp-4);
   border-radius: var(--forma-xl);
   background-color: var(--md-sys-color-surface-container);
@@ -488,8 +493,16 @@
     font-size: 2.5rem;
   }
 
+  /* Con ancho de sobra las etiquetas pasan de linea en vez de deslizarse: ninguna queda cortada en el borde. */
+  .etiquetas {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  /* Tantas columnas como quepan con un ancho minimo: el nombre largo de una rotacion no queda
+     apretado en una columna angosta. Se ajusta la columna, no la letra. */
   .cuadros {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
   }
 }
 
@@ -503,9 +516,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .cuadros {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 339px) {

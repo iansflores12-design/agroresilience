@@ -4,7 +4,9 @@ import { readFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { leerKharis } from '../src/lib/decision/kharis.js'
 import { decidir } from '../src/lib/decision/motor.js'
+import { LUGARES, NOMBRES_PUNTOS } from '../src/lib/decision/parametros.js'
 import type { Decision, EntradaDecision } from '../src/lib/decision/tipos.js'
+import { preciosDeRegion } from './_precios.js'
 
 /**
  * Lee las salidas de Kharis del disco (vercel.json las incluye con `includeFiles`) y, si no
@@ -23,7 +25,10 @@ async function leerArchivo(url: string): Promise<Response> {
 export async function decisionPara(entrada: EntradaDecision, urlPeticion: string): Promise<Decision> {
   const base = new URL('/kharis/', urlPeticion).href
   const { indice, punto, escala, distanciaKm } = await leerKharis(base, entrada, leerArchivo)
-  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm })
+  // Con parcela la region es la del punto de Kharis mas cercano; sin ella, el lugar elegido.
+  const region = entrada.parcela ? NOMBRES_PUNTOS[punto.punto] ?? punto.punto : LUGARES[entrada.zonaId]?.nombre ?? punto.punto
+  const precios = await preciosDeRegion(region)
+  return decidir(entrada, punto, { fechaBase: indice.fecha_base, modelo: indice.version_modelo, escala, distanciaKm, precios })
 }
 
 export function json(dato: unknown, estado = 200): Response {

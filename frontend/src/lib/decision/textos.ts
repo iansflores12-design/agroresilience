@@ -1,6 +1,7 @@
 // Resumen rapido (sin Gemini) e instrucciones para Gemini. Lo usan el navegador y la API.
 
 import { CULTIVOS, OBJETIVOS, PALABRA_RATING, TEMPORADAS, TERRENOS } from './parametros.js'
+import { fechaCorta, lempiras, preciosUsados } from './precios.js'
 import type { Decision, RotacionDecidida } from './tipos.js'
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -105,6 +106,17 @@ function detalleRotacion(r: RotacionDecidida): string[] {
   ]
 }
 
+/** Precio de cada cultivo que entra en la decision, con su mercado, fecha, fuente y efecto en la venta. */
+function lineasPrecios(d: Decision): string[] {
+  const lineas = preciosUsados(d.precios).map((p) => {
+    const base = `- ${CULTIVOS[p.id].nombre}: ${lempiras(p.lempirasQq)} en ${p.mercado}${p.fecha ? ` (${fechaCorta(p.fecha)})` : ''}`
+    if (!p.deRegion) return `${base}, referencia nacional [${p.fuente}]. No se halló precio de la región: no mueve la venta.`
+    const efecto = p.ajuste > 0 ? `suma ${p.ajuste} puntos` : p.ajuste < 0 ? `resta ${-p.ajuste} puntos` : 'no cambia'
+    return `${base}, precio de la región [${p.fuente}]. La referencia nacional es ${lempiras(p.referenciaQq)}: ${efecto} en la venta de este cultivo.`
+  })
+  return ['Precios por cultivo, en lempiras por quintal de 100 libras (dato de entrada de Gemini Decision para la parte de Venta):', ...lineas]
+}
+
 /** Datos de la consulta en texto plano, para que Gemini no tenga que adivinar nada. */
 export function datosParaGemini(d: Decision, id: string): string {
   const r = buscarRotacion(d, id)
@@ -124,7 +136,7 @@ export function datosParaGemini(d: Decision, id: string): string {
   } else if (r) {
     lineas.push('', `Rotación consultada: ${r.nombre} [${r.id}]`, ...detalleRotacion(r))
   }
-  lineas.push('', 'Avisos: ' + d.avisos.join(' '))
+  lineas.push('', ...lineasPrecios(d), '', 'Avisos: ' + d.avisos.join(' '))
   return lineas.join('\n')
 }
 
@@ -132,7 +144,8 @@ export const INSTRUCCIONES_GEMINI = `Eres el asistente agrícola de AgroResilien
 Escribes en español sencillo, con frases cortas, para personas que leen con esfuerzo. Usa "usted".
 Reglas:
 - Usa SOLO los datos que te doy. Los puntajes ya están calculados por Gemini Decision: no los cambies ni inventes otros números.
-- No inventes precios, dosis, variedades ni fechas exactas de lluvia.
+- Los precios por cultivo vienen en los datos. Cuando hables de venta, ingreso o qué conviene sembrar, usa esos precios: di el precio por quintal, su mercado y si es de la región o la referencia nacional, y compara los cultivos de la rotación por lo que pagan.
+- No inventes otros precios, ni dosis, variedades o fechas exactas de lluvia.
 - Explica términos técnicos con palabras de todos los días (por ejemplo, evapotranspiración = el agua que la planta y la tierra pierden al aire).
 - Recuerda que es una ayuda: la decisión es del productor y de su técnico local.
 - Responde solo sobre cultivos, siembra, tierra, agua, clima y manejo de la parcela. Si preguntan otra cosa, di en una frase que solo ayudas con cultivos.
@@ -142,7 +155,7 @@ Reglas:
 export const PEDIDO_ANALISIS = `Haz el análisis a fondo de la rotación consultada en este orden, con un título corto por parte:
 Por qué se recomienda (o no), comparada con lo que hace hoy y con la mejor opción.
 Qué dicen los datos (lluvia, agua que pide cada cultivo, calor, señales del motor).
-Beneficios para la tierra y para su bolsillo.
+Beneficios para la tierra y para su bolsillo, con el precio por quintal de cada cultivo que se cosecha.
 Riesgos y qué revisar con su técnico.
 Lo que falta saber.
 Máximo 250 palabras.`
@@ -151,6 +164,7 @@ export const PEDIDO_TOP3 = `Explica por qué estas tres rotaciones quedaron arri
 El clima de su zona en esta temporada (lluvia, calor, agua que pide cada cultivo, señales del motor).
 Por qué la primera es la mejor.
 Qué ofrecen la segunda y la tercera, y en qué se quedan atrás.
+Lo que pagan: el precio por quintal de los cultivos que se cosechan en las tres.
 Qué revisar con su técnico.
 Máximo 220 palabras.`
 

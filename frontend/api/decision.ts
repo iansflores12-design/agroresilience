@@ -1,5 +1,6 @@
 // POST /api/decision  { entrada }  ->  Decision (gemini-decision.v1)
-// Gemini Decision: ranking de rotaciones con el pronostico de Kharis. Determinista y rapido.
+// Gemini Decision: ranking de rotaciones con el pronostico de Kharis y los precios de la region
+// (busqueda en la web, guardada 12 horas). Con los mismos datos da siempre los mismos puntajes.
 
 import { validarEntrada } from '../src/lib/decision/motor.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'

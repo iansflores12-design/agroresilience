@@ -1,6 +1,7 @@
 // Gemini Decision: compara rotaciones con el pronostico de Kharis, el terreno y los objetivos.
-// Es determinista: los mismos datos dan siempre los mismos puntajes. Gemini (el modelo de
-// lenguaje) solo explica estos numeros; no los cambia.
+// Es determinista: los mismos datos dan siempre los mismos puntajes. Los precios de la region
+// (precios.ts) entran como dato y mueven la parte de venta; Gemini (el modelo de lenguaje) solo
+// explica estos numeros, no los cambia.
 
 import { ajustarAParcela, dentroDeHonduras } from './escala.js'
 import {
@@ -17,6 +18,7 @@ import {
   ratingDePuntaje,
   type ParametrosCultivo,
 } from './parametros.js'
+import { PRECIOS_REFERENCIA, ajustePorPrecio, fechaCorta, lempiras, type PreciosRegion } from './precios.js'
 import type {
   ClaveFactor,
   Confianza,
@@ -213,7 +215,7 @@ function calcularPasos(p: PuntoKharis, e: EntradaDecision, cand: Candidato, ajus
 
 const media = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : 0)
 
-function factoresDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]): Record<ClaveFactor, number> {
+function factoresDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[], precios?: PreciosRegion | null): Record<ClaveFactor, number> {
   const conCultivo = pasos.filter((x) => x.cultivoId !== null)
   const desnudas = pasos.length - conCultivo.length
   const ids = conCultivo.map((x) => x.cultivoId as string)
@@ -242,9 +244,10 @@ function factoresDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]):
   const extremos = senal(p, 'P7')?.probabilidad ?? 0
   const erosion = 100 - terreno.erosion * (desnudas * 28 + extremos * 20) + (coberturas > 0 ? 15 * terreno.erosion : 0)
 
-  // Una cosecha que se pierde por falta de agua no se vende.
+  // Una cosecha que se pierde por falta de agua no se vende. El precio de la region sube o baja el mercado.
   const cosechas = conCultivo.filter((x) => CULTIVOS[x.cultivoId as string].cosecha)
-  const ventaPasos = cosechas.map((x) => CULTIVOS[x.cultivoId as string].mercado * Math.sqrt((x.agua ?? 0) / 100))
+  const mercado = (id: string) => limitar(CULTIVOS[id].mercado + ajustePorPrecio(id, precios))
+  const ventaPasos = cosechas.map((x) => mercado(x.cultivoId as string) * Math.sqrt((x.agua ?? 0) / 100))
   const distintas = new Set(cosechas.map((x) => x.cultivoId)).size
   const venta = media(ventaPasos) + 8 * Math.max(0, distintas - 1)
 
@@ -284,6 +287,32 @@ function pasoPlan(x: PasoCalculado): PasoPlan {
   }
 }
 
+/** El precio con el que se califico la venta de cada cultivo que se cosecha. */
+function evidenciaPrecios(pasos: PasoCalculado[], precios?: PreciosRegion | null): Evidencia[] {
+  const ids = [...new Set(pasos.map((x) => x.cultivoId).filter((id): id is string => id !== null && CULTIVOS[id].cosecha))]
+  const lista: Evidencia[] = []
+  for (const id of ids) {
+    const ref = PRECIOS_REFERENCIA[id]
+    if (!ref) continue
+    const nombre = minus(CULTIVOS[id].nombre)
+    const local = precios?.cultivos[id]
+    if (!local) {
+      lista.push({
+        texto: `Precio de referencia del ${nombre}: ${lempiras(ref.lempirasQq)} el quintal en ${ref.mercado} (${fechaCorta(ref.fecha)}). No se halló el de su región: la venta se califica sin ajuste.`,
+        fuente: ref.fuente,
+      })
+      continue
+    }
+    const puntos = ajustePorPrecio(id, precios)
+    const efecto = puntos > 0 ? `suma ${puntos} puntos a su venta` : puntos < 0 ? `resta ${-puntos} puntos a su venta` : 'no cambia su venta'
+    lista.push({
+      texto: `Precio del ${nombre} en ${local.mercado}: ${lempiras(local.lempirasQq)} el quintal${local.fecha ? ` (${fechaCorta(local.fecha)})` : ''}. La referencia nacional es ${lempiras(ref.lempirasQq)}: ${efecto}.`,
+      fuente: `${local.fuente}; búsqueda en la web del ${fechaCorta(precios?.consultado ?? '')}`,
+    })
+  }
+  return lista
+}
+
 function evidenciaDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]): Evidencia[] {
   const lista: Evidencia[] = []
   for (const x of pasos) {
@@ -312,7 +341,7 @@ function evidenciaDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[])
   return lista
 }
 
-function razonFactor(clave: ClaveFactor, e: EntradaDecision, pasos: PasoCalculado[], cand: Candidato): string | null {
+function razonFactor(clave: ClaveFactor, e: EntradaDecision, pasos: PasoCalculado[], cand: Candidato, precios?: PreciosRegion | null): string | null {
   const nuevo = pasos.find((x, i) => i > 0 && x.cultivoId && x.cultivoId !== e.cultivoId && !x.continua)
   const nombreNuevo = nuevo?.cultivoId ? articulo(nuevo.cultivoId) : null
   switch (clave) {
@@ -330,8 +359,14 @@ function razonFactor(clave: ClaveFactor, e: EntradaDecision, pasos: PasoCalculad
       return cand.cultivos.every((c) => c !== null)
         ? `La tierra no queda desnuda en todo el año: protege su terreno ${minus(TERRENOS[e.terreno].nombre)} de la lluvia fuerte.`
         : null
-    case 'venta':
+    case 'venta': {
+      const id = nuevo?.cultivoId
+      const local = id ? precios?.cultivos[id] : undefined
+      if (id && local && CULTIVOS[id].cosecha && ajustePorPrecio(id, precios) > 0) {
+        return `Suma una cosecha de ${minus(CULTIVOS[id].nombre)}, que en ${local.mercado} se paga a ${lempiras(local.lempirasQq)} el quintal, más que la referencia nacional.`
+      }
       return nombreNuevo && nuevo?.cultivoId && CULTIVOS[nuevo.cultivoId].cosecha ? `Suma una cosecha de ${minus(CULTIVOS[nuevo.cultivoId].nombre)} para vender.` : null
+    }
     case 'forraje':
       return nombreNuevo && nuevo?.cultivoId && CULTIVOS[nuevo.cultivoId].forraje >= 50 ? `${nombreNuevo.charAt(0).toUpperCase()}${nombreNuevo.slice(1)} sirve de comida para los animales.` : null
     case 'plagas':
@@ -365,6 +400,8 @@ export interface MetaKharis {
   /** Con parcela: malla de altura y coeficientes validados, y la distancia al punto de Kharis usado. */
   escala?: EscalaFina | null
   distanciaKm?: number
+  /** Precios de la region (api/_precios.ts). Sin ellos la venta usa solo la referencia nacional. */
+  precios?: PreciosRegion | null
 }
 
 export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKharis): Decision {
@@ -384,7 +421,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
 
   const calculadas = candidatos(e.cultivoId).map((cand) => {
     const pasos = calcularPasos(p, e, cand, ajusteTemp)
-    const valores = factoresDe(p, e, pasos)
+    const valores = factoresDe(p, e, pasos, meta.precios)
     let puntaje = claves.reduce((s, k) => s + w[k] * valores[k], 0)
     const inviable = pasos.some((x) => x.cultivoId && CULTIVOS[x.cultivoId].cosecha && (x.agua ?? 100) < 30)
     if (inviable) puntaje = Math.min(puntaje, 58)
@@ -415,7 +452,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     else if (diferencia > 0) razones.push({ tipo: 'comparacion', texto: `Saca ${diferencia} puntos más que lo que hace hoy.` })
     else if (diferencia < 0) razones.push({ tipo: 'comparacion', texto: `Saca ${-diferencia} puntos menos que lo que hace hoy.` })
     for (const a of aporte) {
-      const texto = razonFactor(a.k, e, x.pasos, x.cand)
+      const texto = razonFactor(a.k, e, x.pasos, x.cand, meta.precios)
       if (texto && !razones.some((r) => r.texto === texto)) razones.push({ tipo: a.k, texto })
       if (razones.length >= 4) break
     }
@@ -426,7 +463,9 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     const nuevos = usados.filter((id) => id !== e.cultivoId)
     const beneficios = (x.cand.actual ? CULTIVOS[e.cultivoId].beneficios : nuevos.flatMap((id) => CULTIVOS[id].beneficios)).slice(0, 4)
     const riesgos = [...riesgosDe(x.pasos, e), ...usados.flatMap((id) => CULTIVOS[id].riesgos)]
-    const faltaSaber = [...new Set([...usados.flatMap((id) => CULTIVOS[id].falta), 'Cómo le fue en su parcela en años pasados'])]
+    // Si ya se hallo el precio de la region, deja de ser algo que falta saber.
+    const faltan = usados.flatMap((id) => CULTIVOS[id].falta.filter((f) => !(meta.precios?.cultivos[id] && /precio/i.test(f))))
+    const faltaSaber = [...new Set([...faltan, 'Cómo le fue en su parcela en años pasados'])]
     const confianza: Confianza = x.inviable || usados.some((id) => CULTIVOS[id].riego) ? 'baja' : 'media'
 
     return {
@@ -445,7 +484,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
       beneficios,
       riesgos: [...new Set(riesgos)].slice(0, 5),
       faltaSaber: faltaSaber.slice(0, 4),
-      evidencia: [...(parcela ? evidenciaParcela(parcela) : []), ...evidenciaDe(p, e, x.pasos)],
+      evidencia: [...(parcela ? evidenciaParcela(parcela) : []), ...evidenciaDe(p, e, x.pasos), ...evidenciaPrecios(x.pasos, meta.precios)],
     }
   })
 
@@ -463,9 +502,12 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     },
     rotaciones,
     mejorId: mejor.cand.id,
+    ...(meta.precios ? { precios: meta.precios } : {}),
     avisos: [
       'Más allá de dos meses el pronóstico se parece al clima normal del lugar: sirve para la temporada, no para un día exacto.',
-      'El agua de cada cultivo sale de FAO-56 y los precios de referencia de SIMPAH 2026: revise los de su mercado. El forraje y el frijol terciopelo son aproximados.',
+      meta.precios?.origen === 'busqueda'
+        ? `El agua de cada cultivo sale de FAO-56. Los precios de ${meta.precios.region} se buscaron en la web y se comparan con la referencia de SIMPAH 2026: confírmelos en su mercado. El forraje y el frijol terciopelo son aproximados.`
+        : 'El agua de cada cultivo sale de FAO-56 y los precios de referencia de SIMPAH 2026: revise los de su mercado. El forraje y el frijol terciopelo son aproximados.',
       'Es una ayuda para pensar: la decisión final es suya y de su técnico.',
     ],
   }

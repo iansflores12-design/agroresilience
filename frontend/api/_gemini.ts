@@ -25,6 +25,9 @@ export interface PedidoGemini {
   mensajes: MensajeGemini[]
   signal?: AbortSignal
   maxTokens?: number
+  /** Deja que el modelo busque en Google antes de responder. */
+  busqueda?: boolean
+  temperatura?: number
 }
 
 export function hayClave(): boolean {
@@ -43,8 +46,9 @@ function cuerpo(p: PedidoGemini): string {
   return JSON.stringify({
     systemInstruction: { parts: [{ text: p.sistema }] },
     contents: p.mensajes.map((m) => ({ role: m.rol, parts: [{ text: m.texto }] })),
+    ...(p.busqueda ? { tools: [{ google_search: {} }] } : {}),
     generationConfig: {
-      temperature: 0.4,
+      temperature: p.temperatura ?? 0.4,
       // Holgado: los modelos que razonan gastan parte de este tope antes de escribir y, si es
       // corto, la respuesta llega cortada a media frase. El largo real lo limita el pedido.
       maxOutputTokens: p.maxTokens ?? 4096,
@@ -136,4 +140,26 @@ export async function geminiTexto(p: PedidoGemini): Promise<string> {
   const texto = textoDe(await r.json().catch(() => null)).trim()
   if (!texto) throw new ErrorGemini('servidor', 'Gemini no devolvio texto')
   return texto
+}
+
+export interface FuenteWeb {
+  titulo: string
+  url: string
+}
+
+/** Respuesta completa con las paginas que el modelo consulto (para pedidos con `busqueda`). */
+export async function geminiConFuentes(p: PedidoGemini): Promise<{ texto: string; fuentes: FuenteWeb[] }> {
+  const r = await llamar('generateContent', p)
+  const dato: unknown = await r.json().catch(() => null)
+  const texto = textoDe(dato).trim()
+  if (!texto) throw new ErrorGemini('servidor', 'Gemini no devolvio texto')
+  const trozos = (dato as { candidates?: { groundingMetadata?: { groundingChunks?: { web?: { uri?: string; title?: string } }[] } }[] })
+    ?.candidates?.[0]?.groundingMetadata?.groundingChunks
+  const fuentes: FuenteWeb[] = []
+  for (const t of trozos ?? []) {
+    const url = t.web?.uri
+    if (typeof url !== 'string' || !url.startsWith('https://') || fuentes.some((f) => f.url === url)) continue
+    fuentes.push({ titulo: (t.web?.title ?? '').slice(0, 80) || 'Fuente', url })
+  }
+  return { texto, fuentes }
 }

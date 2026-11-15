@@ -1,6 +1,8 @@
 // Contratos de Gemini Decision. Este modulo no usa el DOM: lo comparten el navegador y las
 // funciones de `api/`.
 
+import type { PreciosRegion } from './precios.js'
+
 export type Terreno = 'plano' | 'elevado' | 'bajo' | 'ondulado'
 export type Temporada = 'primera' | 'postrera' | 'verano'
 export type Objetivo = 'agua' | 'suelo' | 'erosion' | 'ingreso' | 'forraje' | 'nitrogeno' | 'plagas'
@@ -108,6 +110,8 @@ export interface Decision {
   rotaciones: RotacionDecidida[]
   mejorId: string
   avisos: string[]
+  /** Precios de la region con los que se califico la venta. */
+  precios?: PreciosRegion
 }
 
 /* ---------- Subconjunto del contrato kharis.web.v1 que usa la decision ---------- */

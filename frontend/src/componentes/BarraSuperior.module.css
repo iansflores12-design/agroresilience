@@ -47,6 +47,20 @@
   grid-area: tira;
 }
 
+/* En tableta la marca, el contexto y el sonido caben en una sola fila: la barra fija ocupa una
+   fila menos y deja mas pantalla al contenido. Si el contexto no cabe, pasa de linea dentro de su columna. */
+@media (min-width: 600px) and (max-width: 839px) {
+  .barra {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'marca tira sonido';
+    gap: var(--esp-4);
+  }
+
+  .barra > :nth-child(2) {
+    justify-content: flex-end;
+  }
+}
+
 @media (min-width: 840px) {
   .marca {
     display: none;
