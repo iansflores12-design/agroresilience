@@ -300,7 +300,7 @@ export default function Rotacion() {
         )}
         {decision.estado === 'calculando' && (
           <p className={estilos.estado} role="status">
-            Gemini Decision está comparando rotaciones…
+            Comparando rotaciones…
           </p>
         )}
         {decision.estado === 'error' && <p className={estilos.estado}>No se pudo leer el pronóstico de su lugar.</p>}

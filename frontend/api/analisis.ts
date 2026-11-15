@@ -38,7 +38,7 @@ export async function POST(request: Request): Promise<Response> {
           enviar({ tipo: 'error', causa: 'kharis', mensaje: String(e) })
           return
         }
-        enviar({ tipo: 'paso', id: 'decision', texto: 'Gemini Decision comparó las rotaciones' })
+        enviar({ tipo: 'paso', id: 'decision', texto: 'Se compararon las rotaciones' })
         enviar({ tipo: 'decision', decision })
         if (rotacionId !== TOP3 && !buscarRotacion(decision, rotacionId)) {
           enviar({ tipo: 'error', causa: 'servidor', mensaje: 'Rotación desconocida' })
@@ -51,7 +51,7 @@ export async function POST(request: Request): Promise<Response> {
         enviar({
           tipo: 'paso',
           id: 'gemini',
-          texto: rotacionId === TOP3 ? 'Gemini explica las tres mejores con el clima de su zona' : 'Gemini escribe el análisis a fondo',
+          texto: rotacionId === TOP3 ? 'La IA explica las tres mejores con el clima de su zona' : 'La IA escribe el análisis a fondo',
         })
         const pedido = {
           sistema: INSTRUCCIONES_GEMINI,

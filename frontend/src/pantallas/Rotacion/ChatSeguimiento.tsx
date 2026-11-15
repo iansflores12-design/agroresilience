@@ -54,10 +54,10 @@ export function ChatSeguimiento({
       if (c.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
       if (respaldo) {
         fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: respaldo(limpio), fecha: new Date().toISOString() }])
-        fijarError('Gemini no contestó. Le dejamos un resumen rápido con los datos de su consulta.')
+        fijarError('La IA no contestó. Le dejamos un resumen rápido con los datos de su consulta.')
         return
       }
-      fijarError('Gemini no pudo responder. Su pregunta quedó escrita: puede reintentar.')
+      fijarError('La IA no contestó. Su pregunta quedó escrita: puede reintentar.')
       fijarMensajes(lista)
       fijarTexto(limpio)
     } finally {
@@ -104,7 +104,7 @@ export function ChatSeguimiento({
         ))}
         {esperando && (
           <p className={estilos.burbujaAsistente}>
-            <span className="solo-lectores">Gemini está escribiendo</span>
+            <span className="solo-lectores">La IA está escribiendo</span>
             <span aria-hidden="true">…</span>
           </p>
         )}

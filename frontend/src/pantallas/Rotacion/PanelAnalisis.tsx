@@ -36,9 +36,9 @@ export function PanelAnalisis({
   analisis,
   resumen,
   titulo = 'Análisis a fondo',
-  apoyo = 'Gemini explica los números; no los cambia.',
-  aviso = { titulo: 'Análisis a fondo listo', descripcion: 'Gemini terminó de revisar esta rotación.' },
-  espera = 'Gemini sigue preparando el análisis a fondo. Le avisamos cuando esté.',
+  apoyo = 'La IA explica los números; no los cambia.',
+  aviso = { titulo: 'Análisis a fondo listo', descripcion: 'La IA terminó de revisar esta rotación.' },
+  espera = 'La IA sigue preparando el análisis a fondo. Le avisamos cuando esté.',
 }: {
   analisis: EstadoAnalisis & { reintentar: () => void }
   resumen: string

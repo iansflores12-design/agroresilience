@@ -201,9 +201,9 @@ function PorQueTop3({ d }: { d: Decision }) {
         analisis={analisis}
         resumen={resumenRapido(d, TOP3)}
         titulo="Por qué estas tres"
-        apoyo={`Gemini lo explica con el clima de ${d.punto.nombre}. No cambia los puntajes.`}
-        aviso={{ titulo: 'Explicación lista', descripcion: 'Gemini terminó de explicar las tres mejores.' }}
-        espera="Gemini sigue preparando la explicación. Le avisamos cuando esté."
+        apoyo={`La IA lo explica con el clima de ${d.punto.nombre}. No cambia los puntajes.`}
+        aviso={{ titulo: 'Explicación lista', descripcion: 'La IA terminó de explicar las tres mejores.' }}
+        espera="La IA sigue preparando la explicación. Le avisamos cuando esté."
       />
       {analisis.fase === 'listo' && (
         <ChatSeguimiento
@@ -307,7 +307,7 @@ export default function Inicio() {
         {decision.estado === 'calculando' && (
           <section className={estilos.seccion}>
             <p className={estilos.ayuda} role="status">
-              Gemini Decision está comparando rotaciones…
+              Comparando rotaciones…
             </p>
             <ul className={estilos.podio} aria-hidden="true">
               {[0, 1, 2].map((i) => (

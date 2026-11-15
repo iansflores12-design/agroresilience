@@ -31,8 +31,11 @@ export function hayClave(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim())
 }
 
-function modelo(): string {
-  return process.env.GEMINI_MODELO?.trim() || 'gemini-3.8-flash'
+/** El modelo configurado y, detrás, el de respaldo: se usa si el primero está saturado, sin cuota o no existe. */
+function modelos(): string[] {
+  const principal = process.env.GEMINI_MODELO?.trim() || 'gemini-3.8-flash'
+  const respaldo = process.env.GEMINI_MODELO_RESPALDO?.trim() || 'gemini-3.5-flash'
+  return principal === respaldo ? [principal] : [principal, respaldo]
 }
 
 function cuerpo(p: PedidoGemini): string {
@@ -42,24 +45,27 @@ function cuerpo(p: PedidoGemini): string {
     contents: p.mensajes.map((m) => ({ role: m.rol, parts: [{ text: m.texto }] })),
     generationConfig: {
       temperature: 0.4,
-      maxOutputTokens: p.maxTokens ?? 1200,
+      // Holgado: los modelos que razonan gastan parte de este tope antes de escribir y, si es
+      // corto, la respuesta llega cortada a media frase. El largo real lo limita el pedido.
+      maxOutputTokens: p.maxTokens ?? 4096,
       ...(nivel ? { thinkingConfig: { thinkingLevel: nivel } } : {}),
     },
   })
 }
 
-/** Esperas antes de reintentar cuando Gemini esta saturado (503) o falla un momento (500). */
-const ESPERAS_MS = [700, 1500]
-
 const esperar = (ms: number) => new Promise((listo) => setTimeout(listo, ms))
+
+/** Respuestas con las que vale la pena probar otro modelo: saturado, sin cuota, caído o inexistente. */
+const PROBAR_OTRO = new Set([429, 500, 503, 404])
 
 async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   const clave = process.env.GEMINI_API_KEY?.trim()
   if (!clave) throw new ErrorGemini('sin_clave', 'Falta GEMINI_API_KEY en el servidor')
+  const lista = modelos()
   let r: Response
-  for (let intento = 0; ; intento++) {
+  for (let i = 0; ; i++) {
     try {
-      r = await fetch(`${URL_BASE}${modelo()}:${metodo}`, {
+      r = await fetch(`${URL_BASE}${lista[i]}:${metodo}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
         body: cuerpo(p),
@@ -69,9 +75,9 @@ async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
       if (p.signal?.aborted) throw new ErrorGemini('cancelado')
       throw new ErrorGemini('red', String(e))
     }
-    // Modelo saturado o tropiezo pasajero: se reintenta un par de veces antes de rendirse.
-    if ((r.status === 503 || r.status === 500) && intento < ESPERAS_MS.length && !p.signal?.aborted) {
-      await esperar(ESPERAS_MS[intento])
+    if (PROBAR_OTRO.has(r.status) && i < lista.length - 1 && !p.signal?.aborted) {
+      console.error(`[gemini] ${lista[i]} respondio ${r.status}; se prueba ${lista[i + 1]}`)
+      await esperar(300)
       continue
     }
     break

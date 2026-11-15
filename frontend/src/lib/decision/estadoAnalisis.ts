@@ -83,18 +83,18 @@ export function transicion(e: EstadoAnalisis, ev: EventoAnalisis): EstadoAnalisi
 export function textoCausa(c: CausaAnalisis | null): string {
   switch (c) {
     case 'sin_clave':
-      return 'El análisis a fondo de Gemini todavía no está conectado en este servidor.'
+      return 'El análisis a fondo de la IA todavía no está conectado en este servidor.'
     case 'cuota':
-      return 'Gemini recibió muchas consultas. Espere un momento y vuelva a intentar.'
+      return 'La IA recibió muchas consultas. Espere un momento y vuelva a intentar.'
     case 'cuota_local':
       return 'Ya usó los análisis a fondo de hoy. Mañana puede pedir más.'
     case 'clave':
-      return 'El servidor no tiene permiso para usar Gemini.'
+      return 'El servidor no tiene permiso para usar la IA.'
     case 'kharis':
       return 'No se pudo leer el pronóstico de su lugar.'
     case 'red':
       return 'Se cortó la conexión.'
     default:
-      return 'Gemini no pudo responder esta vez.'
+      return 'La IA no contestó esta vez.'
   }
 }

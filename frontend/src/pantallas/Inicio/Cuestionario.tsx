@@ -206,7 +206,7 @@ export function Cuestionario({
       )}
       {paso === 0 && !soloPaso && (
         <p className={estilos.intro}>
-          Con cinco respuestas, Gemini Decision compara rotaciones con el pronóstico de su zona.
+          Con cinco respuestas comparamos rotaciones con el pronóstico de su zona.
         </p>
       )}
       <h1 id="pregunta-cuestionario" ref={titulo} tabIndex={-1} className={estilos.pregunta}>

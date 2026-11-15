@@ -89,7 +89,7 @@ export function respuestaRapida(d: Decision, id: string, pregunta: string): stri
   }
   const aviso = cuidado(r.riesgos[0])
   if (aviso && !partes.some((x) => r.riesgos.includes(x))) partes.push(aviso)
-  return `Resumen rápido, sin Gemini. ${partes.join(' ')}`
+  return `Resumen rápido: la IA no contestó. ${partes.join(' ')}`
 }
 
 /** Lo que el motor sabe de una rotacion: calendario, partes del puntaje, razones y evidencia. */

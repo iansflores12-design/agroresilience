@@ -140,7 +140,7 @@ describe('Resúmenes rápidos de respaldo', () => {
 
   it('el chat tiene respuesta preparada según la pregunta, sin Gemini', () => {
     const mejor = decision.rotaciones[0]
-    expect(respuestaRapida(decision, TOP3, '¿Y si llueve menos de lo previsto?')).toMatch(/^Resumen rápido, sin Gemini\. .*mm de lluvia/)
+    expect(respuestaRapida(decision, TOP3, '¿Y si llueve menos de lo previsto?')).toMatch(/^Resumen rápido: la IA no contestó\. .*mm de lluvia/)
     expect(respuestaRapida(decision, mejor.id, '¿Por qué la primera es la mejor?')).toContain(`${mejor.nombre}: ${mejor.puntaje} de 100`)
     expect(respuestaRapida(decision, mejor.id, '¿Qué necesito para empezar?')).toContain('Calendario:')
   })
