@@ -439,12 +439,6 @@
 
 /* ---------- Gemini explica las tres mejores ---------- */
 
-.porQue {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-4);
-}
-
 .esqueleto {
   min-height: 11rem;
   border-radius: var(--forma-xl);

@@ -15,7 +15,6 @@ if (-not $clave) {
 }
 $lineas = @(
     "GEMINI_API_KEY=$clave",
-    'GEMINI_MODELO=gemini-3.8-flash',
     'VITE_API_URL=/api'
 )
 [IO.File]::WriteAllText($destino, ($lineas -join "`n") + "`n")

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { geminiTexto, modelos, reiniciarPausas } from './_gemini.js'
 import { preciosDeRegion } from './_precios.js'
 
 function respuestaGemini(texto: string): Response {
@@ -17,6 +18,7 @@ function respuestaGemini(texto: string): Response {
 
 describe('busqueda de precios por region', () => {
   beforeEach(() => {
+    reiniciarPausas()
     process.env.GEMINI_API_KEY = 'clave-de-prueba'
   })
   afterEach(() => {
@@ -62,5 +64,40 @@ describe('busqueda de precios por region', () => {
     vi.stubGlobal('fetch', fetchFalso)
     expect((await preciosDeRegion('Tela')).origen).toBe('referencia')
     expect(fetchFalso).not.toHaveBeenCalled()
+  })
+})
+
+describe('cadena de modelos de Gemini', () => {
+  beforeEach(() => {
+    reiniciarPausas()
+    process.env.GEMINI_API_KEY = 'clave-de-prueba'
+  })
+  afterEach(() => {
+    delete process.env.GEMINI_API_KEY
+    delete process.env.GEMINI_MODELOS
+    delete process.env.GEMINI_MODELO
+    vi.unstubAllGlobals()
+  })
+
+  it('empieza por el de mas cuota gratuita y deja al final el modelo de configuraciones viejas', () => {
+    expect(modelos()[0]).toBe('gemini-3.5-flash-lite')
+    process.env.GEMINI_MODELO = 'gemini-3.8-flash'
+    expect(modelos()[0]).toBe('gemini-3.5-flash-lite')
+    expect(modelos().at(-1)).toBe('gemini-3.8-flash')
+    process.env.GEMINI_MODELOS = 'uno, dos'
+    expect(modelos()).toEqual(['uno', 'dos'])
+  })
+
+  it('si un modelo esta sin cuota pasa al siguiente y no lo vuelve a probar enseguida', async () => {
+    process.env.GEMINI_MODELOS = 'sin-cuota,con-cuota'
+    const usados: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const modelo = /models\/([^:]+):/.exec(url)?.[1] ?? ''
+      usados.push(modelo)
+      return modelo === 'sin-cuota' ? new Response('{"error":{}}', { status: 429 }) : respuestaGemini('listo')
+    }))
+    expect(await geminiTexto({ sistema: 's', mensajes: [{ rol: 'user', texto: 'hola' }] })).toBe('listo')
+    expect(await geminiTexto({ sistema: 's', mensajes: [{ rol: 'user', texto: 'hola' }] })).toBe('listo')
+    expect(usados).toEqual(['sin-cuota', 'con-cuota', 'con-cuota'])
   })
 })

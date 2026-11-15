@@ -19,6 +19,7 @@ export function ChatSeguimiento({
   titulo = 'Pregunte sobre esta rotación',
   sugerencias = SUGERENCIAS,
   respaldo,
+  integrado = false,
 }: {
   contexto: ContextoChat
   cliente?: ClienteChat
@@ -26,6 +27,8 @@ export function ChatSeguimiento({
   sugerencias?: string[]
   /** Respuesta preparada de antemano con los datos de la decisión, por si Gemini no contesta. */
   respaldo?: (pregunta: string) => string
+  /** Va dentro de la tarjeta del análisis: sin fondo ni relleno propios, separado por una línea. */
+  integrado?: boolean
 }) {
   const [mensajes, fijarMensajes] = useState<MensajeChat[]>([])
   const [texto, fijarTexto] = useState('')
@@ -73,7 +76,7 @@ export function ChatSeguimiento({
   }
 
   return (
-    <section className={estilos.chat} aria-labelledby="titulo-chat">
+    <section className={integrado ? estilos.chatIntegrado : estilos.chat} aria-labelledby="titulo-chat">
       <h2 id="titulo-chat" className={estilos.tituloTarjeta}>
         {titulo}
       </h2>

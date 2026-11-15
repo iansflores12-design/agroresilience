@@ -196,24 +196,24 @@ function PorQueTop3({ d }: { d: Decision }) {
   )
 
   return (
-    <div className={estilos.porQue}>
-      <PanelAnalisis
-        analisis={analisis}
-        resumen={resumenRapido(d, TOP3)}
-        titulo="Por qué estas tres"
-        apoyo={`La IA lo explica con el clima de ${d.punto.nombre}. No cambia los puntajes.`}
-        aviso={{ titulo: 'Explicación lista', descripcion: 'La IA terminó de explicar las tres mejores.' }}
-        espera="La IA sigue preparando la explicación. Le avisamos cuando esté."
-      />
+    <PanelAnalisis
+      analisis={analisis}
+      resumen={resumenRapido(d, TOP3)}
+      titulo="Por qué estas tres"
+      apoyo={`La IA lo explica con el clima de ${d.punto.nombre}. No cambia los puntajes.`}
+      aviso={{ titulo: 'Explicación lista', descripcion: 'La IA terminó de explicar las tres mejores.' }}
+      espera="La IA sigue preparando la explicación. Le avisamos cuando esté."
+    >
       {analisis.fase === 'listo' && (
         <ChatSeguimiento
+          integrado
           contexto={contexto}
           titulo="Pregunte sobre estas rotaciones"
           sugerencias={PREGUNTAS_TOP3}
           respaldo={(pregunta) => respuestaRapida(d, TOP3, pregunta)}
         />
       )}
-    </div>
+    </PanelAnalisis>
   )
 }
 

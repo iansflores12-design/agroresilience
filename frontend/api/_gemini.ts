@@ -34,11 +34,33 @@ export function hayClave(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim())
 }
 
-/** El modelo configurado y, detrás, el de respaldo: se usa si el primero está saturado, sin cuota o no existe. */
-function modelos(): string[] {
-  const principal = process.env.GEMINI_MODELO?.trim() || 'gemini-3.8-flash'
-  const respaldo = process.env.GEMINI_MODELO_RESPALDO?.trim() || 'gemini-3.5-flash'
-  return principal === respaldo ? [principal] : [principal, respaldo]
+/**
+ * Cadena de modelos, del que da mas consultas gratis al dia al que da menos (probado el 15-11-2026 con
+ * una clave sin facturacion, scripts/probar_modelos.mjs): los Flash-Lite dan cientos de consultas al
+ * dia y los Flash solo unas 20. Si uno esta sin cuota, saturado o no existe, se prueba el siguiente.
+ */
+const CADENA = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.8-flash']
+
+/**
+ * GEMINI_MODELOS (lista separada por comas) reemplaza la cadena completa. GEMINI_MODELO y
+ * GEMINI_MODELO_RESPALDO, de configuraciones anteriores, se suman al final como respaldo extra:
+ * asi una clave vieja con un Flash de 20 consultas al dia no deja al sitio sin cuota.
+ */
+export function modelos(): string[] {
+  const lista = process.env.GEMINI_MODELOS?.split(',').map((m) => m.trim()).filter(Boolean)
+  if (lista?.length) return [...new Set(lista)]
+  const elegidos = [process.env.GEMINI_MODELO, process.env.GEMINI_MODELO_RESPALDO].map((m) => m?.trim()).filter((m): m is string => Boolean(m))
+  return [...new Set([...CADENA, ...elegidos])]
+}
+
+/** Modelos que acaban de fallar: se saltan un rato para no gastar una llamada en cada consulta. */
+const enPausa = new Map<string, number>()
+
+function pausaMs(estado: number, busqueda: boolean): number {
+  // Sin facturacion la busqueda con Google no tiene cuota: no vale la pena insistir pronto.
+  if (estado === 429) return busqueda ? 60 * 60_000 : 5 * 60_000
+  if (estado === 404) return 60 * 60_000
+  return 30_000
 }
 
 function cuerpo(p: PedidoGemini): string {
@@ -65,7 +87,12 @@ const PROBAR_OTRO = new Set([429, 500, 503, 404])
 async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   const clave = process.env.GEMINI_API_KEY?.trim()
   if (!clave) throw new ErrorGemini('sin_clave', 'Falta GEMINI_API_KEY en el servidor')
-  const lista = modelos()
+  const todos = modelos()
+  const marca = (m: string) => (p.busqueda ? `${m}|busqueda` : m)
+  const ahora = Date.now()
+  const libres = todos.filter((m) => (enPausa.get(marca(m)) ?? 0) <= ahora)
+  // Si todos estan en pausa se prueba igual el primero, para devolver su error real.
+  const lista = libres.length ? libres : todos.slice(0, 1)
   let r: Response
   for (let i = 0; ; i++) {
     try {
@@ -79,10 +106,13 @@ async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
       if (p.signal?.aborted) throw new ErrorGemini('cancelado')
       throw new ErrorGemini('red', String(e))
     }
-    if (PROBAR_OTRO.has(r.status) && i < lista.length - 1 && !p.signal?.aborted) {
-      console.error(`[gemini] ${lista[i]} respondio ${r.status}; se prueba ${lista[i + 1]}`)
-      await esperar(300)
-      continue
+    if (PROBAR_OTRO.has(r.status)) {
+      enPausa.set(marca(lista[i]), Date.now() + pausaMs(r.status, Boolean(p.busqueda)))
+      if (i < lista.length - 1 && !p.signal?.aborted) {
+        console.error(`[gemini] ${lista[i]} respondio ${r.status}; se prueba ${lista[i + 1]}`)
+        await esperar(200)
+        continue
+      }
     }
     break
   }
@@ -92,6 +122,11 @@ async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   if (r.status === 429 || r.status === 503) throw new ErrorGemini('cuota', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
   if (r.status === 401 || r.status === 403) throw new ErrorGemini('clave', detalle)
   throw new ErrorGemini('servidor', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
+}
+
+/** Solo para pruebas: olvida las pausas. */
+export function reiniciarPausas(): void {
+  enPausa.clear()
 }
 
 function textoDe(dato: unknown): string {

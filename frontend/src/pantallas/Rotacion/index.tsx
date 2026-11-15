@@ -271,8 +271,11 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
         <Detalles r={r} />
       </div>
       <Fuentes r={r} d={d} />
-      <PanelAnalisis analisis={analisis} resumen={resumen} />
-      {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} respaldo={(pregunta) => respuestaRapida(d, r.id, pregunta)} />}
+      <PanelAnalisis analisis={analisis} resumen={resumen}>
+        {analisis.fase === 'listo' && (
+          <ChatSeguimiento integrado contexto={contexto} respaldo={(pregunta) => respuestaRapida(d, r.id, pregunta)} />
+        )}
+      </PanelAnalisis>
     </>
   )
 }

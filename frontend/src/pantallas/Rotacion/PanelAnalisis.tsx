@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Boton } from '../../componentes/Boton'
 import { Icono } from '../../componentes/Icono'
 import type { NombreIcono } from '../../componentes/iconos'
@@ -30,7 +30,8 @@ function Pasos({ pasos }: { pasos: EstadoAnalisis['pasos'] }) {
 
 /**
  * Analisis a fondo de Gemini segun la linea de tiempo: pasos en vivo, texto en vivo o resumen
- * rapido, aviso cuando llega tarde y reintento si falla.
+ * rapido, aviso cuando llega tarde y reintento si falla. Lo que va en `children` (el chat de
+ * seguimiento) queda dentro de la misma tarjeta, debajo del texto.
  */
 export function PanelAnalisis({
   analisis,
@@ -39,6 +40,7 @@ export function PanelAnalisis({
   apoyo = 'La IA explica los números; no los cambia.',
   aviso = { titulo: 'Análisis a fondo listo', descripcion: 'La IA terminó de revisar esta rotación.' },
   espera = 'La IA sigue preparando el análisis a fondo. Le avisamos cuando esté.',
+  children,
 }: {
   analisis: EstadoAnalisis & { reintentar: () => void }
   resumen: string
@@ -47,6 +49,7 @@ export function PanelAnalisis({
   /** Aviso que salta cuando el análisis llega después del resumen rápido. */
   aviso?: { titulo: string; descripcion: string }
   espera?: string
+  children?: ReactNode
 }) {
   const { fase, pasos, texto, causa, llegoTarde, guardado, reintentar } = analisis
   const ancla = useRef<HTMLElement>(null)
@@ -125,6 +128,8 @@ export function PanelAnalisis({
           </div>
         </>
       )}
+
+      {children}
     </section>
   )
 }
