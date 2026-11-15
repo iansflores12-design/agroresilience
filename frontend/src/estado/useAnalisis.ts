@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { traductor } from '../i18n/traductor'
 import { pedirAnalisis } from '../lib/decision/cliente'
 import { LIMITE_MS, estadoInicial, transicion, type EstadoAnalisis } from '../lib/decision/estadoAnalisis'
 import { analisisGuardado, claveAnalisis, gastarUno, guardarAnalisis, quedanHoy } from '../lib/decision/memoria'
@@ -31,7 +32,7 @@ export function useAnalisis(
       return
     }
     despachar({ tipo: 'reinicio' })
-    despachar({ tipo: 'paso', id: 'inicio', texto: 'Preparando su consulta' })
+    despachar({ tipo: 'paso', id: 'inicio', texto: traductor(entrada.idioma)('analisis.preparando') })
     if (quedanHoy() <= 0) {
       despachar({ tipo: 'error', causa: 'cuota_local' })
       return

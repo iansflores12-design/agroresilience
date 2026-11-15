@@ -1,5 +1,6 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { Idioma } from '../i18n/idiomas'
 import { dentroDeHonduras } from '../lib/decision/escala'
 import { OBJETIVOS } from '../lib/decision/parametros'
 import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
@@ -147,11 +148,12 @@ export function useEstadoApp() {
   return valor
 }
 
-/** Entrada completa para Gemini Decision, o null si falta contestar algo. */
-export function entradaDe(e: EstadoApp): EntradaDecision | null {
+/** Entrada completa para Gemini Decision, o null si falta contestar algo. Con `idioma`, los textos salen en ese idioma. */
+export function entradaDe(e: EstadoApp, idioma?: Idioma): EntradaDecision | null {
   if (!e.zonaId || !e.cultivoId || !e.terreno || !e.temporada) return null
   return {
     zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos,
     ...(e.parcela ? { parcela: e.parcela } : {}),
+    ...(idioma ? { idioma } : {}),
   }
 }

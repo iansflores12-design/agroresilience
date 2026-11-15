@@ -38,6 +38,7 @@ import Schedule from '@material-symbols/svg-400/rounded/schedule.svg?react'
 import Person from '@material-symbols/svg-400/rounded/person.svg?react'
 import ExpandMore from '@material-symbols/svg-400/rounded/keyboard_arrow_down.svg?react' // equivalente de expand_more
 import Grain from '@material-symbols/svg-400/rounded/grain.svg?react'
+import Translate from '@material-symbols/svg-400/rounded/translate.svg?react'
 import Eco from '@material-symbols/svg-400/rounded/eco.svg?react'
 import Spa from '@material-symbols/svg-400/rounded/spa.svg?react'
 import RiceBowl from '@material-symbols/svg-400/rounded/rice_bowl.svg?react'
@@ -97,6 +98,7 @@ export const iconos = {
   person: Person,
   expand_more: ExpandMore,
   grain: Grain,
+  translate: Translate,
   eco: Eco,
   spa: Spa,
   rice_bowl: RiceBowl,

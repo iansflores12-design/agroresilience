@@ -1,14 +1,15 @@
 // Resumen rapido (sin Gemini) e instrucciones para Gemini. Lo usan el navegador y la API.
+// Los textos salen de `src/i18n/recursos/` en el idioma de la consulta (por defecto, español).
 
-import { CULTIVOS, OBJETIVOS, PALABRA_RATING, TEMPORADAS, TERRENOS } from './parametros.js'
+import { lista, traductor } from '../../i18n/traductor.js'
 import type { Decision, RotacionDecidida } from './tipos.js'
 
-const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-
-/** "2026-11-10" -> "10 de noviembre" */
-export function fechaEnPalabras(iso: string): string {
+/** "2026-11-10" -> "10 de noviembre" (o "November 10", "10 de novembro"). */
+export function fechaEnPalabras(iso: string, idioma?: string | null): string {
+  const t = traductor(idioma)
   const [, m, d] = iso.split('-').map(Number)
-  return m && d ? `${d} de ${MESES[m - 1]}` : iso
+  const mes = lista(t, 'fechas.meses')[m - 1]
+  return mes && d ? t('fechas.diaMes', { dia: d, mes }) : iso
 }
 
 export function buscarRotacion(d: Decision, id: string): RotacionDecidida | null {
@@ -19,60 +20,62 @@ export function buscarRotacion(d: Decision, id: string): RotacionDecidida | null
 export function resumenRapido(d: Decision, id: string): string {
   const r = buscarRotacion(d, id)
   if (!r) return ''
+  const t = traductor(d.entrada.idioma)
   const mejor = buscarRotacion(d, d.mejorId)
   const partes: string[] = []
-  partes.push(`${r.nombre}: ${r.puntaje} de 100 (${PALABRA_RATING[r.rating].toLowerCase()}) en ${d.punto.nombre}.`)
-  if (r.mejor) partes.push('Es la mejor de las opciones comparadas para su parcela.')
-  else if (mejor) partes.push(`La mejor opción es ${mejor.nombre.toLowerCase()}, con ${mejor.puntaje}.`)
+  partes.push(t('resumenRapido.puntaje', { nombre: r.nombre, puntaje: r.puntaje, rating: t(`rating.${r.rating}`).toLowerCase(), lugar: d.punto.nombre }))
+  if (r.mejor) partes.push(t('resumenRapido.esLaMejor'))
+  else if (mejor) partes.push(t('resumenRapido.laMejor', { nombre: mejor.nombre.toLowerCase(), puntaje: mejor.puntaje }))
   partes.push(...r.razones.slice(0, 3).map((x) => x.texto))
   const riesgo = r.riesgos[0]?.replace(/\.?$/, '.')
-  if (riesgo) partes.push(`Tenga cuidado: ${riesgo.charAt(0).toLowerCase()}${riesgo.slice(1)}`)
+  if (riesgo) partes.push(t('resumenRapido.cuidado', { riesgo: `${riesgo.charAt(0).toLowerCase()}${riesgo.slice(1)}` }))
   return partes.join(' ')
 }
 
 /** Datos de la consulta en texto plano, para que Gemini no tenga que adivinar nada. */
 export function datosParaGemini(d: Decision, id: string): string {
+  const t = traductor(d.entrada.idioma)
   const r = buscarRotacion(d, id)
   const e = d.entrada
+  const temporada = (x: string) => t(`temporadas.${x}.nombre`)
   const lineas = [
-    `Lugar: ${d.punto.nombre} (punto Kharis ${d.punto.id}, modelo ${d.punto.modelo}, datos observados hasta ${d.punto.fechaBase}).`,
-    `Terreno: ${TERRENOS[e.terreno].nombre} (${TERRENOS[e.terreno].descripcion}).`,
-    `Cultivo actual: ${CULTIVOS[e.cultivoId].nombre}, sembrado en ${TEMPORADAS[e.temporada].nombre} (${TEMPORADAS[e.temporada].texto}).`,
-    `Objetivos del productor: ${e.objetivos.length ? e.objetivos.map((o) => OBJETIVOS[o].nombre).join(', ') : 'no eligió'}.`,
+    t('gemini.lugar', { lugar: d.punto.nombre, punto: d.punto.id, modelo: d.punto.modelo, fecha: d.punto.fechaBase }),
+    t('gemini.terreno', { nombre: t(`terrenos.${e.terreno}.nombre`), descripcion: t(`terrenos.${e.terreno}.descripcion`) }),
+    t('gemini.cultivoActual', { cultivo: t(`cultivos.${e.cultivoId}.nombre`), temporada: temporada(e.temporada), meses: t(`temporadas.${e.temporada}.texto`) }),
+    t('gemini.objetivos', { lista: e.objetivos.length ? e.objetivos.map((o) => t(`objetivos.${o}.nombre`)).join(', ') : t('gemini.noEligio') }),
     '',
-    'Ranking de Gemini Decision (puntaje de 0 a 100, ya calculado; no lo cambies):',
-    ...d.rotaciones.map((x, i) => `${i + 1}. ${x.nombre} [${x.id}]: ${x.puntaje} (${PALABRA_RATING[x.rating]})${x.actual ? ' (lo que hace hoy)' : ''}`),
+    t('gemini.ranking'),
+    ...d.rotaciones.map(
+      (x, i) => `${i + 1}. ${x.nombre} [${x.id}]: ${x.puntaje} (${t(`rating.${x.rating}`)})${x.actual ? t('gemini.loQueHaceHoy') : ''}`,
+    ),
   ]
   if (r) {
     lineas.push(
       '',
-      `Rotación consultada: ${r.nombre} [${r.id}]`,
-      'Calendario: ' + r.pasos.map((p) => `${TEMPORADAS[p.temporada].nombre} (${p.meses}): ${p.nombre}`).join('; '),
-      'Partes del puntaje: ' + r.factores.map((f) => `${f.nombre} ${f.valor} (peso ${f.peso})`).join(', '),
-      'Por qué: ' + r.razones.map((x) => x.texto).join(' '),
-      'Evidencia del motor: ' + r.evidencia.map((x) => `${x.texto} [${x.fuente}]`).join(' '),
-      'Riesgos: ' + r.riesgos.join(' '),
-      'Falta saber: ' + r.faltaSaber.join('; '),
-      `Confianza: ${r.confianza}.`,
+      t('gemini.consultada', { nombre: r.nombre, id: r.id }),
+      t('gemini.calendario') + r.pasos.map((p) => `${temporada(p.temporada)} (${p.meses}): ${p.nombre}`).join('; '),
+      t('gemini.partes') + r.factores.map((f) => `${f.nombre} ${f.valor} (${t('gemini.peso')} ${f.peso})`).join(', '),
+      t('gemini.porQue') + r.razones.map((x) => x.texto).join(' '),
+      t('gemini.evidencia') + r.evidencia.map((x) => `${x.texto} [${x.fuente}]`).join(' '),
+      t('gemini.riesgos') + r.riesgos.join(' '),
+      t('gemini.falta') + r.faltaSaber.join('; '),
+      t('gemini.confianza', { confianza: t(`confianza.${r.confianza}`) }),
     )
   }
-  lineas.push('', 'Avisos: ' + d.avisos.join(' '))
+  lineas.push('', t('gemini.avisos') + d.avisos.join(' '))
   return lineas.join('\n')
 }
 
-export const INSTRUCCIONES_GEMINI = `Eres el asistente agrícola de AgroResilience para productores de Honduras.
-Escribes en español sencillo, con frases cortas, para personas que leen con esfuerzo. Usa "usted".
-Reglas:
-- Usa SOLO los datos que te doy. Los puntajes ya están calculados por Gemini Decision: no los cambies ni inventes otros números.
-- No inventes precios, dosis, variedades ni fechas exactas de lluvia.
-- Explica términos técnicos con palabras de todos los días (por ejemplo, evapotranspiración = el agua que la planta y la tierra pierden al aire).
-- Recuerda que es una ayuda: la decisión es del productor y de su técnico local.
-- Sin emojis. Sin tablas. Texto plano con títulos cortos en líneas propias, sin símbolos de Markdown.`
+/** Instrucciones de sistema para Gemini en el idioma de la consulta. */
+export function instruccionesGemini(idioma?: string | null): string {
+  return traductor(idioma)('gemini.instrucciones')
+}
 
-export const PEDIDO_ANALISIS = `Haz el análisis a fondo de la rotación consultada en este orden, con un título corto por parte:
-Por qué se recomienda (o no), comparada con lo que hace hoy y con la mejor opción.
-Qué dicen los datos (lluvia, agua que pide cada cultivo, calor, señales del motor).
-Beneficios para la tierra y para su bolsillo.
-Riesgos y qué revisar con su técnico.
-Lo que falta saber.
-Máximo 250 palabras.`
+/** Lo que se le pide a Gemini para el analisis a fondo. */
+export function pedidoAnalisis(idioma?: string | null): string {
+  return traductor(idioma)('gemini.pedidoAnalisis')
+}
+
+/** Version en español, como antes de la traduccion. */
+export const INSTRUCCIONES_GEMINI = instruccionesGemini('es')
+export const PEDIDO_ANALISIS = pedidoAnalisis('es')

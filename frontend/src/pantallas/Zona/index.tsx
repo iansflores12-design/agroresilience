@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useIdioma } from '../../i18n'
 import { Boton } from '../../componentes/Boton'
 import { Chip } from '../../componentes/Chip'
 import { Tarjeta } from '../../componentes/Tarjeta'
@@ -18,6 +20,8 @@ const DIAS_LECTURA_ANTIGUA = 7
 export default function Zona() {
   const { zonaId, cultivoId, edadSemanas, elegirZona } = useEstadoApp()
   const zona = buscarZona(zonaId)
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   const selectorRef = useRef<HTMLDivElement>(null)
   const zonaAvisada = useRef<string | null>(null)
 
@@ -42,19 +46,21 @@ export default function Zona() {
     if (dias > DIAS_LECTURA_ANTIGUA) {
       zonaAvisada.current = idZona
       avisar.alerta({
-        titulo: 'Lectura de humedad antigua',
-        descripcion: `La última lectura de ${nombreCorto(zona?.nombre ?? '')} es de hace ${dias} días.`,
+        titulo: t('zona.humedadAntigua'),
+        descripcion: t('zona.ultimaLectura', { lugar: nombreCorto(zona?.nombre ?? ''), dias }),
       })
     }
+    // El aviso sale una vez por lugar, en el idioma del momento.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idZona, fechaLectura, zona?.nombre])
 
   async function copiarResumen() {
     if (!zona) return
     try {
-      await navigator.clipboard.writeText(textoResumen(zona, fuentes))
-      avisar.exito({ titulo: 'Resumen copiado' })
+      await navigator.clipboard.writeText(textoResumen(zona, fuentes, idioma))
+      avisar.exito({ titulo: t('zona.copiado') })
     } catch {
-      avisar.error({ titulo: 'No se pudo copiar', descripcion: 'El navegador no permitió usar el portapapeles.' })
+      avisar.error({ titulo: t('zona.noCopiar'), descripcion: t('zona.noPortapapeles') })
     }
   }
 
@@ -62,9 +68,9 @@ export default function Zona() {
     <div className={`pantalla ${estilos.pantalla}`}>
       <div className={`plano-medio ${estilos.contenido}`}>
         <h1 className={estilos.pregunta}>
-          {zona ? `¿Cómo está la tierra en ${nombreCorto(zona.nombre)}?` : '¿Cómo está la tierra?'}
+          {zona ? t('zona.comoEstaEn', { lugar: nombreCorto(zona.nombre) }) : t('zona.comoEsta')}
         </h1>
-        <div role="group" aria-label="Elegir lugar" className={estilos.selector} ref={selectorRef}>
+        <div role="group" aria-label={t('zona.elegirLugar')} className={estilos.selector} ref={selectorRef}>
           {zonas.map((z) => (
             <span key={z.id} data-zona={z.id}>
               <Chip variante="filtro" seleccionado={z.id === zonaId} onClick={() => elegirZona(z.id)}>
@@ -84,10 +90,10 @@ export default function Zona() {
           />
         ) : (
           <Tarjeta className={estilos.vacio}>
-            <h2 className="tipo-titulo">Aún no eligió un lugar</h2>
-            <p className="tipo-nota">Elija un lugar arriba, o en el mapa, para ver cómo está su tierra.</p>
+            <h2 className="tipo-titulo">{t('zona.aunNo')}</h2>
+            <p className="tipo-nota">{t('zona.elijaArriba')}</p>
             <Boton variante="tonal" icono="map" to="/mapa">
-              Ver el mapa
+              {t('zona.verMapa')}
             </Boton>
           </Tarjeta>
         )}

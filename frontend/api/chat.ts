@@ -3,23 +3,30 @@
 // Gemini Decision, el chat de seguimiento recibe su ranking y su evidencia.
 
 import { validarEntrada } from '../src/lib/decision/motor.js'
-import { INSTRUCCIONES_GEMINI, datosParaGemini } from '../src/lib/decision/textos.js'
+import { datosParaGemini, instruccionesGemini } from '../src/lib/decision/textos.js'
+import { normalizarIdioma, type Idioma } from '../src/i18n/idiomas.js'
+import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
 
 const MAX_MENSAJES = 20
 const MAX_LARGO = 2000
 
-function contextoGeneral(c: Record<string, unknown>): string {
+function contextoGeneral(c: Record<string, unknown>, idioma: Idioma): string {
+  const t = traductor(idioma)
   const cultivo = (c.cultivo as { nombre?: string } | null)?.nombre
   const zona = (c.zona as { nombre?: string } | null)?.nombre
   const humedad = c.humedad as { valor?: number; fecha?: string } | null
   const lineas = [
-    `Cultivo: ${cultivo ?? 'no eligió'}${typeof c.edadSemanas === 'number' ? `, semana ${c.edadSemanas}` : ''}${typeof c.etapa === 'string' ? ` (${c.etapa})` : ''}.`,
-    `Lugar: ${zona ?? 'no eligió'}.`,
+    t('gemini.chatCultivo', {
+      cultivo: cultivo ?? t('gemini.noEligio'),
+      semana: typeof c.edadSemanas === 'number' ? t('gemini.chatSemana', { n: c.edadSemanas }) : '',
+      etapa: typeof c.etapa === 'string' ? ` (${c.etapa})` : '',
+    }),
+    t('gemini.chatLugar', { lugar: zona ?? t('gemini.noEligio') }),
   ]
   if (humedad && typeof humedad.valor === 'number') {
-    lineas.push(`Humedad del suelo (SMAP, primeros 5 cm): ${Math.round(humedad.valor * 1000) / 10} % el ${humedad.fecha}.`)
+    lineas.push(t('gemini.chatHumedad', { pct: Math.round(humedad.valor * 1000) / 10, fecha: humedad.fecha }))
   }
   return lineas.join('\n')
 }
@@ -37,9 +44,12 @@ export async function POST(request: Request): Promise<Response> {
   while (mensajes.length && mensajes[0].rol !== 'user') mensajes.shift()
   if (!mensajes.length) return json({ error: 'sin_pregunta' }, 400)
 
-  let datos = contextoGeneral(contexto)
+  const idioma = normalizarIdioma(contexto.idioma ?? cuerpo?.idioma)
+  const t = traductor(idioma)
+  let datos = contextoGeneral(contexto, idioma)
   const consulta = contexto.consulta as { entrada?: unknown; rotacionId?: unknown } | undefined
   const entrada = validarEntrada(consulta?.entrada)
+  if (entrada && !entrada.idioma) entrada.idioma = idioma
   if (entrada && typeof consulta?.rotacionId === 'string') {
     try {
       datos = datosParaGemini(await decisionPara(entrada, request.url), consulta.rotacionId)
@@ -50,7 +60,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const texto = await geminiTexto({
-      sistema: `${INSTRUCCIONES_GEMINI}\nResponde en 120 palabras o menos.\n\nDatos de la consulta:\n${datos}`,
+      sistema: `${instruccionesGemini(idioma)}\n${t('gemini.limiteChat')}\n\n${t('gemini.datosConsulta')}\n${datos}`,
       mensajes,
       signal: request.signal,
       maxTokens: 700,

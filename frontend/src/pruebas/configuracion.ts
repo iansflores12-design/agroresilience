@@ -1,4 +1,11 @@
 import '@testing-library/jest-dom/vitest'
+import i18n from '../i18n'
+
+// Las pruebas se escriben en español: cada una empieza en el idioma base (jsdom dice en-US).
+await i18n.changeLanguage('es')
+beforeEach(async () => {
+  await i18n.changeLanguage('es')
+})
 
 // jsdom no implementa matchMedia (lo usa Sileo para el tema del Toaster).
 if (!window.matchMedia) {

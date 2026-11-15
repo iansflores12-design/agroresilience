@@ -1,10 +1,13 @@
 import type { MensajeChat } from '../../estado/Conversacion'
+import type { Idioma } from '../../i18n/idiomas'
 import type { EntradaDecision } from '../decision/tipos'
 
 export interface ContextoChat {
   /** Consulta de Gemini Decision para el chat de seguimiento de una rotacion. */
   consulta?: { entrada: EntradaDecision; rotacionId: string }
   vista: 'cultivos' | 'mapa' | 'zona' | 'chat'
+  /** Idioma en que debe responder el asistente. Por defecto, español. */
+  idioma?: Idioma
   cultivo: { id: string; nombre: string } | null
   edadSemanas: number | null
   etapa: string | null

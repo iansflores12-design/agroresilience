@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { useIdioma } from '../../i18n'
 import { decimal, diasEntre, fechaLarga, marcaDia } from './formato'
 import estilos from './GraficaHumedad.module.css'
 
@@ -15,11 +17,13 @@ const PADDING = 6
 
 /** Grafica de linea de la humedad (en %) con la normal punteada. SVG propio, sin librerias. */
 export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   const puntos = serie
     .map(([fecha, v]) => ({ fecha, t: marcaDia(fecha), pct: v * 100 }))
     .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.pct))
     .sort((a, b) => a.t - b.t)
-  if (puntos.length === 0) return <p className="tipo-nota">Sin lecturas en los últimos 4 meses.</p>
+  if (puntos.length === 0) return <p className="tipo-nota">{t('grafica.sinLecturas')}</p>
 
   const normalPct = normal === null ? null : normal * 100
   const valores = puntos.map((p) => p.pct).concat(normalPct === null ? [] : [normalPct])
@@ -47,10 +51,15 @@ export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
   const primero = puntos[0]
   const ultimo = puntos[puntos.length - 1]
   const resumen =
-    `Humedad del suelo, ${puntos.length} lecturas del ${fechaLarga(primero.fecha)} al ${fechaLarga(ultimo.fecha)}: ` +
-    `pasó de ${decimal(primero.pct)} % a ${decimal(ultimo.pct)} %, con mínimo de ${decimal(Math.min(...puntos.map((p) => p.pct)))} % ` +
-    `y máximo de ${decimal(Math.max(...puntos.map((p) => p.pct)))} %` +
-    (normalPct === null ? '. Sin normal histórica.' : `. La normal para la época es ${decimal(normalPct)} %.`)
+    t('grafica.resumen', {
+      n: puntos.length,
+      desde: fechaLarga(primero.fecha, idioma),
+      hasta: fechaLarga(ultimo.fecha, idioma),
+      primero: decimal(primero.pct),
+      ultimo: decimal(ultimo.pct),
+      min: decimal(Math.min(...puntos.map((p) => p.pct))),
+      max: decimal(Math.max(...puntos.map((p) => p.pct))),
+    }) + (normalPct === null ? t('grafica.sinNormal') : t('grafica.conNormal', { normal: decimal(normalPct) }))
 
   return (
     <div className={estilos.grafica} role="img" aria-label={resumen}>
@@ -70,14 +79,14 @@ export function GraficaHumedad({ serie, normal }: PropsGraficaHumedad) {
         </svg>
         {normalPct !== null && (
           <span className={estilos.etiquetaNormal} style={{ top: `${py(normalPct)}%` }}>
-            Lo normal: {decimal(normalPct)} %
+            {t('grafica.loNormal', { normal: decimal(normalPct) })}
           </span>
         )}
         <span className={estilos.ultimo} style={{ left: `${px(ultimo.t)}%`, top: `${py(ultimo.pct)}%` }} />
       </div>
       <div className={estilos.ejeX} aria-hidden="true">
-        <span>Hace 4 meses</span>
-        <span>Hoy</span>
+        <span>{t('grafica.hace4')}</span>
+        <span>{t('grafica.hoy')}</span>
       </div>
     </div>
   )

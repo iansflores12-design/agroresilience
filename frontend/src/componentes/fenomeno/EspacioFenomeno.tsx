@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Zona } from '../../datos/zonas'
 import estilos from './EspacioFenomeno.module.css'
 
@@ -15,6 +16,7 @@ export interface PropsFenomeno {
  */
 export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
   const idTitulo = useId()
+  const { t } = useTranslation()
   return (
     <section
       data-placeholder="fenomeno"
@@ -24,10 +26,10 @@ export function EspacioFenomeno({ zona, cultivoId }: PropsFenomeno) {
       className={estilos.seccion}
     >
       <h2 id={idTitulo} className="tipo-titulo">
-        ¿Por qué pasa esto?
+        {t('fenomeno.titulo')}
       </h2>
       <div className={estilos.lienzo}>
-        <p className="tipo-nota">Espacio reservado: aquí irá la explicación gráfica de un fenómeno</p>
+        <p className="tipo-nota">{t('fenomeno.reservado')}</p>
       </div>
     </section>
   )
