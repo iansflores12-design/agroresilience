@@ -5,6 +5,7 @@ import { buscarZona } from '../datos/zonas'
 import { buscarDepartamento } from '../datos/aptitud'
 import { departamentoElegido } from '../datos/lugarDepartamento'
 import { useEstadoApp } from '../estado/EstadoApp'
+import { useEnCuestionario, useMarcarCuestionario } from '../estado/cuestionario'
 import { nombreCultivo } from '../i18n/dominio'
 import { Chip } from './Chip'
 import { PreguntaContexto } from './PreguntaContexto'
@@ -19,6 +20,9 @@ export function TiraContexto() {
   const estado = useEstadoApp()
   const { cultivoId, zonaId, temporada, parcela } = estado
   const [abierta, fijarAbierta] = useState<'cultivoId' | 'zonaId' | null>(null)
+  // Dentro de la encuesta (o al editar una respuesta) los chips sobran: solo se ven fuera de ella.
+  useMarcarCuestionario(abierta !== null)
+  const enCuestionario = useEnCuestionario()
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
   // El lugar se elige por departamento; los estados viejos solo traen el punto de datos.
@@ -40,19 +44,23 @@ export function TiraContexto() {
       : t('contexto.sinLugarAria')
 
   return (
-    <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
-      <Chip icono="grass" aria-label={ariaCultivo} aria-haspopup="dialog" onClick={() => fijarAbierta('cultivoId')}>
-        {textoCultivo}
-      </Chip>
-      <Chip
-        icono={conParcela ? 'my_location' : 'location_on'}
-        aria-label={ariaLugar}
-        aria-haspopup="dialog"
-        onClick={() => fijarAbierta('zonaId')}
-      >
-        {conParcela ? t('contexto.suParcela') : (nombreLugar ?? t('contexto.elegirLugar'))}
-      </Chip>
+    <>
+      {!enCuestionario && (
+        <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
+          <Chip icono="grass" aria-label={ariaCultivo} aria-haspopup="dialog" onClick={() => fijarAbierta('cultivoId')}>
+            {textoCultivo}
+          </Chip>
+          <Chip
+            icono={conParcela ? 'my_location' : 'location_on'}
+            aria-label={ariaLugar}
+            aria-haspopup="dialog"
+            onClick={() => fijarAbierta('zonaId')}
+          >
+            {conParcela ? t('contexto.suParcela') : (nombreLugar ?? t('contexto.elegirLugar'))}
+          </Chip>
+        </div>
+      )}
       <PreguntaContexto clave={abierta} alCerrar={() => fijarAbierta(null)} />
-    </div>
+    </>
   )
 }

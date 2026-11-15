@@ -38,9 +38,8 @@ describe('Estructura', () => {
   it('mantiene cultivo y zona elegidos en la tira de contexto al cambiar de vista', async () => {
     const usuario = userEvent.setup()
     renderizarApp('/')
-    const tira = screen.getByRole('group', { name: 'Contexto elegido' })
-    expect(within(tira).getByText('Elegir cultivo')).toBeInTheDocument()
-    expect(within(tira).getByText('Elegir lugar')).toBeInTheDocument()
+    // Dentro de la encuesta la tira no se muestra: cultivo y lugar se contestan ahi mismo.
+    expect(screen.queryByRole('group', { name: 'Contexto elegido' })).not.toBeInTheDocument()
 
     // Cuestionario de Gemini Decision: lugar, terreno, cultivo (con semanas), temporada y objetivos.
     const cultivo = cultivos[0]
@@ -50,6 +49,7 @@ describe('Estructura', () => {
     await usuario.click(screen.getByRole('button', { name: 'Siguiente' }))
     await usuario.click(screen.getByRole('button', { name: /^De primera/ }))
     await usuario.click(screen.getByRole('button', { name: 'Ver mis rotaciones' }))
+    const tira = screen.getByRole('group', { name: 'Contexto elegido' })
     expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
 
     const nav = screen.getByRole('navigation', { name: 'Principal' })
@@ -59,7 +59,8 @@ describe('Estructura', () => {
 
     for (const etiqueta of ['Tierra', 'Preguntar', 'Plan']) {
       await usuario.click(within(nav).getByRole('link', { name: etiqueta }))
-      expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
+      const tira = screen.getByRole('group', { name: 'Contexto elegido' })
+    expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
       expect(within(tira).getByText('Choluteca')).toBeInTheDocument()
     }
   })

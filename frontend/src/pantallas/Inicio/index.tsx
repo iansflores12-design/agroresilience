@@ -16,6 +16,7 @@ import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes
 import { buscarCultivo, cultivos } from '../../datos/cultivos'
 import { confirmar } from '../../lib/sonido'
 import { entradaDe, useEstadoApp, type Perfil } from '../../estado/EstadoApp'
+import { useMarcarCuestionario } from '../../estado/cuestionario'
 import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
@@ -280,6 +281,7 @@ export default function Inicio() {
   const cultivo = buscarCultivo(entrada?.cultivoId ?? null)
   // 'todo' = el cuestionario completo; una clave = solo esa pregunta, abierta desde un chip.
   const [editando, fijarEditando] = useState<ClavePregunta | 'todo' | null>(null)
+  useMarcarCuestionario(!entrada || editando !== null)
   const [intento, fijarIntento] = useState(0)
   // Un cultivo permanente (cafe, platano, palma, cana) no se rota por temporadas: no hay rotaciones que calcular.
   const perenne = Boolean(entrada && CULTIVOS[entrada.cultivoId]?.perenne)
