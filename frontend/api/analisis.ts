@@ -11,6 +11,7 @@ import { LUGARES } from '../src/lib/decision/parametros.js'
 import { INSTRUCCIONES_GEMINI, PEDIDO_ANALISIS, buscarRotacion, datosParaGemini } from '../src/lib/decision/textos.js'
 import { ErrorGemini, geminiEnVivo, hayClave } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
+export { OPTIONS } from './_comun.js'
 
 export async function POST(request: Request): Promise<Response> {
   const cuerpo = await leerCuerpo(request)

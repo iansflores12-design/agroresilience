@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:android": "tsc -b && vite build --mode android && cap sync android",
+    "android": "npm run build:android && cap open android",
+    "apk": "npm run build:android && cd android && gradlew assembleDebug",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
@@ -13,6 +16,8 @@
     "tema": "node --import ./scripts/registrar_resolver.mjs scripts/generar_tema.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
     "@fontsource-variable/google-sans-flex": "^5.3.2",
     "leaflet": "^1.9.4",
     "react": "^19.3.1",
@@ -21,6 +26,7 @@
     "sileo": "^0.1.6"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@material-symbols/svg-400": "^0.49.0",
     "@material/material-color-utilities": "^0.4.0",
     "@testing-library/jest-dom": "^7.0.1",

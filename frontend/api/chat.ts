@@ -6,6 +6,7 @@ import { validarEntrada } from '../src/lib/decision/motor.js'
 import { INSTRUCCIONES_GEMINI, datosParaGemini } from '../src/lib/decision/textos.js'
 import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
+export { OPTIONS } from './_comun.js'
 
 const MAX_MENSAJES = 20
 const MAX_LARGO = 2000
