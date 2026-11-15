@@ -1,7 +1,16 @@
-// Parametros de Gemini Decision.
-// Kc, limite de calor y tolerancia de maiz, frijol y sorgo vienen de kharis/config.py (FAO-56).
-// Los de arroz, tomate y frijol terciopelo, los valores de mercado y de forraje son
-// ILUSTRATIVOS: pendientes de validar con el equipo agronomico.
+// Parametros de Gemini Decision. Fuentes (revisadas el 15-11-2026):
+// - Kc inicial, medio y final: FAO-56 (Allen et al., 1998), Tabla 12. Maiz 0.3 / 1.20 / 0.60-0.35;
+//   sorgo 0.3 / 1.00-1.10 / 0.55; arroz 1.05 / 1.20 / 0.90-0.60; frijol 0.4 / 1.15 / 0.35;
+//   tomate 0.6 / 1.15 / 0.70-0.90. https://www.fao.org/4/x0490e/x0490e0b.htm
+//   Frijol terciopelo (Mucuna): sin valor en FAO-56; se usa el patron de leguminosa (APROXIMADO).
+// - Limite de calor en floracion: maiz 35 C, frijol 30 C y sorgo 38 C (kharis/config.py); arroz 35 C
+//   (esterilidad de espiguillas desde ~34 C en antesis) y tomate 32 C (cuajado de fruto). Mucuna 38 C, APROXIMADO.
+// - Mercado (indice 0-100 de "que tan seguro es venderlo bien"): referencia con precios de 2026 de SIMPAH y
+//   prensa hondurena. Frijol rojo ~L2,000/qq mayorista (agosto 2026) y el pais importa; maiz blanco ~L690/qq
+//   (carga de L1,380, junio 2026); arroz con precio de garantia de L545/qq y compra asegurada por la agroindustria;
+//   tomate L10-20/lb, muy variable; sorgo sobre todo para alimento animal, pocos compradores. Se debe revisar en
+//   el mercado local de cada productor.
+// - Forraje, tolerancia a la sequia y encharcamiento: criterio agronomico general, PENDIENTE de validar.
 
 import type { ClaveFactor, Objetivo, Temporada, Terreno } from './tipos.js'
 
@@ -33,14 +42,14 @@ export interface ParametrosCultivo {
 export const CULTIVOS: Record<string, ParametrosCultivo> = {
   maiz: {
     nombre: 'Maíz', familia: 'gramínea', cicloSemanas: 17, kc: [0.3, 1.2, 0.6], tCalor: 35, tolerancia: 0.45,
-    encharca: true, riego: false, mercado: 70, forraje: 55, cosecha: true,
+    encharca: true, riego: false, mercado: 72, forraje: 55, cosecha: true,
     beneficios: ['Ya conoce la semilla y el manejo', 'Es grano básico para la casa'],
     riesgos: ['Pide mucha agua justo en la floración', 'Repetirlo cansa la tierra y trae más plagas'],
     falta: ['La fecha real de siembra según las lluvias de su zona'],
   },
   frijol: {
     nombre: 'Frijol', familia: 'leguminosa', cicloSemanas: 12, kc: [0.4, 1.15, 0.35], tCalor: 30, tolerancia: 0.35,
-    encharca: true, riego: false, mercado: 74, forraje: 25, cosecha: true,
+    encharca: true, riego: false, mercado: 80, forraje: 25, cosecha: true,
     beneficios: ['Deja abono natural (nitrógeno) en la tierra', 'Crece rápido', 'Da otro grano para la casa'],
     riesgos: ['Sufre con el calor fuerte en la floración', 'Se pudre si la tierra se encharca'],
     falta: ['El precio del frijol esta temporada en su mercado'],
@@ -53,15 +62,15 @@ export const CULTIVOS: Record<string, ParametrosCultivo> = {
     falta: ['El precio y los compradores de sorgo en su zona'],
   },
   arroz: {
-    nombre: 'Arroz', familia: 'gramínea', cicloSemanas: 18, kc: [1.05, 1.2, 0.9], tCalor: 35, tolerancia: 0.1,
-    encharca: false, riego: true, mercado: 65, forraje: 35, cosecha: true,
+    nombre: 'Arroz', familia: 'gramínea', cicloSemanas: 18, kc: [1.05, 1.2, 0.75], tCalor: 35, tolerancia: 0.1,
+    encharca: false, riego: true, mercado: 70, forraje: 35, cosecha: true,
     beneficios: ['Se vende bien donde el agua está asegurada', 'Aprovecha los terrenos bajos que se encharcan'],
     riesgos: ['Necesita mucha agua', 'Casi no se da sin riego en zonas secas'],
     falta: ['Si hay riego en su parcela'],
   },
   tomate: {
     nombre: 'Tomate', familia: 'hortaliza', cicloSemanas: 16, kc: [0.6, 1.15, 0.8], tCalor: 32, tolerancia: 0.25,
-    encharca: true, riego: true, mercado: 82, forraje: 5, cosecha: true,
+    encharca: true, riego: true, mercado: 75, forraje: 5, cosecha: true,
     beneficios: ['Se vende a buen precio: ingreso extra', 'Cambia de familia y corta las plagas del grano'],
     riesgos: ['Necesita riego seguro', 'Pide más cuidado y más gasto'],
     falta: ['Si hay riego en su parcela', 'El precio del tomate en su mercado'],

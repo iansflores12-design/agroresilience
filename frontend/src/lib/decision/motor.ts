@@ -25,6 +25,7 @@ import type {
   Objetivo,
   PasoPlan,
   PuntoKharis,
+  Razon,
   RotacionDecidida,
   SenalKharis,
   Temporada,
@@ -378,7 +379,13 @@ export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): D
   const mejor = ordenadas[0]
 
   const rotaciones: RotacionDecidida[] = ordenadas.map((x) => {
-    const factores: Factor[] = claves.map((k) => ({ clave: k, nombre: NOMBRE_FACTOR[k], peso: Math.round(w[k] * 100) / 100, valor: redondo(x.valores[k]) }))
+    const factores: Factor[] = claves.map((k) => ({
+      clave: k,
+      nombre: NOMBRE_FACTOR[k],
+      peso: Math.round(w[k] * 100) / 100,
+      valor: redondo(x.valores[k]),
+      objetivo: e.objetivos.some((o) => OBJETIVOS[o].factor === k),
+    }))
     const diferencia = x.puntaje - actual.puntaje
 
     // Por que: las partes que mas suben el puntaje frente a lo que hace hoy.
@@ -386,17 +393,17 @@ export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): D
       .map((k) => ({ k, d: w[k] * (x.valores[k] - actual.valores[k]) }))
       .filter((a) => x.cand.actual || a.d > 0.4)
       .sort((a, b) => (x.cand.actual ? w[b.k] * x.valores[b.k] - w[a.k] * x.valores[a.k] : b.d - a.d))
-    const razones: string[] = []
-    if (x.cand.actual) razones.push('Es lo que hace hoy: sirve para comparar las otras opciones.')
-    else if (diferencia > 0) razones.push(`Saca ${diferencia} puntos más que lo que hace hoy.`)
-    else if (diferencia < 0) razones.push(`Saca ${-diferencia} puntos menos que lo que hace hoy.`)
+    const razones: Razon[] = []
+    if (x.cand.actual) razones.push({ tipo: 'actual', texto: 'Es lo que hace hoy: sirve para comparar las otras opciones.' })
+    else if (diferencia > 0) razones.push({ tipo: 'comparacion', texto: `Saca ${diferencia} puntos más que lo que hace hoy.` })
+    else if (diferencia < 0) razones.push({ tipo: 'comparacion', texto: `Saca ${-diferencia} puntos menos que lo que hace hoy.` })
     for (const a of aporte) {
-      const r = razonFactor(a.k, e, x.pasos, x.cand)
-      if (r && !razones.includes(r)) razones.push(r)
+      const texto = razonFactor(a.k, e, x.pasos, x.cand)
+      if (texto && !razones.some((r) => r.texto === texto)) razones.push({ tipo: a.k, texto })
       if (razones.length >= 4) break
     }
     const cumplidos = e.objetivos.filter((o) => x.valores[OBJETIVOS[o].factor] >= 70).map((o) => minus(OBJETIVOS[o].nombre))
-    if (cumplidos.length) razones.push(`Va con lo que usted quiere: ${cumplidos.join(', ')}.`)
+    if (cumplidos.length) razones.push({ tipo: 'objetivos', texto: `Va con lo que usted quiere: ${cumplidos.join(', ')}.` })
 
     const usados = [...new Set(x.pasos.map((y) => y.cultivoId).filter((y): y is string => y !== null))]
     const nuevos = usados.filter((id) => id !== e.cultivoId)
@@ -440,7 +447,7 @@ export function decidir(e: EntradaDecision, p: PuntoKharis, meta: MetaKharis): D
     mejorId: mejor.cand.id,
     avisos: [
       'Más allá de dos meses el pronóstico se parece al clima normal del lugar: sirve para la temporada, no para un día exacto.',
-      'Los precios, el forraje y los datos de arroz, tomate y frijol terciopelo son de referencia y faltan validar.',
+      'El agua de cada cultivo sale de FAO-56 y los precios de referencia de SIMPAH 2026: revise los de su mercado. El forraje y el frijol terciopelo son aproximados.',
       'Es una ayuda para pensar: la decisión final es suya y de su técnico.',
     ],
   }

@@ -55,7 +55,7 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
 
   return (
     <section className={estilos.chat} aria-labelledby="titulo-chat">
-      <h2 id="titulo-chat" className="tipo-titulo">
+      <h2 id="titulo-chat" className={estilos.tituloTarjeta}>
         Pregunte sobre esta rotación
       </h2>
       {mensajes.length === 0 && (

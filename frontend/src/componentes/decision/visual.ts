@@ -1,5 +1,23 @@
 import type { NombreIcono } from '../iconos'
-import type { Objetivo, Rating, Temporada, Terreno } from '../../lib/decision/tipos'
+import type { ClaveFactor, Objetivo, Rating, Razon, Temporada, Terreno } from '../../lib/decision/tipos'
+
+export const ICONO_FACTOR: Record<ClaveFactor, NombreIcono> = {
+  agua: 'water_drop',
+  calor: 'thermostat',
+  suelo: 'compost',
+  erosion: 'landslide',
+  venta: 'savings',
+  forraje: 'pets',
+  plagas: 'pest_control',
+  nitrogeno: 'eco',
+}
+
+export function iconoRazon(r: Razon, diferencia: number): NombreIcono {
+  if (r.tipo === 'comparacion') return diferencia >= 0 ? 'trending_up' : 'trending_down'
+  if (r.tipo === 'objetivos') return 'flag'
+  if (r.tipo === 'actual') return 'schedule'
+  return ICONO_FACTOR[r.tipo]
+}
 
 export const ICONO_CULTIVO: Record<string, NombreIcono> = {
   maiz: 'grain',

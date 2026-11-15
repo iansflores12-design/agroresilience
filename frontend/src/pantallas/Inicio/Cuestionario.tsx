@@ -4,6 +4,7 @@ import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import type { NombreIcono } from '../../componentes/iconos'
+import { SelectorCultivo } from '../../componentes/decision/SuCultivo'
 import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
 import { CULTIVOS, LUGARES, ORDEN_TEMPORADAS, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
 import type { Temporada, Terreno } from '../../lib/decision/tipos'
@@ -117,7 +118,10 @@ export function Cuestionario({
       <h1 id="pregunta-cuestionario" ref={titulo} tabIndex={-1} className={estilos.pregunta}>
         {pregunta.titulo}
       </h1>
-      <ul className={clases(estilos.opciones, pregunta.clave === 'zonaId' && estilos.opcionesLugar)}>
+      {pregunta.clave === 'cultivoId' ? (
+        <SelectorCultivo elegido={elegida ?? null} alElegir={elegir} />
+      ) : (
+      <ul className={estilos.opciones}>
         {pregunta.opciones.map((o) => {
           const marcada = o.id === elegida
           return (
@@ -140,6 +144,7 @@ export function Cuestionario({
           )
         })}
       </ul>
+      )}
       <div className={estilos.accionesCuestionario}>
         {paso > 0 ? (
           <Boton variante="texto" icono="arrow_back" onClick={() => fijarPaso(paso - 1)}>

@@ -24,7 +24,7 @@ export function resumenRapido(d: Decision, id: string): string {
   partes.push(`${r.nombre}: ${r.puntaje} de 100 (${PALABRA_RATING[r.rating].toLowerCase()}) en ${d.punto.nombre}.`)
   if (r.mejor) partes.push('Es la mejor de las opciones comparadas para su parcela.')
   else if (mejor) partes.push(`La mejor opción es ${mejor.nombre.toLowerCase()}, con ${mejor.puntaje}.`)
-  partes.push(...r.razones.slice(0, 3))
+  partes.push(...r.razones.slice(0, 3).map((x) => x.texto))
   const riesgo = r.riesgos[0]?.replace(/\.?$/, '.')
   if (riesgo) partes.push(`Tenga cuidado: ${riesgo.charAt(0).toLowerCase()}${riesgo.slice(1)}`)
   return partes.join(' ')
@@ -49,7 +49,7 @@ export function datosParaGemini(d: Decision, id: string): string {
       `Rotación consultada: ${r.nombre} [${r.id}]`,
       'Calendario: ' + r.pasos.map((p) => `${TEMPORADAS[p.temporada].nombre} (${p.meses}): ${p.nombre}`).join('; '),
       'Partes del puntaje: ' + r.factores.map((f) => `${f.nombre} ${f.valor} (peso ${f.peso})`).join(', '),
-      'Por qué: ' + r.razones.join(' '),
+      'Por qué: ' + r.razones.map((x) => x.texto).join(' '),
       'Evidencia del motor: ' + r.evidencia.map((x) => `${x.texto} [${x.fuente}]`).join(' '),
       'Riesgos: ' + r.riesgos.join(' '),
       'Falta saber: ' + r.faltaSaber.join('; '),

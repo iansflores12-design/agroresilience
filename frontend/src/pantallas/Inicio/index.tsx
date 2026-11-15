@@ -4,7 +4,10 @@ import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import { RatingRotacion } from '../../componentes/decision/RatingRotacion'
-import { ICONO_CULTIVO, ICONO_OBJETIVO, ICONO_TERRENO } from '../../componentes/decision/visual'
+import { EdadCultivo, SelectorCultivo } from '../../componentes/decision/SuCultivo'
+import { ICONO_CULTIVO, ICONO_OBJETIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
+import { buscarCultivo } from '../../datos/cultivos'
+import { confirmar } from '../../lib/sonido'
 import { entradaDe, useEstadoApp, type Perfil } from '../../estado/EstadoApp'
 import { useDecision } from '../../estado/useDecision'
 import { CULTIVOS, LUGARES, OBJETIVOS, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
@@ -82,8 +85,9 @@ function Objetivos({ elegidos, alternar }: { elegidos: Objetivo[]; alternar: (o:
 
 export default function Inicio() {
   const estado = useEstadoApp()
-  const { fijarPerfil, alternarObjetivo, objetivos } = estado
+  const { fijarPerfil, alternarObjetivo, objetivos, elegirCultivo, edadSemanas, fijarEdad } = estado
   const entrada = entradaDe(estado)
+  const cultivo = buscarCultivo(entrada?.cultivoId ?? null)
   const [editando, fijarEditando] = useState(false)
   const [intento, fijarIntento] = useState(0)
   const decision = useDecision(editando ? null : entrada, intento)
@@ -122,6 +126,22 @@ export default function Inicio() {
           <Objetivos elegidos={objetivos} alternar={alternarObjetivo} />
         </section>
 
+        <section className={estilos.seccion} aria-labelledby="titulo-cultivo">
+          <h2 id="titulo-cultivo" className="tipo-titulo">
+            ¿Qué sembró?
+          </h2>
+          <SelectorCultivo
+            elegido={entrada.cultivoId}
+            alElegir={(id) => {
+              if (id === entrada.cultivoId) return
+              elegirCultivo(id)
+              confirmar()
+            }}
+          />
+        </section>
+
+        {cultivo && <EdadCultivo cultivo={cultivo} semanas={edadSemanas} alCambiar={fijarEdad} />}
+
         <section className={estilos.perfil} aria-labelledby="titulo-perfil">
           <h2 id="titulo-perfil" className="solo-lectores">
             Su parcela
@@ -136,8 +156,8 @@ export default function Inicio() {
               Terreno {TERRENOS[entrada.terreno].nombre.toLowerCase()}
             </li>
             <li>
-              <Icono nombre={ICONO_CULTIVO[entrada.cultivoId] ?? 'grass'} tamano={20} />
-              {CULTIVOS[entrada.cultivoId].nombre} de {t.nombre.toLowerCase()}
+              <Icono nombre={ICONO_TEMPORADA[entrada.temporada]} tamano={20} />
+              Siembra de {t.nombre.toLowerCase()}
             </li>
           </ul>
           <Boton variante="tonal" icono="edit" onClick={() => fijarEditando(true)}>

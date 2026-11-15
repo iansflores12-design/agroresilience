@@ -1,44 +1,253 @@
 import { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { Boton } from '../../componentes/Boton'
+import { BotonIcono } from '../../componentes/BotonIcono'
 import { Icono } from '../../componentes/Icono'
-import { Partes } from '../../componentes/mapa/Partes'
+import { clases } from '../../componentes/clases'
 import { RatingRotacion } from '../../componentes/decision/RatingRotacion'
-import { ICONO_CULTIVO, ICONO_TEMPORADA } from '../../componentes/decision/visual'
+import { ICONO_CULTIVO, ICONO_FACTOR, ICONO_TEMPORADA, iconoRazon } from '../../componentes/decision/visual'
 import { entradaDe, useEstadoApp } from '../../estado/EstadoApp'
 import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
 import { TEMPORADAS } from '../../lib/decision/parametros'
 import { buscarRotacion, fechaEnPalabras, resumenRapido } from '../../lib/decision/textos'
-import type { Decision, RotacionDecidida } from '../../lib/decision/tipos'
+import type { Decision, PasoPlan, RotacionDecidida } from '../../lib/decision/tipos'
 import { ChatSeguimiento } from './ChatSeguimiento'
+import { AnilloPuntaje, BarraLineal, Pestanas } from './Indicadores'
 import { PanelAnalisis } from './PanelAnalisis'
 import estilos from './Rotacion.module.css'
 
-function comparacion(r: RotacionDecidida, d: Decision): string {
-  if (r.actual) return 'Es lo que hace hoy. Sirve para comparar.'
-  const base = r.diferencia > 0 ? `${r.diferencia} puntos más que lo que hace hoy.` : r.diferencia < 0 ? `${-r.diferencia} puntos menos que lo que hace hoy.` : 'Igual que lo que hace hoy.'
-  if (r.mejor) return `La mejor de ${d.rotaciones.length} opciones. ${base}`
-  return base
+function apoyo(r: RotacionDecidida, d: Decision): string {
+  if (r.actual) return 'Es lo que hace hoy. Sirve de base para comparar.'
+  const base =
+    r.diferencia > 0
+      ? `${r.diferencia} puntos más que lo que hace hoy`
+      : r.diferencia < 0
+        ? `${-r.diferencia} puntos menos que lo que hace hoy`
+        : 'Igual que lo que hace hoy'
+  return r.mejor ? `La mejor de ${d.rotaciones.length} opciones. ${base}.` : `${base}.`
 }
 
-function Lista({ titulo, puntos, icono }: { titulo: string; puntos: string[]; icono: 'thumb_up' | 'warning' | 'info' }) {
-  if (!puntos.length) return null
+/* ---------- Tarjeta heroe ---------- */
+
+function Heroe({ r, d }: { r: RotacionDecidida; d: Decision }) {
   return (
-    <div className={estilos.lista}>
-      <h3 className={estilos.subtitulo}>
-        <Icono nombre={icono} tamano={20} />
-        {titulo}
-      </h3>
-      <ul>
-        {puntos.map((p) => (
-          <li key={p}>{p}</li>
-        ))}
-      </ul>
-    </div>
+    <section className={estilos.heroe} aria-labelledby="titulo-rotacion">
+      <AnilloPuntaje valor={r.puntaje} />
+      <div className={estilos.heroeTexto}>
+        <span className={estilos.sobretitulo}>
+          <Icono nombre={r.mejor ? 'workspace_premium' : ICONO_CULTIVO[r.cultivoIcono] ?? 'grass'} tamano={20} />
+          {r.mejor ? 'La mejor para su parcela' : r.actual ? 'Lo que hace hoy' : `Opción para ${d.punto.nombre}`}
+        </span>
+        <h1 id="titulo-rotacion" className={estilos.titular}>
+          {r.nombre}
+        </h1>
+        <div className={estilos.heroeFila}>
+          <RatingRotacion rating={r.rating} grande />
+          {!r.actual && (
+            <span className={estilos.diferencia}>
+              <Icono nombre={r.diferencia >= 0 ? 'trending_up' : 'trending_down'} tamano={20} />
+              {r.diferencia >= 0 ? '+' : '−'}
+              {Math.abs(r.diferencia)}
+            </span>
+          )}
+        </div>
+        <p className={estilos.apoyo}>{apoyo(r, d)}</p>
+      </div>
+    </section>
   )
 }
+
+/* ---------- Por que ---------- */
+
+function PorQue({ r }: { r: RotacionDecidida }) {
+  return (
+    <section className={estilos.tarjeta} aria-labelledby="titulo-por-que">
+      <h2 id="titulo-por-que" className={estilos.tituloTarjeta}>
+        {r.mejor ? 'Por qué es la mejor' : 'Por qué tiene este puntaje'}
+      </h2>
+      <ul className={estilos.lista}>
+        {r.razones.map((x) => (
+          <li key={x.texto} className={estilos.elemento}>
+            <span className={estilos.iconoLista}>
+              <Icono nombre={iconoRazon(x, r.diferencia)} tamano={24} />
+            </span>
+            <span className={estilos.textoElemento}>{x.texto}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/* ---------- Calendario ---------- */
+
+function cubre(p: PasoPlan): number | null {
+  if (p.lluviaMm === null || !p.aguaPideMm) return null
+  return Math.round((100 * p.lluviaMm) / p.aguaPideMm)
+}
+
+function Calendario({ r }: { r: RotacionDecidida }) {
+  return (
+    <section className={estilos.tarjeta} aria-labelledby="titulo-calendario">
+      <h2 id="titulo-calendario" className={estilos.tituloTarjeta}>
+        Su año de siembra
+      </h2>
+      <ol className={estilos.linea}>
+        {r.pasos.map((p) => {
+          const pct = p.nombre.endsWith('(sigue)') ? null : cubre(p)
+          return (
+            <li key={p.temporada} className={clases(estilos.temporada, !p.cultivoId && estilos.temporadaVacia)}>
+              <span className={estilos.iconoTemporada}>
+                <Icono nombre={p.cultivoId ? ICONO_TEMPORADA[p.temporada] : 'remove'} tamano={24} />
+              </span>
+              <span className={estilos.textoElemento}>
+                <span className={estilos.sobrelinea}>
+                  {TEMPORADAS[p.temporada].nombre} · {p.meses.toLowerCase()}
+                </span>
+                <span className={estilos.titularElemento}>{p.nombre}</span>
+                {pct !== null && (
+                  <>
+                    <BarraLineal
+                      valor={Math.min(pct, 100)}
+                      tono="agua"
+                      etiqueta={`La lluvia prevista cubre ${pct} % del agua que pide`}
+                    />
+                    <span className={estilos.apoyoElemento}>
+                      Lluvia {p.lluviaMm} mm · pide {p.aguaPideMm} mm{pct >= 100 ? ' · alcanza' : ` · cubre ${pct} %`}
+                    </span>
+                  </>
+                )}
+                {!p.cultivoId && <span className={estilos.apoyoElemento}>La tierra queda descubierta</span>}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+    </section>
+  )
+}
+
+/* ---------- Partes del puntaje ---------- */
+
+function Partes({ r }: { r: RotacionDecidida }) {
+  const orden = [...r.factores].sort((a, b) => b.peso - a.peso)
+  return (
+    <section className={estilos.tarjeta} aria-labelledby="titulo-partes">
+      <h2 id="titulo-partes" className={estilos.tituloTarjeta}>
+        Cómo se calculó
+      </h2>
+      <p className={estilos.apoyoTarjeta}>De lo que más pesa a lo que menos. Lo que usted marcó pesa el triple.</p>
+      <ul className={estilos.partes}>
+        {orden.map((f) => (
+          <li key={f.clave} className={estilos.parte}>
+            <span className={estilos.parteCabeza}>
+              <Icono nombre={ICONO_FACTOR[f.clave]} tamano={20} />
+              <span className={estilos.parteNombre}>
+                {f.nombre}
+                {f.objetivo && (
+                  <span className={estilos.insignia}>
+                    <Icono nombre="flag" tamano={16} />
+                    Su objetivo
+                  </span>
+                )}
+              </span>
+              <span className={estilos.parteValor}>{f.valor}</span>
+            </span>
+            <BarraLineal valor={f.valor} etiqueta={`${f.nombre}: ${f.valor} de 100`} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/* ---------- Pestanas: a favor, cuidado, falta saber ---------- */
+
+function ListaSimple({ puntos, icono }: { puntos: string[]; icono: 'check_circle' | 'warning' | 'help' }) {
+  return (
+    <ul className={estilos.lista}>
+      {puntos.map((p) => (
+        <li key={p} className={estilos.elemento}>
+          <span className={estilos.iconoListaSuave}>
+            <Icono nombre={icono} tamano={20} />
+          </span>
+          <span className={estilos.textoElemento}>{p}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function Detalles({ r }: { r: RotacionDecidida }) {
+  return (
+    <section className={estilos.tarjeta} aria-labelledby="titulo-detalles">
+      <h2 id="titulo-detalles" className={estilos.tituloTarjeta}>
+        Lo bueno y lo que hay que cuidar
+      </h2>
+      <Pestanas
+        etiqueta="Ventajas, cuidados y lo que falta saber"
+        pestanas={[
+          { id: 'favor', etiqueta: 'A favor', icono: 'thumb_up', cuenta: r.beneficios.length, contenido: <ListaSimple puntos={r.beneficios} icono="check_circle" /> },
+          { id: 'cuidado', etiqueta: 'Cuidado', icono: 'warning', cuenta: r.riesgos.length, contenido: <ListaSimple puntos={r.riesgos} icono="warning" /> },
+          {
+            id: 'falta',
+            etiqueta: 'Falta saber',
+            icono: 'help',
+            cuenta: r.faltaSaber.length,
+            contenido: (
+              <>
+                <ListaSimple puntos={r.faltaSaber} icono="help" />
+                <p className={estilos.apoyoTarjeta}>Revise estos puntos con su técnico antes de decidir.</p>
+              </>
+            ),
+          },
+        ]}
+      />
+    </section>
+  )
+}
+
+/* ---------- De donde salen los datos ---------- */
+
+function Fuentes({ r, d }: { r: RotacionDecidida; d: Decision }) {
+  return (
+    <details className={estilos.expandible}>
+      <summary className="capa-estado">
+        <span className={estilos.iconoLista}>
+          <Icono nombre="science" tamano={24} />
+        </span>
+        <span className={estilos.textoElemento}>
+          <span className={estilos.titularElemento}>De dónde salen los datos</span>
+          <span className={estilos.apoyoElemento}>
+            Kharis {d.punto.modelo} · datos hasta el {fechaEnPalabras(d.punto.fechaBase)} · confianza {r.confianza}
+          </span>
+        </span>
+        <Icono nombre="expand_more" tamano={24} />
+      </summary>
+      <ul className={estilos.lista}>
+        {r.evidencia.map((x) => (
+          <li key={x.texto} className={estilos.elemento}>
+            <span className={estilos.textoElemento}>
+              <span>{x.texto}</span>
+              <span className={estilos.apoyoElemento}>{x.fuente}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <ul className={estilos.avisos}>
+        {d.avisos.map((a) => (
+          <li key={a}>
+            <Icono nombre="info" tamano={18} />
+            {a}
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
+/* ---------- Pantalla ---------- */
 
 function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
   const estado = useEstadoApp()
@@ -54,111 +263,14 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
 
   return (
     <>
-      <header className={estilos.cabecera}>
-        <span className={estilos.iconoGrande}>
-          <Icono nombre={ICONO_CULTIVO[r.cultivoIcono] ?? 'grass'} tamano={36} />
-        </span>
-        <div className={estilos.titulos}>
-          {(r.mejor || r.actual) && (
-            <span className={estilos.marca}>
-              {r.mejor && <Icono nombre="workspace_premium" tamano={20} />}
-              {r.mejor ? 'La mejor para su parcela' : 'Lo que hace hoy'}
-            </span>
-          )}
-          <h1 className={estilos.pregunta}>{r.nombre}</h1>
-        </div>
-        <div className={estilos.puntajeFila}>
-          <p className={estilos.puntaje} aria-label={`${r.puntaje} de 100`}>
-            {r.puntaje}
-            <span className={estilos.porciento}>%</span>
-          </p>
-          <RatingRotacion rating={r.rating} grande />
-        </div>
-        <p className={estilos.comparacion}>{comparacion(r, d)}</p>
-      </header>
-
-      <section className={estilos.seccion} aria-labelledby="titulo-por-que">
-        <h2 id="titulo-por-que" className="tipo-titulo">
-          {r.mejor ? 'Por qué es la mejor' : 'Por qué tiene este puntaje'}
-        </h2>
-        <ul className={estilos.razones}>
-          {r.razones.map((x) => (
-            <li key={x}>
-              <Icono nombre="check_circle" tamano={20} />
-              <span>{x}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <div className={estilos.columnas}>
-        <section className={estilos.seccion} aria-labelledby="titulo-calendario">
-          <h2 id="titulo-calendario" className="tipo-titulo">
-            Cuándo se siembra
-          </h2>
-          <ol className={estilos.pasos}>
-            {r.pasos.map((p) => (
-              <li key={p.temporada} className={estilos.paso}>
-                <span className={estilos.iconoPaso}>
-                  <Icono nombre={p.cultivoId ? ICONO_TEMPORADA[p.temporada] : 'remove'} tamano={22} />
-                </span>
-                <span className={estilos.textoPaso}>
-                  <span className={estilos.nombrePaso}>{p.nombre}</span>
-                  <span className="tipo-nota">
-                    {TEMPORADAS[p.temporada].nombre}: {p.meses.toLowerCase()}
-                  </span>
-                  {p.lluviaMm !== null && p.aguaPideMm !== null && !p.nombre.endsWith('(sigue)') && (
-                    <span className="tipo-nota">
-                      Lluvia prevista {p.lluviaMm} mm · el cultivo pide unos {p.aguaPideMm} mm
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className={estilos.seccion} aria-labelledby="titulo-partes">
-          <h2 id="titulo-partes" className="tipo-titulo">
-            El puntaje por partes
-          </h2>
-          <Partes partes={r.factores} etiqueta={`Puntaje por partes de ${r.nombre}`} />
-          <p className="tipo-nota">Las partes que usted marcó como objetivo pesan más.</p>
-        </section>
+      <Heroe r={r} d={d} />
+      <div className={estilos.rejilla}>
+        <PorQue r={r} />
+        <Calendario r={r} />
+        <Partes r={r} />
+        <Detalles r={r} />
       </div>
-
-      <div className={estilos.columnas}>
-        <Lista titulo="A favor" puntos={r.beneficios} icono="thumb_up" />
-        <Lista titulo="Tenga cuidado con" puntos={r.riesgos} icono="warning" />
-        <Lista titulo="Falta saber (revise con su técnico)" puntos={r.faltaSaber} icono="info" />
-      </div>
-
-      <details className={estilos.detalles}>
-        <summary className="capa-estado">
-          <Icono nombre="science" tamano={20} />
-          Ver de dónde salen estos datos
-          <Icono nombre="expand_more" tamano={20} />
-        </summary>
-        <ul className={estilos.evidencia}>
-          {r.evidencia.map((x) => (
-            <li key={x.texto}>
-              {x.texto} <span className="tipo-nota">({x.fuente})</span>
-            </li>
-          ))}
-        </ul>
-        <p className="tipo-nota">
-          Pronóstico de Kharis {d.punto.modelo}, punto {d.punto.id}, datos hasta el {fechaEnPalabras(d.punto.fechaBase)}. Confianza de
-          este cálculo: {r.confianza}.
-        </p>
-        <ul className={estilos.avisos}>
-          {d.avisos.map((a) => (
-            <li key={a} className="tipo-nota">
-              {a}
-            </li>
-          ))}
-        </ul>
-      </details>
-
+      <Fuentes r={r} d={d} />
       <PanelAnalisis analisis={analisis} resumen={resumen} />
       {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} />}
     </>
@@ -167,8 +279,7 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
 
 export default function Rotacion() {
   const { id = '' } = useParams()
-  const estado = useEstadoApp()
-  const entrada = entradaDe(estado)
+  const entrada = entradaDe(useEstadoApp())
   const decision = useDecision(entrada)
 
   useEffect(() => {
@@ -180,22 +291,21 @@ export default function Rotacion() {
   return (
     <div className="pantalla">
       <article className={estilos.medio} aria-busy={decision.estado === 'calculando'}>
-        <Boton variante="texto" icono="arrow_back" to="/" className={estilos.volver}>
-          Volver a las rotaciones
-        </Boton>
+        <div className={estilos.barra}>
+          <BotonIcono icono="arrow_back" etiqueta="Volver a las rotaciones" to="/" />
+          <span className={estilos.barraTitulo}>Rotación</span>
+        </div>
         {decision.estado === 'sin_datos' && (
-          <p className={estilos.ayuda}>
-            Primero conteste las preguntas de su parcela en la pantalla Plan.
-          </p>
+          <p className={estilos.estado}>Primero conteste las preguntas de su parcela en la pantalla Plan.</p>
         )}
         {decision.estado === 'calculando' && (
-          <p className={estilos.ayuda} role="status">
+          <p className={estilos.estado} role="status">
             Gemini Decision está comparando rotaciones…
           </p>
         )}
-        {decision.estado === 'error' && <p className={estilos.ayuda}>No se pudo leer el pronóstico de su lugar.</p>}
+        {decision.estado === 'error' && <p className={estilos.estado}>No se pudo leer el pronóstico de su lugar.</p>}
         {decision.estado === 'listo' && !rotacion && (
-          <p className={estilos.ayuda}>Esta rotación ya no está entre las opciones. Vuelva a la lista.</p>
+          <p className={estilos.estado}>Esta rotación ya no está entre las opciones. Vuelva a la lista.</p>
         )}
         {decision.estado === 'listo' && rotacion && <Contenido key={rotacion.id} d={decision.decision} r={rotacion} />}
       </article>

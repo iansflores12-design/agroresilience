@@ -57,6 +57,10 @@ import Waves from '@material-symbols/svg-400/rounded/waves.svg?react'
 import WorkspacePremium from '@material-symbols/svg-400/rounded/workspace_premium.svg?react'
 import Edit from '@material-symbols/svg-400/rounded/edit.svg?react'
 import HourglassTop from '@material-symbols/svg-400/rounded/hourglass_top.svg?react'
+import TrendingUp from '@material-symbols/svg-400/rounded/trending_up.svg?react'
+import TrendingDown from '@material-symbols/svg-400/rounded/trending_down.svg?react'
+import Flag from '@material-symbols/svg-400/rounded/flag.svg?react'
+import Help from '@material-symbols/svg-400/rounded/help.svg?react'
 
 export const iconos = {
   grass: Grass,
@@ -112,6 +116,10 @@ export const iconos = {
   workspace_premium: WorkspacePremium,
   edit: Edit,
   hourglass_top: HourglassTop,
+  trending_up: TrendingUp,
+  trending_down: TrendingDown,
+  flag: Flag,
+  help: Help,
 } as const
 
 export type NombreIcono = keyof typeof iconos

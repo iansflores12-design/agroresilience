@@ -24,6 +24,14 @@ export interface Factor {
   /** Peso ya ajustado a los objetivos; los pesos suman 1. */
   peso: number
   valor: number
+  /** El productor la marco como objetivo: pesa mas. */
+  objetivo: boolean
+}
+
+/** Una razon del puntaje. `tipo` dice de que parte sale (para su icono). */
+export interface Razon {
+  tipo: ClaveFactor | 'comparacion' | 'objetivos' | 'actual'
+  texto: string
 }
 
 export interface Evidencia {
@@ -58,7 +66,7 @@ export interface RotacionDecidida {
   confianza: Confianza
   pasos: PasoPlan[]
   factores: Factor[]
-  razones: string[]
+  razones: Razon[]
   beneficios: string[]
   riesgos: string[]
   faltaSaber: string[]

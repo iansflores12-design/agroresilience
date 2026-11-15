@@ -298,12 +298,19 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
 2. **"¿Qué quiere lograr?"**: siete objetivos que se marcan y desmarcan (ahorrar agua, mejorar la
    tierra, frenar la erosión, ganar más, comida para animales, abono natural, cortar plagas). Cada
    objetivo triplica el peso de su parte del puntaje.
+2b. **"¿Qué sembró?" y "¿Hace cuánto sembró?"**: la rejilla de cultivos y el selector deslizable
+   de semanas de la revisión 2 vuelven tal cual (`componentes/decision/SuCultivo.tsx`). Cambiar el
+   cultivo vuelve a calcular el ranking. El cuestionario usa la misma rejilla.
 3. **Rotaciones recomendadas**: tarjetas pequeñas con icono del cultivo que agrega, nombre,
    puntaje en porcentaje y rating (Alta 80+, Buena 65–79, Intermedia 50–64, Baja <50). Marca "La
    mejor" y "Lo que hace hoy" (repetir el cultivo, siempre incluida para comparar).
-4. **Detalle** (`/rotacion/:id`): puntaje grande, por qué, calendario con lluvia prevista y agua que
-   pide el cultivo, puntaje por partes, a favor, cuidados, falta saber, evidencia del motor en un
-   desplegable, análisis a fondo de Gemini y chat de seguimiento.
+4. **Detalle** (`/rotacion/:id`), con patrones de M3: barra superior pequeña con "Volver"; tarjeta
+   héroe con indicador circular del puntaje (en tinta), rating y diferencia frente a lo de hoy;
+   "Por qué" como lista con icono por parte; "Su año de siembra" como línea de tiempo con barra de
+   lluvia contra agua que pide (color `agua`); "Cómo se calculó" con indicadores lineales de M3
+   Expressive e insignia "Su objetivo"; pestañas A favor / Cuidado / Falta saber; tarjeta
+   expandible "De dónde salen los datos"; análisis de Gemini con chip de estado; chat de
+   seguimiento con campo de texto relleno.
 
 **Backend** (`api/`, funciones de Vercel; en local las sirve Vite):
 
