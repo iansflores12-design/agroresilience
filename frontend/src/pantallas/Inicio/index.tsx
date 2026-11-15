@@ -372,6 +372,19 @@ export default function Inicio() {
           {t('comun.ayudaPensar')}
           {d && t('plan.pronostico', { fecha: fechaEnPalabras(d.punto.fechaBase, idioma) })}
         </p>
+
+        {/* Sus respuestas quedan guardadas; esto solo vuelve a la primera pregunta para repasarlas. */}
+        <Boton
+          variante="tonal"
+          icono="arrow_back"
+          className={estilos.volverInicio}
+          onClick={() => {
+            fijarEditando('todo')
+            window.scrollTo?.({ top: 0 })
+          }}
+        >
+          {t('plan.volverInicio')}
+        </Boton>
       </div>
     </div>
   )

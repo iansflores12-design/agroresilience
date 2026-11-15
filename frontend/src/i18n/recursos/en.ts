@@ -35,6 +35,9 @@ const en: Recursos = {
     activarSonido: 'Turn sound on',
   },
   contexto: {
+    tituloCultivo: 'What are you planting?',
+    tituloLugar: 'Where is your plot?',
+    elegirEnMapa: 'Choose on the map',
     grupo: 'Chosen context',
     cultivoAria: 'Crop: {{cultivo}}',
     sinCultivoAria: 'No crop. Choose a crop',
@@ -47,6 +50,7 @@ const en: Recursos = {
     elegirLugar: 'Choose a place',
   },
   comun: {
+    cerrar: 'Close',
     deCien: '{{valor}} out of 100',
     unasSemanas: 'About {{n}} weeks',
     reintentar: 'Try again',
@@ -491,6 +495,8 @@ What is still unknown.
     puesto: '{{total}} out of 100. Rank {{puesto}} of {{de}} departments.',
     loQueCuesta: 'Its main limitation: {{limite}}.',
     comoAnio: 'How is the year looking?',
+    anioLluviaZona: 'Rain over the last month in {{lugar}}: {{pct}} % of normal (NASA, CHIRPS).',
+    anioLluviaPais: 'Rain over the last month in the country: {{pct}} % of normal (NASA, CHIRPS).',
     verPartes: 'See the score by parts',
     partesEn: 'Score by parts in {{departamento}}',
     toqueDepartamento: 'Tap a department on the map to see how it grows there.',
@@ -697,6 +703,7 @@ What is still unknown.
     },
   },
   plan: {
+    volverInicio: 'Back to the start',
     queSembrarDespues: 'What to plant next?',
     suCultivo: 'Your crop',
     sinObjetivos: 'No goals',

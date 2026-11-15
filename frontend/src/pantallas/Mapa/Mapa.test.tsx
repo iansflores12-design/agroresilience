@@ -3,6 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { aptitud, rotacionesPara } from '../../datos/aptitud'
 import { humedadPorcentaje, zonas } from '../../datos/zonas'
 import { avisar } from '../../lib/avisos'
+import { detectarAnio } from '../../componentes/mapa/escenario'
+
+const anioCholuteca = () => detectarAnio(zonas.find((z) => z.id === 'choluteca') ?? null).escenario
 import { renderizarApp } from '../../pruebas/renderizar'
 
 vi.mock('../../lib/avisos', () => ({
@@ -75,7 +78,7 @@ describe('Mapa', () => {
 
     it('pinta cada departamento con su puntaje y muestra el del lugar elegido', () => {
       renderizarApp('/mapa')
-      const esperado = aptitud('HN-CH', 'maiz', 'normal')!
+      const esperado = aptitud('HN-CH', 'maiz', anioCholuteca())!
       const choluteca = screen.getByRole('button', {
         name: new RegExp(`^Departamento de Choluteca: .* para maíz, ${esperado.total} de 100$`),
       })
@@ -98,21 +101,27 @@ describe('Mapa', () => {
       expect(screen.getByRole('heading', { level: 2, name: 'Qué sembrar después en Olancho' })).toBeInTheDocument()
     })
 
-    it('cambiar el tipo de año cambia el puntaje', async () => {
+    it('el tipo de año sale solo de la lluvia del último mes', () => {
+      renderizarApp('/mapa')
+      const seccion = screen.getByRole('region', { name: '¿Se da bien el maíz en Choluteca?' })
+      expect(within(seccion).queryByRole('button', { name: 'Seco' })).not.toBeInTheDocument()
+      const nombre = { seco: 'Seco', normal: 'Normal', lluvioso: 'Lluvioso' }[anioCholuteca()]
+      expect(within(seccion).getByText(nombre)).toBeInTheDocument()
+      expect(within(seccion).getByText(/Lluvia del último mes en Choluteca/)).toBeInTheDocument()
+    })
+
+    it('el chip de cultivo lo cambia sin salir del mapa', async () => {
       const usuario = userEvent.setup()
       renderizarApp('/mapa')
-      const seco = aptitud('HN-CH', 'maiz', 'seco')!
-      expect(seco.total).not.toBe(aptitud('HN-CH', 'maiz', 'normal')!.total)
-      const anio = screen.getByRole('group', { name: '¿Cómo viene el año?' })
-      await usuario.click(within(anio).getByRole('button', { name: 'Seco' }))
-      expect(within(anio).getByRole('button', { name: 'Seco' })).toHaveAttribute('aria-pressed', 'true')
-      expect(screen.getByText(`${seco.total} de 100. Puesto ${seco.puesto} de 18 departamentos.`)).toBeInTheDocument()
+      await usuario.click(screen.getByRole('button', { name: /^Cultivo: / }))
+      await usuario.click(screen.getByRole('button', { name: 'Sorgo (maicillo)' }))
+      expect(screen.getByRole('heading', { level: 2, name: '¿Se da bien el sorgo en Choluteca?' })).toBeInTheDocument()
     })
 
     it('lista que sembrar despues y abre y cierra el detalle de una opcion', async () => {
       const usuario = userEvent.setup()
       renderizarApp('/mapa')
-      const opciones = rotacionesPara('HN-CH', 'maiz', 'normal')
+      const opciones = rotacionesPara('HN-CH', 'maiz', anioCholuteca())
       const seccion = screen.getByRole('region', { name: 'Qué sembrar después en Choluteca' })
       // El nombre accesible es "tipo, nombre, nivel, puntaje": se ancla en el nivel para no confundir
       // "frijol" con "frijol terciopelo".

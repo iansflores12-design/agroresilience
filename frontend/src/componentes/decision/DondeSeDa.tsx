@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { aptitud, departamentoDeZona, tieneAptitud } from '../../datos/aptitud'
 import type { Cultivo } from '../../datos/cultivos'
-import { cajaHonduras } from '../../datos/zonas'
+import { buscarZona, cajaHonduras } from '../../datos/zonas'
 import { ContenedorMapa } from '../mapa/ContenedorMapa'
-import { useEscenario } from '../mapa/escenario'
+import { detectarAnio } from '../mapa/escenario'
 import { NivelAptitud } from '../mapa/NivelAptitud'
 import estilos from './DondeSeDa.module.css'
 
@@ -19,7 +19,7 @@ const sinAccion = () => {}
  */
 export function DondeSeDa({ cultivo, zonaId }: { cultivo: Cultivo; zonaId: string | null }) {
   const { t } = useTranslation()
-  const [escenario] = useEscenario()
+  const { escenario } = detectarAnio(buscarZona(zonaId))
   const [tocado, fijarTocado] = useState<string | null>(null)
   if (!tieneAptitud(cultivo.id)) return null
 

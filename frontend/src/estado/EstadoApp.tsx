@@ -114,7 +114,8 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
     setEstado((e) => (e.cultivoId === id ? e : { ...e, cultivoId: id, edadSemanas: 0 }))
   }, [])
   const elegirZona = useCallback((id: string) => {
-    setEstado((e) => (e.zonaId === id ? e : { ...e, zonaId: id }))
+    // Otro lugar elegido a mano: la ubicacion GPS de antes ya no corresponde.
+    setEstado((e) => (e.zonaId === id ? e : { ...e, zonaId: id, parcela: null }))
   }, [])
   const fijarEdad = useCallback((semanas: number) => {
     setEstado((e) => ({ ...e, edadSemanas: Math.max(0, semanas) }))

@@ -12,7 +12,7 @@ import { Tarjeta } from '../../componentes/Tarjeta'
 import { clases } from '../../componentes/clases'
 import { BASES, DATOS, ORDEN_BASES, ORDEN_DATOS, type CapaBase, type CapaDatos } from '../../componentes/mapa/capas'
 import { ContenedorMapa } from '../../componentes/mapa/ContenedorMapa'
-import { useEscenario } from '../../componentes/mapa/escenario'
+import { detectarAnio } from '../../componentes/mapa/escenario'
 import { Icono } from '../../componentes/Icono'
 import type { ControlMapa } from '../../componentes/mapa/MapaHonduras'
 import { LeyendaAptitud, NivelAptitud } from '../../componentes/mapa/NivelAptitud'
@@ -23,7 +23,6 @@ import {
   departamentoDeZona,
   rotacionesPara,
   tieneAptitud,
-  type Escenario,
 } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
 import { buscarZona, cajaHonduras, humedadPorcentaje, zonas } from '../../datos/zonas'
@@ -32,7 +31,6 @@ import { avisar } from '../../lib/avisos'
 import estilos from './Mapa.module.css'
 import { Rotaciones } from './Rotaciones'
 
-const ORDEN_ESCENARIOS: Escenario[] = ['seco', 'normal', 'lluvioso']
 
 /** En pantallas anchas la lista cabe al lado del mapa; en el telefono empieza cerrada. */
 function esPantallaAncha() {
@@ -59,7 +57,6 @@ export default function Mapa() {
   const { zonaId, cultivoId, elegirZona } = useEstadoApp()
   const navegar = useNavigate()
   const { t } = useTranslation()
-  const [escenario, fijarEscenario] = useEscenario()
   const [departamentoTocado, fijarDepartamentoTocado] = useState<string | null>(null)
   const controlMapa = useRef<ControlMapa>(null)
   const [listaAbierta] = useState(esPantallaAncha)
@@ -68,6 +65,8 @@ export default function Mapa() {
   const [datos, fijarDatos] = useState<CapaDatos | null>(null)
 
   const zona = buscarZona(zonaId)
+  const anio = detectarAnio(zona)
+  const escenario = anio.escenario
   const humedad = zona ? humedadPorcentaje(zona) : null
   const cultivo = tieneAptitud(cultivoId) ? buscarCultivo(cultivoId) : null
   const elCultivo = cultivo ? t(`cultivos.${cultivo.id}.el`) : ''
@@ -238,13 +237,13 @@ export default function Mapa() {
                 <p className="tipo-nota" id="titulo-anio">
                   {t('mapa.comoAnio')}
                 </p>
-                <div className={estilos.escenarios} role="group" aria-labelledby="titulo-anio">
-                  {ORDEN_ESCENARIOS.map((e) => (
-                    <Chip key={e} variante="filtro" seleccionado={e === escenario} onClick={() => fijarEscenario(e)}>
-                      {t(`aptitud.escenarios.${e}`)}
-                    </Chip>
-                  ))}
-                </div>
+                <p className={estilos.anioDetectado}>
+                  <span className={estilos.anioTipo}>
+                    <Icono nombre={escenario === 'seco' ? 'wb_sunny' : escenario === 'lluvioso' ? 'rainy' : 'partly_cloudy_day'} tamano={20} />
+                    {t(`aptitud.escenarios.${escenario}`)}
+                  </span>
+                  {anio.pct !== null && <span>{t(zona ? 'mapa.anioLluviaZona' : 'mapa.anioLluviaPais', { pct: anio.pct, lugar: zona?.nombre })}</span>}
+                </p>
               </div>
               <details className={estilos.detalle}>
                 <summary>{t('mapa.verPartes')}</summary>
