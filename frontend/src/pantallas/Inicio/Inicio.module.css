@@ -1,0 +1,337 @@
+.medio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-8);
+  width: 100%;
+  max-width: var(--ancho-contenido);
+  margin-inline: auto;
+  padding: var(--esp-4) var(--esp-4) var(--esp-8);
+}
+
+.pregunta {
+  font: var(--tipo-pregunta);
+  letter-spacing: -0.01em;
+  color: var(--md-sys-color-on-surface);
+  outline: none;
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.ayuda {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---------- Opciones grandes (cuestionario y objetivos) ---------- */
+
+.opciones,
+.objetivos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--esp-3);
+}
+
+.opcion,
+.objetivo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--esp-3) var(--esp-4) var(--esp-3) var(--esp-3);
+  border: 2px solid transparent;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  text-align: start;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto),
+    border-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.opcion:active,
+.objetivo:active {
+  border-radius: var(--forma-lg);
+}
+
+.opcionMarcada,
+.objetivoMarcado,
+.opcionMarcada:active,
+.objetivoMarcado:active {
+  border-color: var(--md-sys-color-primary);
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.opcionMarcada :global(.tipo-nota),
+.objetivoMarcado :global(.tipo-nota) {
+  color: inherit;
+}
+
+.iconoOpcion,
+.iconoObjetivo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-primary);
+}
+
+.opcionMarcada .iconoOpcion,
+.objetivoMarcado .iconoObjetivo {
+  background-color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-primary-container);
+}
+
+.textoOpcion {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nombreOpcion {
+  font: var(--tipo-etiqueta);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Cuestionario ---------- */
+
+.cuestionario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  width: 100%;
+  max-width: var(--ancho-lectura);
+  margin-inline: auto;
+}
+
+.progreso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.barraProgreso {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.barraProgreso > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--md-sys-color-on-surface);
+  transform-origin: left center;
+  transition: transform var(--mov-espacial) var(--curva-resorte);
+}
+
+.intro {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.accionesCuestionario {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+/* ---------- Perfil ---------- */
+
+.perfil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3) var(--esp-4);
+  padding: var(--esp-4);
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-low);
+}
+
+.datosPerfil {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-4);
+  font: var(--tipo-cuerpo-fuerte);
+  color: var(--md-sys-color-on-surface);
+}
+
+.datosPerfil > li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+/* ---------- Tarjetas de rotacion ---------- */
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--esp-3);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  width: 100%;
+  height: 100%;
+  min-height: 11rem;
+  padding: var(--esp-4);
+  border: 2px solid transparent;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  text-align: start;
+  text-decoration: none;
+  transition:
+    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
+    background-color var(--mov-efecto) var(--curva-efecto);
+}
+
+.tarjeta:active {
+  border-radius: var(--forma-lg);
+}
+
+.tarjetaMejor {
+  border-color: var(--md-sys-color-primary);
+  background-color: var(--md-sys-color-surface-container-lowest);
+}
+
+.tarjetaArriba {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+.iconoRotacion {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--forma-lg);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-primary);
+}
+
+.tarjetaMejor .iconoRotacion {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  font: var(--tipo-nota);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.nombreRotacion {
+  font: var(--tipo-etiqueta);
+  overflow-wrap: anywhere;
+}
+
+.tarjetaPie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-block-start: auto;
+}
+
+.puntaje {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.porciento {
+  margin-inline-start: 2px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.esqueleto {
+  min-height: 11rem;
+  border-radius: var(--forma-xl);
+  background-color: var(--md-sys-color-surface-container);
+  animation: latido 1.2s var(--curva-efecto) infinite alternate;
+}
+
+@keyframes latido {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  font: var(--tipo-cuerpo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto {
+    animation: none;
+  }
+}
+
+@media (min-width: 600px) {
+  .medio {
+    padding-inline: var(--esp-6);
+  }
+
+  .opciones,
+  .objetivos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tarjetas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 840px) {
+  .pregunta {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+  }
+
+  .objetivos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tarjetas {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 359px) {
+  .tarjetas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

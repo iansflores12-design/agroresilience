@@ -1,0 +1,37 @@
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  min-height: 32px;
+  padding: var(--esp-1) var(--esp-3) var(--esp-1) var(--esp-2);
+  border-radius: var(--forma-completa);
+  font: var(--tipo-nota);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.grande {
+  min-height: 40px;
+  padding-inline: var(--esp-3) var(--esp-4);
+  font: var(--tipo-etiqueta);
+}
+
+.alta {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.buena {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.intermedia {
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.baja {
+  background-color: var(--agro-color-tierra-container);
+  color: var(--agro-color-on-tierra-container);
+}

@@ -131,7 +131,8 @@ de todos los días:
 
 | Ruta | Pantalla | Etiqueta | Icono (Material Symbols Rounded) | Pregunta de la pantalla |
 | --- | --- | --- | --- | --- |
-| `/` | `pantallas/Cultivos` | Cultivo | `grass` | ¿Qué sembró? |
+| `/` | `pantallas/Inicio` | Plan | `grass` | ¿Qué quiere lograr? (antes, el cuestionario) |
+| `/rotacion/:id` | `pantallas/Rotacion` | (parte de Plan) | — | Nombre de la rotación |
 | `/mapa` | `pantallas/Mapa` | Mapa | `map` | ¿Dónde está su parcela? |
 | `/zona` | `pantallas/Zona` | Tierra | `water_drop` | ¿Cómo está la tierra en <zona>? |
 | `/chat` | `pantallas/Chat` | Preguntar | `forum` | Pregunte lo que quiera |
@@ -286,7 +287,40 @@ interface PropsSelectorDeslizable {
 Cada pantalla empieza con su pregunta en `--tipo-pregunta`. Se quita `PlanoFondo` de las
 cuatro pantallas (sección 1, regla 2).
 
-### Cultivo (`/`): "¿Qué sembró?"
+### Plan (`/`) y Gemini Decision (revisión 3, 2026-11-15)
+
+Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
+
+1. **Cuestionario, una pregunta por pantalla** (`Inicio/Cuestionario.tsx`), solo si faltan datos o
+   al tocar "Cambiar datos": lugar (11 lugares con punto de Kharis), terreno (plano, elevado, bajo,
+   ondulado), cultivo y temporada de siembra (primera, postrera, verano). Al tocar una respuesta
+   pasa a la siguiente.
+2. **"¿Qué quiere lograr?"**: siete objetivos que se marcan y desmarcan (ahorrar agua, mejorar la
+   tierra, frenar la erosión, ganar más, comida para animales, abono natural, cortar plagas). Cada
+   objetivo triplica el peso de su parte del puntaje.
+3. **Rotaciones recomendadas**: tarjetas pequeñas con icono del cultivo que agrega, nombre,
+   puntaje en porcentaje y rating (Alta 80+, Buena 65–79, Intermedia 50–64, Baja <50). Marca "La
+   mejor" y "Lo que hace hoy" (repetir el cultivo, siempre incluida para comparar).
+4. **Detalle** (`/rotacion/:id`): puntaje grande, por qué, calendario con lluvia prevista y agua que
+   pide el cultivo, puntaje por partes, a favor, cuidados, falta saber, evidencia del motor en un
+   desplegable, análisis a fondo de Gemini y chat de seguimiento.
+
+**Backend** (`api/`, funciones de Vercel; en local las sirve Vite):
+
+- `POST /api/decision { entrada }` → `Decision`. Gemini Decision (`src/lib/decision/motor.ts`) es
+  determinista: lee `public/kharis/<punto>.json` (lluvia, ET0, temperatura máxima, señales P2, P4,
+  P7, P8) y puntúa cada rotación. Si el backend no responde, el navegador corre el mismo código.
+- `POST /api/analisis { entrada, rotacionId }` → NDJSON en vivo (`paso`, `decision`, `texto`,
+  `fin`, `error`). Gemini explica los números; no los cambia.
+- `POST /api/chat { mensajes, contexto }` → `{ texto }`; con `contexto.consulta` recibe el ranking.
+- Línea de tiempo (`src/lib/decision/estadoAnalisis.ts`, límite de 6 s): si el primer texto llega
+  antes, se muestra en vivo; si no, resumen rápido, y al terminar aviso "Análisis a fondo listo";
+  si falla, resumen rápido y "Reintentar". Cuota de 15 análisis al día por teléfono; un intento
+  fallido no cuenta; los análisis hechos se guardan y no vuelven a gastar.
+- Variables del servidor: `GEMINI_API_KEY`, `GEMINI_MODELO` (por defecto `gemini-3.8-flash`),
+  `GEMINI_PENSAMIENTO` (opcional). Ver `.env.example`.
+
+### Cultivo (`/`): "¿Qué sembró?" (revisión 2, reemplazada)
 1. **Elegir cultivo, primero.** Rejilla de tarjetas grandes y tocables, una por cultivo
    (dos columnas en compacta, tres o más en expandida), con un icono de Material Symbols
    que lo represente lo mejor posible, el nombre común completo en `--tipo-etiqueta` y,
