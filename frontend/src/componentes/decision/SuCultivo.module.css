@@ -1,26 +1,5 @@
-.medio {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-8);
-  width: 100%;
-  max-width: var(--ancho-contenido);
-  margin-inline: auto;
-  padding: var(--esp-4) var(--esp-4) var(--esp-8);
-}
+/* Copia fiel de la pantalla "¿Qué sembró?" original (revision 2). */
 
-.pregunta {
-  font: var(--tipo-pregunta);
-  letter-spacing: -0.01em;
-  color: var(--md-sys-color-on-surface);
-}
-
-.seccion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-3);
-}
-
-/* Elegir cultivo: tarjetas grandes y tocables. */
 .cultivos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -97,7 +76,6 @@
   color: var(--md-sys-color-primary-container);
 }
 
-/* Edad del cultivo */
 .edad {
   display: flex;
   flex-direction: column;
@@ -131,130 +109,15 @@
   background-color: var(--md-sys-color-on-surface);
 }
 
-/* Donde se da mejor: el mapa lleva su propio alto. */
-.mapaInicio {
-  position: relative;
-  aspect-ratio: 3 / 2;
-  max-height: 32rem;
-}
-
-.mapaInicio > section {
-  height: 100%;
-  min-height: 0;
-}
-
-.resultado {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--esp-2) var(--esp-3);
-  font: var(--tipo-cuerpo);
-  color: var(--md-sys-color-on-surface);
-}
-
-.accion {
-  align-self: flex-start;
-}
-
-/* Rotaciones */
-.rotaciones {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--esp-3);
-}
-
-.rotacion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-}
-
-.beneficio {
-  font: var(--tipo-cuerpo);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.pasos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-  margin-block-start: var(--esp-2);
-}
-
-.paso {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-3);
-  width: 100%;
-  min-height: var(--alto-accion);
-  padding: var(--esp-2) var(--esp-4) var(--esp-2) var(--esp-2);
-  border-radius: var(--forma-lg-mas);
-  background-color: var(--md-sys-color-surface-container-lowest);
-  color: var(--md-sys-color-on-surface);
-  text-align: start;
-  transition:
-    border-radius var(--mov-espacial-rapido) var(--curva-resorte),
-    background-color var(--mov-efecto) var(--curva-efecto);
-}
-
-.paso:active {
-  border-radius: var(--forma-md);
-}
-
-.pasoElegido {
-  background-color: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.iconoPaso {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--forma-completa);
-  background-color: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.textoPaso {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.nombrePaso {
-  font: var(--tipo-cuerpo-fuerte);
-  overflow-wrap: anywhere;
-}
-
 @media (min-width: 600px) {
-  .medio {
-    padding-inline: var(--esp-6);
-  }
-
   .cultivos {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .rotaciones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 840px) {
-  .pregunta {
-    font-size: 2.25rem;
-    line-height: 2.75rem;
-  }
-
-  .cultivos {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .edad {
-    padding: var(--esp-8) var(--esp-8);
+    padding: var(--esp-8);
   }
 }
 

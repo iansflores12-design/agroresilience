@@ -11,12 +11,13 @@ export interface Destino {
 
 /** Los cuatro destinos de la aplicacion (DISENO.md, seccion 3). */
 export const destinos: Destino[] = [
-  { ruta: '/', vista: 'cultivos', etiqueta: 'Cultivo', icono: 'grass' },
+  { ruta: '/', vista: 'cultivos', etiqueta: 'Plan', icono: 'grass' },
   { ruta: '/mapa', vista: 'mapa', etiqueta: 'Mapa', icono: 'map' },
   { ruta: '/zona', vista: 'zona', etiqueta: 'Tierra', icono: 'water_drop' },
   { ruta: '/chat', vista: 'chat', etiqueta: 'Preguntar', icono: 'forum' },
 ]
 
 export function destinoActual(pathname: string): Destino | undefined {
-  return destinos.find((d) => (d.ruta === '/' ? pathname === '/' : pathname.startsWith(d.ruta)))
+  // El detalle de una rotacion es parte de Plan.
+  return destinos.find((d) => (d.ruta === '/' ? pathname === '/' || pathname.startsWith('/rotacion/') : pathname.startsWith(d.ruta)))
 }

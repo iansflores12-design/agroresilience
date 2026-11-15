@@ -1,0 +1,462 @@
+{
+  "activa": "v007",
+  "versiones": [
+    {
+      "version": "v001",
+      "padre": null,
+      "creada": "2026-11-15 04:06:49",
+      "motivo": "entrenamiento base",
+      "datos_hasta": "2020-12-31",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v001.pt",
+      "info": {
+        "val_loss": 0.30618472637173,
+        "mejor_epoca": 2
+      }
+    },
+    {
+      "version": "v002",
+      "padre": "v001",
+      "creada": "2026-11-15 04:07:09",
+      "motivo": "walk-forward 2021",
+      "datos_hasta": "2021-12-31",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v002.pt",
+      "info": {
+        "lote_desde": "2021-01-01",
+        "lote_hasta": "2021-12-31",
+        "ventanas_lote": 10770,
+        "mae_lote": {
+          "T2M_MAX": 1.07691,
+          "T2M_MIN": 0.72161,
+          "T2M": 0.69259,
+          "PRECTOTCORR": 6.1792,
+          "WS2M": 0.41525,
+          "RH2M": 3.47318,
+          "ALLSKY_SFC_SW_DWN": 2.71078
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.111,
+            "T2M_MIN": 0.0293,
+            "T2M": 0.0491,
+            "PRECTOTCORR": 0.0246,
+            "WS2M": 0.0613,
+            "RH2M": 0.3698,
+            "ALLSKY_SFC_SW_DWN": 0.043
+          },
+          "desvio_medio": {
+            "T2M_MAX": -0.3209,
+            "T2M_MIN": 0.0686,
+            "T2M": -0.1523,
+            "PRECTOTCORR": 0.7314,
+            "WS2M": -0.2014,
+            "RH2M": 0.6558,
+            "ALLSKY_SFC_SW_DWN": 0.193
+          },
+          "razon_error": {
+            "T2M_MAX": 0.8383,
+            "T2M_MIN": 0.8162,
+            "T2M": 0.873,
+            "PRECTOTCORR": 1.2208,
+            "WS2M": 0.7319,
+            "RH2M": 0.788,
+            "ALLSKY_SFC_SW_DWN": 0.9965
+          },
+          "psi_max": 0.3698,
+          "razon_error_media": 0.895,
+          "deriva_distribucion": true,
+          "deriva_error": false,
+          "hay_deriva": true
+        },
+        "ventanas_holdout": 2880,
+        "puntaje_holdout_actual": 0.87675,
+        "puntaje_holdout_calibracion": 0.86617,
+        "puntaje_holdout_pesos": 0.86614,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": false,
+        "poda": {
+          "ventanas_totales": 278520,
+          "retenidas_recientes": 91421,
+          "extremos_conservados": 45409,
+          "podadas": 141690,
+          "vida_media_dias": 730.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.33012798569268653
+        },
+        "rollback_automatico": true
+      }
+    },
+    {
+      "version": "v003",
+      "padre": "v002",
+      "creada": "2026-11-15 04:07:27",
+      "motivo": "walk-forward 2022",
+      "datos_hasta": "2022-12-31",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v003.pt",
+      "info": {
+        "lote_desde": "2022-01-01",
+        "lote_hasta": "2022-12-31",
+        "ventanas_lote": 10770,
+        "mae_lote": {
+          "T2M_MAX": 1.01691,
+          "T2M_MIN": 0.73136,
+          "T2M": 0.68185,
+          "PRECTOTCORR": 6.36846,
+          "WS2M": 0.3983,
+          "RH2M": 3.1099,
+          "ALLSKY_SFC_SW_DWN": 2.7354
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.2703,
+            "T2M_MIN": 0.0274,
+            "T2M": 0.1619,
+            "PRECTOTCORR": 0.1127,
+            "WS2M": 0.1275,
+            "RH2M": 0.6563,
+            "ALLSKY_SFC_SW_DWN": 0.0331
+          },
+          "desvio_medio": {
+            "T2M_MAX": -0.4186,
+            "T2M_MIN": -0.0176,
+            "T2M": -0.2978,
+            "PRECTOTCORR": 0.7845,
+            "WS2M": -0.2707,
+            "RH2M": 0.693,
+            "ALLSKY_SFC_SW_DWN": -0.1365
+          },
+          "razon_error": {
+            "T2M_MAX": 0.7916,
+            "T2M_MIN": 0.8272,
+            "T2M": 0.8594,
+            "PRECTOTCORR": 1.2582,
+            "WS2M": 0.7021,
+            "RH2M": 0.7056,
+            "ALLSKY_SFC_SW_DWN": 1.0055
+          },
+          "psi_max": 0.6563,
+          "razon_error_media": 0.8785,
+          "deriva_distribucion": true,
+          "deriva_error": false,
+          "hay_deriva": true
+        },
+        "ventanas_holdout": 2880,
+        "puntaje_holdout_actual": 0.83175,
+        "puntaje_holdout_calibracion": 0.82488,
+        "puntaje_holdout_pesos": 0.8309,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": false,
+        "poda": {
+          "ventanas_totales": 289470,
+          "retenidas_recientes": 90525,
+          "extremos_conservados": 46906,
+          "podadas": 152039,
+          "vida_media_dias": 730.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.34121110993954873
+        },
+        "rollback_automatico": true
+      }
+    },
+    {
+      "version": "v004",
+      "padre": "v003",
+      "creada": "2026-11-15 04:07:45",
+      "motivo": "walk-forward 2023",
+      "datos_hasta": "2023-12-31",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v004.pt",
+      "info": {
+        "lote_desde": "2023-01-01",
+        "lote_hasta": "2023-12-31",
+        "ventanas_lote": 10770,
+        "mae_lote": {
+          "T2M_MAX": 1.13006,
+          "T2M_MIN": 0.75981,
+          "T2M": 0.73714,
+          "PRECTOTCORR": 5.0116,
+          "WS2M": 0.40942,
+          "RH2M": 3.70767,
+          "ALLSKY_SFC_SW_DWN": 2.6397
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.1127,
+            "T2M_MIN": 0.5408,
+            "T2M": 0.3922,
+            "PRECTOTCORR": 0.0007,
+            "WS2M": 0.1015,
+            "RH2M": 0.0457,
+            "ALLSKY_SFC_SW_DWN": 0.0105
+          },
+          "desvio_medio": {
+            "T2M_MAX": 0.3297,
+            "T2M_MIN": 0.7609,
+            "T2M": 0.622,
+            "PRECTOTCORR": 0.2229,
+            "WS2M": -0.2896,
+            "RH2M": 0.192,
+            "ALLSKY_SFC_SW_DWN": 0.0556
+          },
+          "razon_error": {
+            "T2M_MAX": 0.8797,
+            "T2M_MIN": 0.8594,
+            "T2M": 0.9291,
+            "PRECTOTCORR": 0.9901,
+            "WS2M": 0.7217,
+            "RH2M": 0.8412,
+            "ALLSKY_SFC_SW_DWN": 0.9704
+          },
+          "psi_max": 0.5408,
+          "razon_error_media": 0.8845,
+          "deriva_distribucion": true,
+          "deriva_error": false,
+          "hay_deriva": true
+        },
+        "ventanas_holdout": 2880,
+        "puntaje_holdout_actual": 0.93921,
+        "puntaje_holdout_calibracion": 0.92574,
+        "puntaje_holdout_pesos": 0.93201,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": false,
+        "poda": {
+          "ventanas_totales": 300420,
+          "retenidas_recientes": 90162,
+          "extremos_conservados": 48986,
+          "podadas": 161272,
+          "vida_media_dias": 730.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.3321964787940184
+        },
+        "rollback_automatico": true
+      }
+    },
+    {
+      "version": "v005",
+      "padre": "v004",
+      "creada": "2026-11-15 04:08:03",
+      "motivo": "walk-forward 2024",
+      "datos_hasta": "2024-12-31",
+      "tamano_mb": 3.325,
+      "archivo": "versiones/v005.pt",
+      "info": {
+        "lote_desde": "2024-01-01",
+        "lote_hasta": "2024-12-31",
+        "ventanas_lote": 10800,
+        "mae_lote": {
+          "T2M_MAX": 1.23432,
+          "T2M_MIN": 0.85199,
+          "T2M": 0.83636,
+          "PRECTOTCORR": 5.61004,
+          "WS2M": 0.44664,
+          "RH2M": 3.74904,
+          "ALLSKY_SFC_SW_DWN": 2.78028
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.1172,
+            "T2M_MIN": 1.0357,
+            "T2M": 0.4715,
+            "PRECTOTCORR": 0.0196,
+            "WS2M": 0.0539,
+            "RH2M": 0.1786,
+            "ALLSKY_SFC_SW_DWN": 0.027
+          },
+          "desvio_medio": {
+            "T2M_MAX": 0.3422,
+            "T2M_MIN": 1.0483,
+            "T2M": 0.7245,
+            "PRECTOTCORR": 0.3748,
+            "WS2M": -0.2157,
+            "RH2M": 0.3999,
+            "ALLSKY_SFC_SW_DWN": -0.1505
+          },
+          "razon_error": {
+            "T2M_MAX": 0.9608,
+            "T2M_MIN": 0.9637,
+            "T2M": 1.0542,
+            "PRECTOTCORR": 1.1083,
+            "WS2M": 0.7873,
+            "RH2M": 0.8506,
+            "ALLSKY_SFC_SW_DWN": 1.022
+          },
+          "psi_max": 1.0357,
+          "razon_error_media": 0.9638,
+          "deriva_distribucion": true,
+          "deriva_error": false,
+          "hay_deriva": true
+        },
+        "ventanas_holdout": 2880,
+        "puntaje_holdout_actual": 1.0175,
+        "puntaje_holdout_calibracion": 1.01142,
+        "puntaje_holdout_pesos": 1.03616,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": false,
+        "poda": {
+          "ventanas_totales": 311370,
+          "retenidas_recientes": 88991,
+          "extremos_conservados": 51508,
+          "podadas": 170871,
+          "vida_media_dias": 730.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.3292608942422602
+        },
+        "rollback_automatico": true
+      }
+    },
+    {
+      "version": "v006",
+      "padre": "v005",
+      "creada": "2026-11-15 04:08:21",
+      "motivo": "walk-forward 2025",
+      "datos_hasta": "2025-12-31",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v006.pt",
+      "info": {
+        "lote_desde": "2025-01-01",
+        "lote_hasta": "2025-12-31",
+        "ventanas_lote": 10770,
+        "mae_lote": {
+          "T2M_MAX": 1.04482,
+          "T2M_MIN": 0.77436,
+          "T2M": 0.66087,
+          "PRECTOTCORR": 4.70182,
+          "WS2M": 0.41534,
+          "RH2M": 3.37046,
+          "ALLSKY_SFC_SW_DWN": 2.56979
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.0041,
+            "T2M_MIN": 0.1981,
+            "T2M": 0.0543,
+            "PRECTOTCORR": 0.0245,
+            "WS2M": 0.0683,
+            "RH2M": 0.2265,
+            "ALLSKY_SFC_SW_DWN": 0.0201
+          },
+          "desvio_medio": {
+            "T2M_MAX": -0.0072,
+            "T2M_MIN": 0.414,
+            "T2M": 0.2085,
+            "PRECTOTCORR": 0.2452,
+            "WS2M": -0.1893,
+            "RH2M": 0.5175,
+            "ALLSKY_SFC_SW_DWN": -0.0409
+          },
+          "razon_error": {
+            "T2M_MAX": 0.8133,
+            "T2M_MIN": 0.8759,
+            "T2M": 0.833,
+            "PRECTOTCORR": 0.9289,
+            "WS2M": 0.7321,
+            "RH2M": 0.7647,
+            "ALLSKY_SFC_SW_DWN": 0.9447
+          },
+          "psi_max": 0.2265,
+          "razon_error_media": 0.8418,
+          "deriva_distribucion": false,
+          "deriva_error": false,
+          "hay_deriva": false
+        },
+        "ventanas_holdout": 2880,
+        "puntaje_holdout_actual": 0.89301,
+        "puntaje_holdout_calibracion": 0.88737,
+        "puntaje_holdout_pesos": 0.90695,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": false,
+        "poda": {
+          "ventanas_totales": 322350,
+          "retenidas_recientes": 88112,
+          "extremos_conservados": 53439,
+          "podadas": 180799,
+          "vida_media_dias": 1460.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.32206570075617896
+        },
+        "rollback_automatico": true
+      }
+    },
+    {
+      "version": "v007",
+      "padre": "v006",
+      "creada": "2026-11-15 04:08:39",
+      "motivo": "walk-forward 2026",
+      "datos_hasta": "2026-11-10",
+      "tamano_mb": 3.326,
+      "archivo": "versiones/v007.pt",
+      "info": {
+        "lote_desde": "2026-01-01",
+        "lote_hasta": "2026-11-10",
+        "ventanas_lote": 9240,
+        "mae_lote": {
+          "T2M_MAX": 1.4646,
+          "T2M_MIN": 0.80309,
+          "T2M": 0.93637,
+          "PRECTOTCORR": 4.9509,
+          "WS2M": 0.5212,
+          "RH2M": 4.43731,
+          "ALLSKY_SFC_SW_DWN": 2.79082
+        },
+        "deriva": {
+          "psi": {
+            "T2M_MAX": 0.1368,
+            "T2M_MIN": 0.2865,
+            "T2M": 0.2553,
+            "PRECTOTCORR": 0.0454,
+            "WS2M": 0.0652,
+            "RH2M": 0.0767,
+            "ALLSKY_SFC_SW_DWN": 0.0076
+          },
+          "desvio_medio": {
+            "T2M_MAX": 0.2888,
+            "T2M_MIN": 0.4732,
+            "T2M": 0.4566,
+            "PRECTOTCORR": 0.3246,
+            "WS2M": 0.2423,
+            "RH2M": -0.0127,
+            "ALLSKY_SFC_SW_DWN": 0.0127
+          },
+          "razon_error": {
+            "T2M_MAX": 1.1401,
+            "T2M_MIN": 0.9084,
+            "T2M": 1.1802,
+            "PRECTOTCORR": 0.9781,
+            "WS2M": 0.9187,
+            "RH2M": 1.0068,
+            "ALLSKY_SFC_SW_DWN": 1.0259
+          },
+          "psi_max": 0.2865,
+          "razon_error_media": 1.0226,
+          "deriva_distribucion": true,
+          "deriva_error": false,
+          "hay_deriva": true
+        },
+        "ventanas_holdout": 3600,
+        "puntaje_holdout_actual": 1.05189,
+        "puntaje_holdout_calibracion": 1.05088,
+        "puntaje_holdout_pesos": 1.01935,
+        "calibracion_aceptada": true,
+        "pesos_aceptados": true,
+        "poda": {
+          "ventanas_totales": 330660,
+          "retenidas_recientes": 87370,
+          "extremos_conservados": 54566,
+          "podadas": 188724,
+          "vida_media_dias": 730.0,
+          "ventana_anios": 10.0,
+          "pasos": 360,
+          "loss_media": 0.3299164127972391
+        },
+        "rollback_automatico": false
+      }
+    }
+  ]
+}

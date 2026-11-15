@@ -1,23 +1,36 @@
 import { buscarCultivo } from '../datos/cultivos'
 import { buscarZona } from '../datos/zonas'
 import { useEstadoApp } from '../estado/EstadoApp'
+import { TEMPORADAS } from '../lib/decision/parametros'
 import { Chip } from './Chip'
 import estilos from './TiraContexto.module.css'
 
 /** Dice en palabras completas el cultivo y el lugar elegidos. Cada chip lleva a donde se elige. */
 export function TiraContexto() {
-  const { cultivoId, zonaId, edadSemanas } = useEstadoApp()
+  const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
-  const textoCultivo = cultivo ? `${cultivo.nombre}, semana ${edadSemanas}` : 'Elegir cultivo'
+  if (zona && parcela) {
+    return (
+      <div className={estilos.tira} role="group" aria-label="Contexto elegido">
+        <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${cultivo.nombre}` : 'Sin cultivo. Elegir cultivo'}>
+          {cultivo ? (temporada ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}` : cultivo.nombre) : 'Elegir cultivo'}
+        </Chip>
+        <Chip to="/" icono="my_location" aria-label={`Su parcela, cerca de ${zona.nombre}`}>
+          Su parcela
+        </Chip>
+      </div>
+    )
+  }
+  const textoCultivo = cultivo
+    ? temporada
+      ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}`
+      : cultivo.nombre
+    : 'Elegir cultivo'
   const textoZona = zona ? zona.nombre : 'Elegir lugar'
   return (
     <div className={estilos.tira} role="group" aria-label="Contexto elegido">
-      <Chip
-        to="/"
-        icono="grass"
-        aria-label={cultivo ? `Cultivo: ${cultivo.nombre}, semana ${edadSemanas}` : 'Sin cultivo. Elegir cultivo'}
-      >
+      <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${textoCultivo}` : 'Sin cultivo. Elegir cultivo'}>
         {textoCultivo}
       </Chip>
       <Chip to="/mapa" icono="location_on" aria-label={zona ? `Lugar: ${zona.nombre}` : 'Sin lugar. Elegir lugar'}>

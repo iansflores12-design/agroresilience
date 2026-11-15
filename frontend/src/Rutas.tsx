@@ -1,20 +1,22 @@
 import { Route, Routes } from 'react-router-dom'
 import { Estructura } from './componentes/Estructura'
 import Chat from './pantallas/Chat'
-import Cultivos from './pantallas/Cultivos'
+import Inicio from './pantallas/Inicio'
 import Mapa from './pantallas/Mapa'
+import Rotacion from './pantallas/Rotacion'
 import Zona from './pantallas/Zona'
 
-/** Las cuatro rutas de DISENO.md, seccion 3, dentro del armazon. */
+/** Las rutas de DISENO.md, seccion 3, dentro del armazon. */
 export function Rutas() {
   return (
     <Routes>
       <Route element={<Estructura />}>
-        <Route index element={<Cultivos />} />
+        <Route index element={<Inicio />} />
+        <Route path="rotacion/:id" element={<Rotacion />} />
         <Route path="mapa" element={<Mapa />} />
         <Route path="zona" element={<Zona />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="*" element={<Cultivos />} />
+        <Route path="*" element={<Inicio />} />
       </Route>
     </Routes>
   )

@@ -1,0 +1,18 @@
+# Kharis Engine (Fase 1) - dependencias minimas
+# PyTorch con CUDA (RTX): instalar primero desde el indice de PyTorch, por ejemplo
+#   pip install torch --index-url https://download.pytorch.org/whl/cu130
+# En CPU o Mac basta con:  pip install torch
+torch>=2.2
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+tensorboard>=2.14
+onnx>=1.15
+# Verificacion numerica del ONNX. Si aun no hay rueda para tu version de Python (p. ej. 3.15),
+# Kharis usa el evaluador de referencia oficial de onnx y lo indica en el reporte.
+onnxruntime>=1.17; python_version < "3.15"
+# Opcionales
+netron>=7.0        # visor de arquitectura: netron artefactos/kharis_engine.onnx
+psutil>=5.9        # medicion de RAM
+pyarrow>=14.0      # lectura de Parquet
+onnxscript>=0.1    # solo si se usa el exportador ONNX nuevo (dynamo) como respaldo

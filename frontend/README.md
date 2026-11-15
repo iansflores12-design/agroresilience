@@ -35,6 +35,16 @@ src/
   pruebas/          configuración de Vitest y ayudantes
 ```
 
+## Gemini Decision y backend
+
+`api/` tiene las funciones del backend (`decision`, `analisis`, `chat`). En local, `npm run dev`
+las sirve dentro de Vite; en Vercel corren como funciones. Para el análisis a fondo, crear
+`frontend/.env.local` con `GEMINI_API_KEY=...` (nunca se manda al navegador). Sin clave, el
+ranking funciona igual y el análisis muestra el resumen rápido con botón de reintento.
+
+`public/kharis/` es copia de `kharis_engine/salidas/web/`. Tras correr el motor, copiar de nuevo.
+Detalle del flujo en DISENO.md, sección 8, "Plan y Gemini Decision".
+
 ## Espacios reservados
 
 - **Fenómeno:** `src/componentes/fenomeno/EspacioFenomeno.tsx`, con

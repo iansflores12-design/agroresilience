@@ -1,5 +1,8 @@
 // oxlint-disable react/only-export-components -- el contrato de DISENO.md exige proveedor y hook en el mismo modulo
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { dentroDeHonduras } from '../lib/decision/escala'
+import { OBJETIVOS } from '../lib/decision/parametros'
+import type { EntradaDecision, Objetivo, Temporada, Terreno } from '../lib/decision/tipos'
 import { configurarSonido } from '../lib/sonido'
 
 export interface EstadoApp {
@@ -8,6 +11,20 @@ export interface EstadoApp {
   /** Semanas desde la siembra. */
   edadSemanas: number
   sonido: boolean
+  /** Respuestas de Gemini Decision. */
+  terreno: Terreno | null
+  temporada: Temporada | null
+  objetivos: Objetivo[]
+  /** Ubicacion de la parcela (GPS), redondeada a ~100 m. Null = se usa el lugar elegido. */
+  parcela: { lat: number; lon: number } | null
+}
+
+export interface Perfil {
+  zonaId: string
+  terreno: Terreno
+  cultivoId: string
+  temporada: Temporada
+  parcela?: { lat: number; lon: number } | null
 }
 
 interface AccionesEstadoApp {
@@ -16,11 +33,32 @@ interface AccionesEstadoApp {
   elegirZona(id: string): void
   fijarEdad(semanas: number): void
   alternarSonido(): void
+  /** Guarda las respuestas del cuestionario de Gemini Decision. */
+  fijarPerfil(p: Perfil): void
+  alternarObjetivo(o: Objetivo): void
 }
 
 export const CLAVE_ESTADO = 'agroresilience.estado.v1'
 
-const porDefecto: EstadoApp = { cultivoId: null, zonaId: null, edadSemanas: 0, sonido: true }
+const porDefecto: EstadoApp = {
+  cultivoId: null,
+  zonaId: null,
+  edadSemanas: 0,
+  sonido: true,
+  terreno: null,
+  temporada: null,
+  objetivos: [],
+  parcela: null,
+}
+
+function leerParcela(x: unknown): { lat: number; lon: number } | null {
+  if (typeof x !== 'object' || x === null) return null
+  const { lat, lon } = x as { lat?: unknown; lon?: unknown }
+  return typeof lat === 'number' && typeof lon === 'number' && dentroDeHonduras(lat, lon) ? { lat, lon } : null
+}
+
+const TERRENOS: Terreno[] = ['plano', 'elevado', 'bajo', 'ondulado']
+const TEMPORADAS: Temporada[] = ['primera', 'postrera', 'verano']
 
 const Contexto = createContext<(EstadoApp & AccionesEstadoApp) | null>(null)
 
@@ -40,6 +78,12 @@ function leerEstadoGuardado(): EstadoApp {
           ? d.edadSemanas
           : 0,
       sonido: typeof d.sonido === 'boolean' ? d.sonido : true,
+      terreno: TERRENOS.includes(d.terreno as Terreno) ? (d.terreno as Terreno) : null,
+      temporada: TEMPORADAS.includes(d.temporada as Temporada) ? (d.temporada as Temporada) : null,
+      objetivos: Array.isArray(d.objetivos)
+        ? d.objetivos.filter((o): o is Objetivo => typeof o === 'string' && o in OBJETIVOS)
+        : [],
+      parcela: leerParcela(d.parcela),
     }
   } catch {
     return porDefecto
@@ -73,10 +117,24 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
   const alternarSonido = useCallback(() => {
     setEstado((e) => ({ ...e, sonido: !e.sonido }))
   }, [])
+  const fijarPerfil = useCallback((p: Perfil) => {
+    setEstado((e) => ({
+      ...e,
+      ...p,
+      parcela: p.parcela ?? null,
+      edadSemanas: e.cultivoId === p.cultivoId ? e.edadSemanas : 0,
+    }))
+  }, [])
+  const alternarObjetivo = useCallback((o: Objetivo) => {
+    setEstado((e) => ({
+      ...e,
+      objetivos: e.objetivos.includes(o) ? e.objetivos.filter((x) => x !== o) : [...e.objetivos, o],
+    }))
+  }, [])
 
   const valor = useMemo(
-    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido }),
-    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido],
+    () => ({ ...estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo }),
+    [estado, elegirCultivo, elegirZona, fijarEdad, alternarSonido, fijarPerfil, alternarObjetivo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
@@ -85,4 +143,13 @@ export function useEstadoApp() {
   const valor = useContext(Contexto)
   if (!valor) throw new Error('useEstadoApp debe usarse dentro de ProveedorEstadoApp')
   return valor
+}
+
+/** Entrada completa para Gemini Decision, o null si falta contestar algo. */
+export function entradaDe(e: EstadoApp): EntradaDecision | null {
+  if (!e.zonaId || !e.cultivoId || !e.terreno || !e.temporada) return null
+  return {
+    zonaId: e.zonaId, cultivoId: e.cultivoId, terreno: e.terreno, temporada: e.temporada, objetivos: e.objetivos,
+    ...(e.parcela ? { parcela: e.parcela } : {}),
+  }
 }

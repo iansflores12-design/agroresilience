@@ -1,6 +1,9 @@
 import type { MensajeChat } from '../../estado/Conversacion'
+import type { EntradaDecision } from '../decision/tipos'
 
 export interface ContextoChat {
+  /** Consulta de Gemini Decision para el chat de seguimiento de una rotacion. */
+  consulta?: { entrada: EntradaDecision; rotacionId: string }
   vista: 'cultivos' | 'mapa' | 'zona' | 'chat'
   cultivo: { id: string; nombre: string } | null
   edadSemanas: number | null

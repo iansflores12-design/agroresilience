@@ -45,6 +45,22 @@ import Nutrition from '@material-symbols/svg-400/rounded/nutrition.svg?react'
 import LocalFlorist from '@material-symbols/svg-400/rounded/local_florist.svg?react'
 import CheckCircle from '@material-symbols/svg-400/rounded/check_circle.svg?react'
 import WbSunny from '@material-symbols/svg-400/rounded/wb_sunny.svg?react'
+import ThumbUp from '@material-symbols/svg-400/rounded/thumb_up.svg?react'
+import Savings from '@material-symbols/svg-400/rounded/savings.svg?react'
+import Compost from '@material-symbols/svg-400/rounded/compost.svg?react'
+import Landslide from '@material-symbols/svg-400/rounded/landslide.svg?react'
+import Pets from '@material-symbols/svg-400/rounded/pets.svg?react'
+import PestControl from '@material-symbols/svg-400/rounded/pest_control.svg?react'
+import HorizontalRule from '@material-symbols/svg-400/rounded/horizontal_rule.svg?react'
+import MountainFlag from '@material-symbols/svg-400/rounded/mountain_flag.svg?react'
+import Waves from '@material-symbols/svg-400/rounded/waves.svg?react'
+import WorkspacePremium from '@material-symbols/svg-400/rounded/workspace_premium.svg?react'
+import Edit from '@material-symbols/svg-400/rounded/edit.svg?react'
+import HourglassTop from '@material-symbols/svg-400/rounded/hourglass_top.svg?react'
+import TrendingUp from '@material-symbols/svg-400/rounded/trending_up.svg?react'
+import TrendingDown from '@material-symbols/svg-400/rounded/trending_down.svg?react'
+import Flag from '@material-symbols/svg-400/rounded/flag.svg?react'
+import Help from '@material-symbols/svg-400/rounded/help.svg?react'
 
 export const iconos = {
   grass: Grass,
@@ -88,6 +104,22 @@ export const iconos = {
   local_florist: LocalFlorist,
   check_circle: CheckCircle,
   wb_sunny: WbSunny,
+  thumb_up: ThumbUp,
+  savings: Savings,
+  compost: Compost,
+  landslide: Landslide,
+  pets: Pets,
+  pest_control: PestControl,
+  horizontal_rule: HorizontalRule,
+  mountain_flag: MountainFlag,
+  waves: Waves,
+  workspace_premium: WorkspacePremium,
+  edit: Edit,
+  hourglass_top: HourglassTop,
+  trending_up: TrendingUp,
+  trending_down: TrendingDown,
+  flag: Flag,
+  help: Help,
 } as const
 
 export type NombreIcono = keyof typeof iconos

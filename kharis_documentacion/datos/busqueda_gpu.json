@@ -1,0 +1,199 @@
+{
+  "generado": "2026-11-15T02:32:56",
+  "dispositivo": "CUDA (NVIDIA GeForce RTX 3070), precision bf16",
+  "criterio": "val_loss (solo validacion)",
+  "resultados": [
+    {
+      "nombre": "ruido-96",
+      "canales": 96,
+      "bloques": 5,
+      "seq_len": 64,
+      "dropout": 0.35,
+      "weight_decay": 0.01,
+      "lr": 0.0007,
+      "ruido_entrada": 0.1,
+      "val_loss": 0.30617,
+      "mejor_epoca": 2,
+      "epocas": 5,
+      "corr_media": 0.7713,
+      "parametros": 396392,
+      "tamano_mb": 1.5121,
+      "segundos": 59.5,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 19.22,
+        "fp16": 20.92,
+        "bf16": 22.52
+      },
+      "mae": {
+        "T2M_MAX": 1.28558,
+        "T2M_MIN": 0.88405,
+        "T2M": 0.79381,
+        "PRECTOTCORR": 5.05873,
+        "WS2M": 0.56747,
+        "RH2M": 4.40933,
+        "ALLSKY_SFC_SW_DWN": 2.72053
+      }
+    },
+    {
+      "nombre": "chica-32",
+      "canales": 32,
+      "bloques": 5,
+      "seq_len": 64,
+      "dropout": 0.2,
+      "weight_decay": 0.001,
+      "lr": 0.001,
+      "ruido_entrada": 0.0,
+      "val_loss": 0.30803,
+      "mejor_epoca": 3,
+      "epocas": 6,
+      "corr_media": 0.7704,
+      "parametros": 62760,
+      "tamano_mb": 0.2394,
+      "segundos": 30.6,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 58.01,
+        "fp16": 52.55,
+        "bf16": 56.5
+      },
+      "mae": {
+        "T2M_MAX": 1.3282,
+        "T2M_MIN": 0.87115,
+        "T2M": 0.82794,
+        "PRECTOTCORR": 5.10598,
+        "WS2M": 0.56418,
+        "RH2M": 4.48482,
+        "ALLSKY_SFC_SW_DWN": 2.76435
+      }
+    },
+    {
+      "nombre": "reg-64",
+      "canales": 64,
+      "bloques": 5,
+      "seq_len": 64,
+      "dropout": 0.25,
+      "weight_decay": 0.001,
+      "lr": 0.001,
+      "ruido_entrada": 0.0,
+      "val_loss": 0.30831,
+      "mejor_epoca": 2,
+      "epocas": 5,
+      "corr_media": 0.7735,
+      "parametros": 194760,
+      "tamano_mb": 0.743,
+      "segundos": 42.5,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 28.41,
+        "fp16": 32.11,
+        "bf16": 32.28
+      },
+      "mae": {
+        "T2M_MAX": 1.29011,
+        "T2M_MIN": 0.88562,
+        "T2M": 0.80129,
+        "PRECTOTCORR": 5.31334,
+        "WS2M": 0.58328,
+        "RH2M": 4.43582,
+        "ALLSKY_SFC_SW_DWN": 2.7493
+      }
+    },
+    {
+      "nombre": "fuerte-64",
+      "canales": 64,
+      "bloques": 5,
+      "seq_len": 64,
+      "dropout": 0.4,
+      "weight_decay": 0.01,
+      "lr": 0.0007,
+      "ruido_entrada": 0.05,
+      "val_loss": 0.30844,
+      "mejor_epoca": 3,
+      "epocas": 6,
+      "corr_media": 0.7726,
+      "parametros": 194760,
+      "tamano_mb": 0.743,
+      "segundos": 50.7,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 28.83,
+        "fp16": 32.29,
+        "bf16": 32.4
+      },
+      "mae": {
+        "T2M_MAX": 1.29701,
+        "T2M_MIN": 0.8575,
+        "T2M": 0.81035,
+        "PRECTOTCORR": 5.18676,
+        "WS2M": 0.54319,
+        "RH2M": 4.40048,
+        "ALLSKY_SFC_SW_DWN": 2.72535
+      }
+    },
+    {
+      "nombre": "larga-64x128",
+      "canales": 64,
+      "bloques": 6,
+      "seq_len": 128,
+      "dropout": 0.3,
+      "weight_decay": 0.01,
+      "lr": 0.0007,
+      "ruido_entrada": 0.05,
+      "val_loss": 0.30888,
+      "mejor_epoca": 3,
+      "epocas": 6,
+      "corr_media": 0.7728,
+      "parametros": 219720,
+      "tamano_mb": 0.8382,
+      "segundos": 101.9,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 15.25,
+        "fp16": 15.58,
+        "bf16": 15.25
+      },
+      "mae": {
+        "T2M_MAX": 1.28568,
+        "T2M_MIN": 0.87246,
+        "T2M": 0.8123,
+        "PRECTOTCORR": 4.95487,
+        "WS2M": 0.54812,
+        "RH2M": 4.41311,
+        "ALLSKY_SFC_SW_DWN": 2.73419
+      }
+    },
+    {
+      "nombre": "lenta-64",
+      "canales": 64,
+      "bloques": 5,
+      "seq_len": 64,
+      "dropout": 0.3,
+      "weight_decay": 0.01,
+      "lr": 0.0004,
+      "ruido_entrada": 0.05,
+      "val_loss": 0.31008,
+      "mejor_epoca": 4,
+      "epocas": 7,
+      "corr_media": 0.7719,
+      "parametros": 194760,
+      "tamano_mb": 0.743,
+      "segundos": 58.6,
+      "precision": "bf16",
+      "pasos_por_s": {
+        "fp32": 28.92,
+        "fp16": 32.23,
+        "bf16": 32.43
+      },
+      "mae": {
+        "T2M_MAX": 1.27834,
+        "T2M_MIN": 0.85514,
+        "T2M": 0.79833,
+        "PRECTOTCORR": 4.98231,
+        "WS2M": 0.55026,
+        "RH2M": 4.39756,
+        "ALLSKY_SFC_SW_DWN": 2.7288
+      }
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { zonas } from '../datos/zonas'
 import { renderizarApp } from '../pruebas/renderizar'
 
 const rutas = [
-  { etiqueta: 'Cultivo', titulo: '¿Qué sembró?' },
+  { etiqueta: 'Plan', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Mapa', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Tierra', titulo: '¿Cómo está la tierra?' },
   { etiqueta: 'Preguntar', titulo: 'Pregunte lo que quiera' },
@@ -43,8 +43,12 @@ describe('Estructura', () => {
     expect(within(tira).getByText('Elegir cultivo')).toBeInTheDocument()
     expect(within(tira).getByText('Elegir lugar')).toBeInTheDocument()
 
+    // Cuestionario de Gemini Decision: lugar, terreno, cultivo y temporada.
     const cultivo = cultivos[0]
+    await usuario.click(screen.getByRole('button', { name: 'Choluteca' }))
+    await usuario.click(screen.getByRole('button', { name: /^Plano/ }))
     await usuario.click(screen.getByRole('button', { name: new RegExp(`^${cultivo.nombre}\\s*Unas`) }))
+    await usuario.click(screen.getByRole('button', { name: /^De primera/ }))
     expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
 
     const nav = screen.getByRole('navigation', { name: 'Principal' })
@@ -52,7 +56,7 @@ describe('Estructura', () => {
     const zona = zonas[0]
     await usuario.click(screen.getByRole('button', { name: zona.nombre }))
 
-    for (const etiqueta of ['Tierra', 'Preguntar', 'Cultivo']) {
+    for (const etiqueta of ['Tierra', 'Preguntar', 'Plan']) {
       await usuario.click(within(nav).getByRole('link', { name: etiqueta }))
       expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
       expect(within(tira).getByText(zona.nombre)).toBeInTheDocument()
