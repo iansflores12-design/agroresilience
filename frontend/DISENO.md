@@ -325,7 +325,7 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
   antes, se muestra en vivo; si no, resumen rápido, y al terminar aviso "Análisis a fondo listo";
   si falla, resumen rápido y "Reintentar". Cuota de 15 análisis al día por teléfono; un intento
   fallido no cuenta; los análisis hechos se guardan y no vuelven a gastar.
-- Variables del servidor: `GEMINI_API_KEY`, `GEMINI_MODELO` (por defecto `gemini-3.8-flash`),
+- Variables del servidor: `GEMINI_API_KEY`, `GEMINI_MODELO` (por defecto `gemini-3.5-flash`),
   `GEMINI_PENSAMIENTO` (opcional, por defecto `minimal`). Ver `.env.example`. El razonamiento
   del modelo cuenta contra el tope de tokens: si Gemini llega al tope, el servidor manda
   `error` con causa `cortado` y la pantalla ofrece reintentar en vez de mostrar texto a medias.

@@ -33,7 +33,7 @@ export function hayClave(): boolean {
 }
 
 function modelo(): string {
-  return process.env.GEMINI_MODELO?.trim() || 'gemini-3.8-flash'
+  return process.env.GEMINI_MODELO?.trim() || 'gemini-3.5-flash'
 }
 
 /**

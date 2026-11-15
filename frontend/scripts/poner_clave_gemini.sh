@@ -16,7 +16,7 @@ if [ -z "$clave" ]; then
   exit 1
 fi
 umask 077
-printf 'GEMINI_API_KEY=%s\nGEMINI_MODELO=gemini-3.8-flash\nVITE_API_URL=/api\n' "$clave" > "$destino"
+printf 'GEMINI_API_KEY=%s\nGEMINI_MODELO=gemini-3.5-flash\nVITE_API_URL=/api\n' "$clave" > "$destino"
 unset clave
 echo "Guardada en $destino (solo tu usuario puede leerla)."
 echo "Arranca el sitio con: npm --prefix frontend install && npm --prefix frontend run dev"
