@@ -8,7 +8,7 @@ const rutas = [
   { etiqueta: 'Plan', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Mapa', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Tierra', titulo: '¿Cómo está la tierra?' },
-  { etiqueta: 'Preguntar', titulo: 'Pregunte lo que quiera' },
+  { etiqueta: 'Preguntar', titulo: 'Sus chats' },
 ]
 
 describe('Estructura', () => {
@@ -43,14 +43,14 @@ describe('Estructura', () => {
     expect(within(tira).getByText('Elegir cultivo')).toBeInTheDocument()
     expect(within(tira).getByText('Elegir lugar')).toBeInTheDocument()
 
-    // Cuestionario de Gemini Decision: lugar, terreno, cultivo y temporada.
+    // Cuestionario de Gemini Decision: lugar, terreno, cultivo (con semanas), temporada y objetivos.
     const cultivo = cultivos[0]
     await usuario.click(screen.getByRole('button', { name: 'Choluteca' }))
     await usuario.click(screen.getByRole('button', { name: /^Plano/ }))
     await usuario.click(screen.getByRole('button', { name: new RegExp(`^${cultivo.nombre}\\s*Unas`) }))
-    expect(screen.getByRole('slider', { name: 'Edad del cultivo' })).toBeInTheDocument()   // se abre abajo
     await usuario.click(screen.getByRole('button', { name: 'Siguiente' }))
     await usuario.click(screen.getByRole('button', { name: /^De primera/ }))
+    await usuario.click(screen.getByRole('button', { name: 'Ver mis rotaciones' }))
     expect(within(tira).getByText(new RegExp(cultivo.nombre))).toBeInTheDocument()
 
     const nav = screen.getByRole('navigation', { name: 'Principal' })

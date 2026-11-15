@@ -113,9 +113,10 @@ svg {
   z-index: var(--z-medio);
 }
 
+/* Lo que flota (navegacion, redactor del chat): sin sombra; una linea fina marca el borde. */
 .plano-superior {
   z-index: var(--z-superior);
-  box-shadow: var(--elevacion-3);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
 }
 
 /* Titulos de seccion y notas */

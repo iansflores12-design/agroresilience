@@ -5,6 +5,7 @@ import { Chip } from '../../componentes/Chip'
 import type { MensajeChat } from '../../estado/Conversacion'
 import { ErrorChat, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import { crearClienteHttp } from '../../lib/chat/clienteHttp'
+import { ContenidoMensaje, MensajeEscribiendose } from '../Chat/Enriquecido'
 import estilos from './Rotacion.module.css'
 
 const SUGERENCIAS = ['¿Qué necesito para empezar?', '¿Y si llueve menos de lo previsto?', '¿Por qué no la otra opción?']
@@ -12,7 +13,20 @@ const SUGERENCIAS = ['¿Qué necesito para empezar?', '¿Y si llueve menos de lo
 let siguienteId = 0
 
 /** Chat de seguimiento sobre una rotacion. Gemini recibe el ranking y la evidencia de la consulta. */
-export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat; cliente?: ClienteChat }) {
+export function ChatSeguimiento({
+  contexto,
+  cliente,
+  titulo = 'Pregunte sobre esta rotación',
+  sugerencias = SUGERENCIAS,
+  respaldo,
+}: {
+  contexto: ContextoChat
+  cliente?: ClienteChat
+  titulo?: string
+  sugerencias?: string[]
+  /** Respuesta preparada de antemano con los datos de la decisión, por si Gemini no contesta. */
+  respaldo?: (pregunta: string) => string
+}) {
   const [mensajes, fijarMensajes] = useState<MensajeChat[]>([])
   const [texto, fijarTexto] = useState('')
   const [esperando, fijarEsperando] = useState(false)
@@ -38,7 +52,12 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
       fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: r.texto, fecha: new Date().toISOString() }])
     } catch (e) {
       if (c.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
-      fijarError('Gemini no pudo responder. Su pregunta quedó escrita: puede reintentar.')
+      if (respaldo) {
+        fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: respaldo(limpio), fecha: new Date().toISOString() }])
+        fijarError('La IA no contestó. Le dejamos un resumen rápido con los datos de su consulta.')
+        return
+      }
+      fijarError('La IA no contestó. Su pregunta quedó escrita: puede reintentar.')
       fijarMensajes(lista)
       fijarTexto(limpio)
     } finally {
@@ -56,26 +75,36 @@ export function ChatSeguimiento({ contexto, cliente }: { contexto: ContextoChat;
   return (
     <section className={estilos.chat} aria-labelledby="titulo-chat">
       <h2 id="titulo-chat" className={estilos.tituloTarjeta}>
-        Pregunte sobre esta rotación
+        {titulo}
       </h2>
       {mensajes.length === 0 && (
         <div className={estilos.sugerencias} role="group" aria-label="Sugerencias">
-          {SUGERENCIAS.map((s) => (
+          {sugerencias.map((s) => (
             <Chip key={s} onClick={() => void enviar(s)}>
               {s}
             </Chip>
           ))}
         </div>
       )}
-      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label="Conversación sobre la rotación">
-        {mensajes.map((m) => (
-          <p key={m.id} className={m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}>
-            {m.texto}
-          </p>
+      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={`Conversación: ${titulo}`}>
+        {mensajes.map((m, i) => (
+          m.rol === 'usuario' ? (
+            <p key={m.id} className={estilos.burbujaUsuario}>
+              {m.texto}
+            </p>
+          ) : (
+            <div key={m.id} className={estilos.burbujaAsistente}>
+              {i === mensajes.length - 1 ? (
+                <MensajeEscribiendose texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              ) : (
+                <ContenidoMensaje texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              )}
+            </div>
+          )
         ))}
         {esperando && (
           <p className={estilos.burbujaAsistente}>
-            <span className="solo-lectores">Gemini está escribiendo</span>
+            <span className="solo-lectores">La IA está escribiendo</span>
             <span aria-hidden="true">…</span>
           </p>
         )}

@@ -32,17 +32,34 @@ function Pasos({ pasos }: { pasos: EstadoAnalisis['pasos'] }) {
  * Analisis a fondo de Gemini segun la linea de tiempo: pasos en vivo, texto en vivo o resumen
  * rapido, aviso cuando llega tarde y reintento si falla.
  */
-export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis & { reintentar: () => void }; resumen: string }) {
+export function PanelAnalisis({
+  analisis,
+  resumen,
+  titulo = 'Análisis a fondo',
+  apoyo = 'La IA explica los números; no los cambia.',
+  aviso = { titulo: 'Análisis a fondo listo', descripcion: 'La IA terminó de revisar esta rotación.' },
+  espera = 'La IA sigue preparando el análisis a fondo. Le avisamos cuando esté.',
+}: {
+  analisis: EstadoAnalisis & { reintentar: () => void }
+  resumen: string
+  titulo?: string
+  apoyo?: string
+  /** Aviso que salta cuando el análisis llega después del resumen rápido. */
+  aviso?: { titulo: string; descripcion: string }
+  espera?: string
+}) {
   const { fase, pasos, texto, causa, llegoTarde, guardado, reintentar } = analisis
   const ancla = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (fase !== 'listo' || !llegoTarde) return
     avisar.exito({
-      titulo: 'Análisis a fondo listo',
-      descripcion: 'Gemini terminó de revisar esta rotación.',
+      titulo: aviso.titulo,
+      descripcion: aviso.descripcion,
       accion: { texto: 'Ver', alPulsar: () => ancla.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) },
     })
+    // El aviso salta una vez por análisis; sus textos no cambian mientras tanto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fase, llegoTarde])
 
   const estado = ESTADO[fase]
@@ -56,9 +73,9 @@ export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis 
         </span>
         <span className={estilos.textoElemento}>
           <h2 id="titulo-analisis" className={estilos.tituloTarjeta}>
-            Análisis a fondo
+            {titulo}
           </h2>
-          <span className={estilos.apoyoElemento}>Gemini explica los números; no los cambia.</span>
+          <span className={estilos.apoyoElemento}>{apoyo}</span>
         </span>
         <span className={estilos.chipEstado}>
           {ocupado && fase !== 'resumen' ? <Girando /> : <Icono nombre={estado.icono} tamano={18} />}
@@ -80,14 +97,18 @@ export function PanelAnalisis({ analisis, resumen }: { analisis: EstadoAnalisis 
           <p className={estilos.textoGemini}>{resumen}</p>
           <p className={estilos.nota} role="status">
             <Girando />
-            Gemini sigue preparando el análisis a fondo. Le avisamos cuando esté.
+            {espera}
           </p>
         </>
       )}
 
       {fase === 'listo' && <p className={estilos.textoGemini}>{texto}</p>}
 
-      {fase === 'fallo' && (
+      {/* Sin clave de Gemini en el servidor no hay nada que el productor pueda hacer: se queda
+          el resumen rápido, sin aviso ni reintento. */}
+      {fase === 'fallo' && causa === 'sin_clave' && <p className={estilos.textoGemini}>{resumen}</p>}
+
+      {fase === 'fallo' && causa !== 'sin_clave' && (
         <>
           <p className={estilos.textoGemini}>{resumen}</p>
           <div className={estilos.aviso} role="alert">

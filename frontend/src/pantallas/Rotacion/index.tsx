@@ -10,7 +10,7 @@ import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
 import { TEMPORADAS } from '../../lib/decision/parametros'
-import { buscarRotacion, fechaEnPalabras, resumenRapido } from '../../lib/decision/textos'
+import { buscarRotacion, fechaEnPalabras, respuestaRapida, resumenRapido } from '../../lib/decision/textos'
 import type { Decision, PasoPlan, RotacionDecidida } from '../../lib/decision/tipos'
 import { ChatSeguimiento } from './ChatSeguimiento'
 import { AnilloPuntaje, BarraLineal, Pestanas } from './Indicadores'
@@ -272,7 +272,7 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
       </div>
       <Fuentes r={r} d={d} />
       <PanelAnalisis analisis={analisis} resumen={resumen} />
-      {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} />}
+      {analisis.fase === 'listo' && <ChatSeguimiento contexto={contexto} respaldo={(pregunta) => respuestaRapida(d, r.id, pregunta)} />}
     </>
   )
 }
@@ -300,7 +300,7 @@ export default function Rotacion() {
         )}
         {decision.estado === 'calculando' && (
           <p className={estilos.estado} role="status">
-            Gemini Decision está comparando rotaciones…
+            Comparando rotaciones…
           </p>
         )}
         {decision.estado === 'error' && <p className={estilos.estado}>No se pudo leer el pronóstico de su lugar.</p>}

@@ -8,6 +8,12 @@ import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
 
 const MAX_MENSAJES = 20
+
+// Lo que el chat sabe dibujar ademas de texto (ver src/pantallas/Chat/Enriquecido.tsx).
+const PIEZAS_VISUALES = `Además del texto, puedes pedir dos piezas visuales, cada una en una línea propia y escrita exactamente así:
+[[mapa:ID]] muestra el mapa de Honduras con qué tan bien se da ese cultivo. ID es uno de: maiz, frijol, sorgo, arroz, tomate, frijol-terciopelo.
+[[animacion:Título corto|Paso uno|Paso dos|Paso tres]] muestra una explicación animada, paso a paso (de 2 a 5 pasos cortos). Un paso puede terminar en =NÚMERO (de 0 a 100) para dibujar una barra, por ejemplo "Lluvia que cubre lo que pide el maíz=72"; usa solo números que estén en los datos.
+Usa el mapa cuando pregunten dónde se da un cultivo o pidan ver el mapa. Usa la animación cuando pidan una explicación animada, con efectos o paso a paso. Si no las piden, responde solo con texto. No uses otras etiquetas.`
 const MAX_LARGO = 2000
 
 function contextoGeneral(c: Record<string, unknown>): string {
@@ -50,14 +56,15 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const texto = await geminiTexto({
-      sistema: `${INSTRUCCIONES_GEMINI}\nResponde en 120 palabras o menos.\n\nDatos de la consulta:\n${datos}`,
+      sistema: `${INSTRUCCIONES_GEMINI}\nResponde en 80 palabras o menos.\n${PIEZAS_VISUALES}\n\nDatos de la consulta:\n${datos}`,
       mensajes,
       signal: request.signal,
-      maxTokens: 700,
+      maxTokens: 3000,
     })
     return json({ texto })
   } catch (e) {
     const causa = e instanceof ErrorGemini ? e.causa : 'servidor'
+    console.error(`[chat] ${causa}: ${e instanceof Error ? e.message : String(e)}`)
     return json({ error: causa }, causa === 'cuota' ? 429 : causa === 'sin_clave' ? 503 : 502)
   }
 }

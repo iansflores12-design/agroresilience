@@ -25,8 +25,10 @@ export interface Perfil {
   cultivoId: string
   temporada: Temporada
   parcela?: { lat: number; lon: number } | null
-  /** Semanas desde la siembra elegidas en el cuestionario. */
+  /** Semanas desde la siembra. Si falta, se conserva (o vuelve a 0 si cambio el cultivo). */
   edadSemanas?: number
+  /** Si faltan, se conservan los que ya habia. */
+  objetivos?: Objetivo[]
 }
 
 interface AccionesEstadoApp {
@@ -124,7 +126,8 @@ export function ProveedorEstadoApp({ children }: { children: ReactNode }) {
       ...e,
       ...p,
       parcela: p.parcela ?? null,
-      edadSemanas: p.edadSemanas ?? (e.cultivoId === p.cultivoId ? e.edadSemanas : 0),
+      edadSemanas: Math.max(0, p.edadSemanas ?? (e.cultivoId === p.cultivoId ? e.edadSemanas : 0)),
+      objetivos: p.objetivos ?? e.objetivos,
     }))
   }, [])
   const alternarObjetivo = useCallback((o: Objetivo) => {

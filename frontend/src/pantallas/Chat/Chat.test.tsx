@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ProveedorConversacion } from '../../estado/Conversacion'
@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   avisar: { exito: vi.fn(), info: vi.fn(), alerta: vi.fn(), error: vi.fn(), promesa: vi.fn(), cerrar: vi.fn(), limpiar: vi.fn() },
 }))
 vi.mock('../../lib/avisos', () => ({ avisar: mocks.avisar }))
+
+/** Los mensajes se buscan dentro del registro: el título del chat repite la primera pregunta. */
+const registro = () => within(screen.getByRole('log'))
 
 type ClienteSim = ClienteChat & { enviar: ReturnType<typeof vi.fn> }
 
@@ -54,7 +57,7 @@ describe('pantalla Chat', () => {
     const campo = screen.getByRole('textbox', { name: 'Mensaje' })
     await u.type(campo, 'Pregunta uno{Enter}')
     expect(await screen.findByText('hola de vuelta')).toBeInTheDocument()
-    expect(screen.getByText('Pregunta uno')).toBeInTheDocument()
+    expect(registro().getByText('Pregunta uno')).toBeInTheDocument()
     expect(campo).toHaveValue('')
     expect(campo).toHaveFocus()
     expect(cliente.enviar).toHaveBeenCalledTimes(1)
@@ -118,7 +121,7 @@ describe('pantalla Chat', () => {
     expect(aviso.accion.texto).toBe('Reintentar')
     aviso.accion.alPulsar()
     expect(await screen.findByText('ahora si')).toBeInTheDocument()
-    expect(screen.getAllByText('fallo')).toHaveLength(1)
+    expect(registro().getAllByText('fallo')).toHaveLength(1)
     expect(cliente.enviar).toHaveBeenCalledTimes(2)
   })
 
@@ -163,12 +166,12 @@ describe('pantalla Chat', () => {
     await u.type(screen.getByRole('textbox', { name: 'Mensaje' }), 'p1{Enter}')
     await screen.findByText('r1')
     await u.click(screen.getByRole('button', { name: 'Borrar conversación' }))
-    expect(screen.queryByText('p1')).not.toBeInTheDocument()
+    expect(registro().queryByText('p1')).not.toBeInTheDocument()
     const aviso = mocks.avisar.exito.mock.calls[0][0]
     expect(aviso.titulo).toBe('Conversación borrada')
     expect(aviso.accion.texto).toBe('Deshacer')
     aviso.accion.alPulsar()
-    expect(await screen.findByText('p1')).toBeInTheDocument()
+    expect(await registro().findByText('p1')).toBeInTheDocument()
     expect(screen.getByText('r1')).toBeInTheDocument()
   })
 
@@ -178,9 +181,9 @@ describe('pantalla Chat', () => {
     await u.type(screen.getByRole('textbox', { name: 'Mensaje' }), 'recuerdame{Enter}')
     await screen.findByText('guardada')
     ocultar()
-    expect(screen.queryByText('recuerdame')).not.toBeInTheDocument()
+    expect(screen.queryByRole('log')).not.toBeInTheDocument()
     mostrar()
-    expect(screen.getByText('recuerdame')).toBeInTheDocument()
+    expect(registro().getByText('recuerdame')).toBeInTheDocument()
     expect(screen.getByText('guardada')).toBeInTheDocument()
   })
 })
