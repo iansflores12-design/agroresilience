@@ -22,6 +22,8 @@ const pt: Recursos = {
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
   nav: {
+    reordenarAyuda: 'Arraste para mudar a ordem, ou use Alt e as setas.',
+    movido: '{{destino}}: posição {{n}} de {{total}}',
     principal: 'Principal',
     plan: 'Plano',
     mapa: 'Mapa',

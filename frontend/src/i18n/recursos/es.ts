@@ -19,6 +19,8 @@ const es = {
     idiomas: { es: 'Español', pt: 'Português', en: 'English' },
   },
   nav: {
+    reordenarAyuda: 'Arrastre para cambiar el orden, o use Alt y las flechas.',
+    movido: '{{destino}}: posición {{n}} de {{total}}',
     principal: 'Principal',
     plan: 'Plan',
     mapa: 'Mapa',
