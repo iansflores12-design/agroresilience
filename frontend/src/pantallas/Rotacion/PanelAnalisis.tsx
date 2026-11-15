@@ -104,7 +104,11 @@ export function PanelAnalisis({
 
       {fase === 'listo' && <p className={estilos.textoGemini}>{texto}</p>}
 
-      {fase === 'fallo' && (
+      {/* Sin clave de Gemini en el servidor no hay nada que el productor pueda hacer: se queda
+          el resumen rápido, sin aviso ni reintento. */}
+      {fase === 'fallo' && causa === 'sin_clave' && <p className={estilos.textoGemini}>{resumen}</p>}
+
+      {fase === 'fallo' && causa !== 'sin_clave' && (
         <>
           <p className={estilos.textoGemini}>{resumen}</p>
           <div className={estilos.aviso} role="alert">

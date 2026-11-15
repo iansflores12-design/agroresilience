@@ -1,14 +1,14 @@
 .seccion {
   display: flex;
   flex-direction: column;
-  gap: var(--esp-3);
+  gap: var(--esp-2);
 }
 
-/* El alto lo fija la proporción del país; el mapa llena la caja. */
+/* Honduras es el doble de ancha que alta: con esa proporción el mapa no deja aire arriba ni abajo. */
 .mapa {
   position: relative;
-  aspect-ratio: 3 / 2;
-  max-height: 30rem;
+  aspect-ratio: 2 / 1;
+  max-height: 22rem;
 }
 
 .mapa > section {
@@ -16,15 +16,11 @@
   min-height: 0;
 }
 
-/* El puntaje del departamento enfocado: nivel y frase en la misma fila, para que el nivel
-   no se confunda con la leyenda de abajo. */
+/* El puntaje del departamento enfocado, en una sola línea bajo el mapa. */
 .resultado {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--esp-3);
-  padding: var(--esp-3) var(--esp-4);
-  border-radius: var(--forma-lg);
-  background-color: var(--md-sys-color-surface-container);
   font: var(--tipo-cuerpo-fuerte);
   color: var(--md-sys-color-on-surface);
 }
@@ -32,16 +28,9 @@
 .resultado > span:last-child {
   flex: 1;
   min-width: 0;
-  padding-block-start: var(--esp-1);
 }
 
-.apoyo {
-  font: var(--tipo-cuerpo);
+.ejemplo {
+  font: var(--tipo-nota);
   color: var(--md-sys-color-on-surface-variant);
-}
-
-.acciones {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-2);
 }

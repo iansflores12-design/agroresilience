@@ -226,9 +226,6 @@ function Rotaciones({ d }: { d: Decision }) {
         <h2 id="titulo-mejores" className="tipo-titulo">
           Las tres mejores
         </h2>
-        <p className={estilos.ayuda}>
-          Según el pronóstico de Kharis con datos hasta el {fechaEnPalabras(d.punto.fechaBase)}. Toque una para ver por qué.
-        </p>
         <ol className={estilos.podio} aria-labelledby="titulo-mejores">
           {tres.map((r) => (
             <TarjetaRotacion key={r.id} r={r} />
@@ -333,7 +330,10 @@ export default function Inicio() {
 
         <SusRespuestas entrada={entrada} semanas={edadSemanas} parcela={d?.punto.parcela} alCambiar={fijarEditando} />
 
-        <p className="tipo-nota">Es una ayuda para pensar: la decisión final es suya y de su técnico.</p>
+        <p className="tipo-nota">
+          Es una ayuda para pensar: la decisión final es suya y de su técnico.
+          {d && ` Pronóstico de Kharis con datos hasta el ${fechaEnPalabras(d.punto.fechaBase)}.`}
+        </p>
       </div>
     </div>
   )

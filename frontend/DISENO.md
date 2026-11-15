@@ -309,8 +309,9 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
      (chips de filtro de M3). Tocar otra cambia el mapa y las rotaciones.
    - **Mapa** "¿Dónde se da mejor el <cultivo>?" (`componentes/decision/DondeSeDa.tsx`): Honduras
      entera pintada por puntaje de aptitud, con el enfoque en el departamento de la parcela (el
-     resto atenuado, `enfocar` en `PropsMapa`), su puntaje encima y en una frase. Tocar otro
-     departamento mueve el enfoque.
+     resto atenuado, `enfocar` en `PropsMapa`), su puntaje encima y en una sola línea debajo. Sin
+     leyenda ni textos de apoyo, para que el mapa y las rotaciones se vean de entrada. Tocar
+     otro departamento mueve el enfoque.
    - **Las tres mejores**, en su propio grupo: tarjetas con icono, nombre, puntaje y rating. En
      teléfono la mejor ocupa todo el ancho. Marca "La mejor" y "Lo que hace hoy".
    - **Más opciones**: las demás rotaciones como cuadrados con icono, nombre y porcentaje.
@@ -320,7 +321,8 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
    - **Sus respuestas**: una fila de chips con cada dato en palabras. Tocar uno abre solo esa
      pregunta del cuestionario (`soloPaso`) y al contestarla se vuelve al Plan.
 3. **Resumen rápido de respaldo para todo lo que escribe Gemini** (`lib/decision/textos.ts`):
-   `resumenRapido` (una rotación o el top 3) si el análisis tarda o falla, y `respuestaRapida`
+   `resumenRapido` (una rotación o el top 3) si el análisis tarda o falla (si el servidor no
+   tiene la clave de Gemini se muestra solo, sin aviso de error ni reintento), y `respuestaRapida`
    para el chat de seguimiento: si Gemini no contesta, responde con los datos de la decisión
    según de qué trate la pregunta (agua, cómo empezar, riesgos o razones).
 4. **Detalle** (`/rotacion/:id`), con patrones de M3: barra superior pequeña con "Volver"; tarjeta
