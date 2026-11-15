@@ -61,3 +61,19 @@
     padding-block-end: var(--esp-6);
   }
 }
+
+/* Chat abierto: sin barra superior. En telefono tampoco hay navegacion inferior (se vuelve con
+   la flecha del chat); en computadora el menu lateral se queda. */
+.armazon[data-inmersivo] > header {
+  display: none;
+}
+
+.armazon[data-inmersivo] .principal {
+  padding-block-end: 0;
+}
+
+@media (max-width: 839px) {
+  .armazon[data-inmersivo] > nav {
+    display: none;
+  }
+}

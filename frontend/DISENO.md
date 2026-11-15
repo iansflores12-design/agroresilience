@@ -333,6 +333,23 @@ Sustituye a la pantalla Cultivo descrita abajo (se conserva como historia).
    expandible "De dónde salen los datos"; análisis de Gemini con chip de estado; chat de
    seguimiento con campo de texto relleno.
 
+### Preguntar (`/chat` y `/chat/:id`), revisión 4 (2026-11-15)
+
+- **Varios chats** (`estado/Conversacion.tsx`, guardados en el teléfono): crear, nombrar (el
+  título sale de la primera pregunta hasta que se le pone uno), fijar arriba y borrar con deshacer.
+- **`/chat` es la selección de chats** (`Chat/Lista.tsx`), con la barra superior y la navegación
+  de siempre y el botón "Nuevo chat".
+- **`/chat/:id` es el chat y toma la pantalla**: sin barra superior y, en teléfono, sin
+  navegación inferior. Se vuelve con la flecha de arriba o deslizando desde el borde izquierdo.
+  En computadora queda el menú lateral y la lista de chats va en una columna a la izquierda.
+- **La respuesta nueva se va escribiendo** a la vista (`MensajeEscribiendose`); con movimiento
+  reducido sale completa.
+- **El chat puede dibujar** (`Chat/Enriquecido.tsx`): `[[mapa:ID]]` muestra el mapa del cultivo
+  con el enfoque en el departamento del productor y `[[animacion:Título|Paso|Paso=72]]` una
+  explicación animada paso a paso, con barras que crecen y botón "Repetir". Gemini las usa solo
+  si se le pide; una etiqueta mal escrita se descarta.
+- Gemini responde **solo sobre cultivos**, breve (80 palabras) y útil.
+
 **Backend** (`api/`, funciones de Vercel; en local las sirve Vite):
 
 - `POST /api/decision { entrada }` → `Decision`. Gemini Decision (`src/lib/decision/motor.ts`) es

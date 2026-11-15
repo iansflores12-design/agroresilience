@@ -48,24 +48,38 @@ function cuerpo(p: PedidoGemini): string {
   })
 }
 
+/** Esperas antes de reintentar cuando Gemini esta saturado (503) o falla un momento (500). */
+const ESPERAS_MS = [700, 1500]
+
+const esperar = (ms: number) => new Promise((listo) => setTimeout(listo, ms))
+
 async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   const clave = process.env.GEMINI_API_KEY?.trim()
   if (!clave) throw new ErrorGemini('sin_clave', 'Falta GEMINI_API_KEY en el servidor')
   let r: Response
-  try {
-    r = await fetch(`${URL_BASE}${modelo()}:${metodo}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
-      body: cuerpo(p),
-      signal: p.signal,
-    })
-  } catch (e) {
-    if (p.signal?.aborted) throw new ErrorGemini('cancelado')
-    throw new ErrorGemini('red', String(e))
+  for (let intento = 0; ; intento++) {
+    try {
+      r = await fetch(`${URL_BASE}${modelo()}:${metodo}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
+        body: cuerpo(p),
+        signal: p.signal,
+      })
+    } catch (e) {
+      if (p.signal?.aborted) throw new ErrorGemini('cancelado')
+      throw new ErrorGemini('red', String(e))
+    }
+    // Modelo saturado o tropiezo pasajero: se reintenta un par de veces antes de rendirse.
+    if ((r.status === 503 || r.status === 500) && intento < ESPERAS_MS.length && !p.signal?.aborted) {
+      await esperar(ESPERAS_MS[intento])
+      continue
+    }
+    break
   }
   if (r.ok) return r
   const detalle = await r.text().catch(() => '')
-  if (r.status === 429) throw new ErrorGemini('cuota', detalle)
+  // 503 = "muchas consultas a este modelo": para el productor es lo mismo que la cuota, espere y reintente.
+  if (r.status === 429 || r.status === 503) throw new ErrorGemini('cuota', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
   if (r.status === 401 || r.status === 403) throw new ErrorGemini('clave', detalle)
   throw new ErrorGemini('servidor', `Gemini respondio ${r.status}: ${detalle.slice(0, 300)}`)
 }

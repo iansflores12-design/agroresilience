@@ -135,6 +135,8 @@ Reglas:
 - No inventes precios, dosis, variedades ni fechas exactas de lluvia.
 - Explica términos técnicos con palabras de todos los días (por ejemplo, evapotranspiración = el agua que la planta y la tierra pierden al aire).
 - Recuerda que es una ayuda: la decisión es del productor y de su técnico local.
+- Responde solo sobre cultivos, siembra, tierra, agua, clima y manejo de la parcela. Si preguntan otra cosa, di en una frase que solo ayudas con cultivos.
+- Sé breve y útil: ve directo a lo que el productor puede hacer.
 - Sin emojis. Sin tablas. Texto plano con títulos cortos en líneas propias, sin símbolos de Markdown.`
 
 export const PEDIDO_ANALISIS = `Haz el análisis a fondo de la rotación consultada en este orden, con un título corto por parte:

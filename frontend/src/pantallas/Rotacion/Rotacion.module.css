@@ -516,8 +516,7 @@
   min-height: var(--alto-accion);
   padding: var(--esp-3) var(--esp-4);
   border: 0;
-  border-block-end: 1px solid var(--md-sys-color-on-surface-variant);
-  border-radius: var(--forma-xs) var(--forma-xs) 0 0;
+  border-radius: var(--forma-xl);
   background-color: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface);
   font: var(--tipo-cuerpo);
@@ -525,8 +524,8 @@
 }
 
 .campo:focus-visible {
-  outline: none;
-  border-block-end: 2px solid var(--md-sys-color-primary);
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
 }
 
 @media (prefers-reduced-motion: reduce) {

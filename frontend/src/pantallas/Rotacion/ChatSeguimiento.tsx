@@ -5,6 +5,7 @@ import { Chip } from '../../componentes/Chip'
 import type { MensajeChat } from '../../estado/Conversacion'
 import { ErrorChat, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import { crearClienteHttp } from '../../lib/chat/clienteHttp'
+import { ContenidoMensaje, MensajeEscribiendose } from '../Chat/Enriquecido'
 import estilos from './Rotacion.module.css'
 
 const SUGERENCIAS = ['¿Qué necesito para empezar?', '¿Y si llueve menos de lo previsto?', '¿Por qué no la otra opción?']
@@ -86,10 +87,20 @@ export function ChatSeguimiento({
         </div>
       )}
       <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={`Conversación: ${titulo}`}>
-        {mensajes.map((m) => (
-          <p key={m.id} className={m.rol === 'usuario' ? estilos.burbujaUsuario : estilos.burbujaAsistente}>
-            {m.texto}
-          </p>
+        {mensajes.map((m, i) => (
+          m.rol === 'usuario' ? (
+            <p key={m.id} className={estilos.burbujaUsuario}>
+              {m.texto}
+            </p>
+          ) : (
+            <div key={m.id} className={estilos.burbujaAsistente}>
+              {i === mensajes.length - 1 ? (
+                <MensajeEscribiendose texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              ) : (
+                <ContenidoMensaje texto={m.texto} zonaId={contexto.zona?.id ?? null} />
+              )}
+            </div>
+          )
         ))}
         {esperando && (
           <p className={estilos.burbujaAsistente}>

@@ -62,6 +62,8 @@ export async function POST(request: Request): Promise<Response> {
         enviar({ tipo: 'fin' })
       } catch (e) {
         const causa = e instanceof ErrorGemini ? e.causa : 'servidor'
+        // El motivo queda en el registro del servidor (nunca lleva la clave); al navegador solo va la causa.
+        if (causa !== 'cancelado') console.error(`[analisis] ${causa}: ${e instanceof Error ? e.message : String(e)}`)
         if (causa !== 'cancelado') enviar({ tipo: 'error', causa })
       } finally {
         try {

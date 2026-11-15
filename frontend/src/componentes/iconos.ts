@@ -14,6 +14,8 @@ import Add from '@material-symbols/svg-400/rounded/add.svg?react'
 import Remove from '@material-symbols/svg-400/rounded/remove.svg?react'
 import Send from '@material-symbols/svg-400/rounded/send.svg?react'
 import Search from '@material-symbols/svg-400/rounded/search.svg?react'
+import Keep from '@material-symbols/svg-400/rounded/keep.svg?react'
+import Replay from '@material-symbols/svg-400/rounded/replay.svg?react'
 import ArrowForward from '@material-symbols/svg-400/rounded/arrow_forward.svg?react'
 import ArrowBack from '@material-symbols/svg-400/rounded/arrow_back.svg?react'
 import Layers from '@material-symbols/svg-400/rounded/layers.svg?react'
@@ -74,6 +76,8 @@ export const iconos = {
   remove: Remove,
   send: Send,
   search: Search,
+  keep: Keep,
+  replay: Replay,
   arrow_forward: ArrowForward,
   arrow_back: ArrowBack,
   layers: Layers,

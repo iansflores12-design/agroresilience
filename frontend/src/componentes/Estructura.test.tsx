@@ -8,7 +8,7 @@ const rutas = [
   { etiqueta: 'Plan', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Mapa', titulo: '¿Dónde está su parcela?' },
   { etiqueta: 'Tierra', titulo: '¿Cómo está la tierra?' },
-  { etiqueta: 'Preguntar', titulo: 'Pregunte lo que quiera' },
+  { etiqueta: 'Preguntar', titulo: 'Sus chats' },
 ]
 
 describe('Estructura', () => {
