@@ -1,0 +1,13 @@
+{
+  "caja_honduras": {"lat_min": 12.98, "lat_max": 16.52, "lon_min": -89.35, "lon_max": -83.15},
+  "puntos": [
+    {"id": "comayagua",   "nombre": "Valle de Comayagua",     "lat": 14.45, "lon": -87.64},
+    {"id": "choluteca",   "nombre": "Choluteca (corredor seco)", "lat": 13.30, "lon": -87.19},
+    {"id": "danli",       "nombre": "Danli, El Paraiso",      "lat": 14.03, "lon": -86.58},
+    {"id": "juticalpa",   "nombre": "Juticalpa, Olancho",     "lat": 14.66, "lon": -86.22},
+    {"id": "sula",        "nombre": "Valle de Sula",          "lat": 15.50, "lon": -88.03},
+    {"id": "olanchito",   "nombre": "Valle del Aguan",        "lat": 15.48, "lon": -86.57},
+    {"id": "santa_rosa",  "nombre": "Santa Rosa de Copan",    "lat": 14.77, "lon": -88.78},
+    {"id": "la_esperanza","nombre": "La Esperanza, Intibuca", "lat": 14.32, "lon": -88.17}
+  ]
+}

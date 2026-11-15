@@ -1,8 +1,0 @@
-raw/
-processed/
-.netrc
-.env
-__pycache__/
-.venv/
-entrada/
-salida/

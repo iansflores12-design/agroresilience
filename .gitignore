@@ -1,9 +1,16 @@
-.DS_Store
-__pycache__/
-.env
-.netrc
-.venv/
+﻿# Secretos
+config/*token*.txt
 
-# Archivos locales que no son parte de la app
+# Datos crudos (15 GB): solo locales
+raw/
+entrada/
+
+# Entornos, logs y motores fuera del repo
+.venv/
+.venv_kharis/
+kharis_engine/
+logs/
+__pycache__/
+*.pyc
 .claude/
-agromapa.zip
+node_modules/

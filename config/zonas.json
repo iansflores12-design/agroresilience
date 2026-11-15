@@ -1,0 +1,350 @@
+{
+  "caja_honduras": {
+    "lat_min": 12.98,
+    "lat_max": 16.52,
+    "lon_min": -89.35,
+    "lon_max": -83.15
+  },
+  "puntos": [
+    {
+      "id": "comayagua",
+      "nombre": "Valle de Comayagua",
+      "lat": 14.45,
+      "lon": -87.64,
+      "departamento": "Comayagua",
+      "tipo": "departamento",
+      "cultivos_zona": "cafe,hortalizas,maiz",
+      "suelo_alterno": {
+        "lat": 14.46274,
+        "lon": -87.62684,
+        "distancia_km": 2
+      }
+    },
+    {
+      "id": "choluteca",
+      "nombre": "Choluteca (corredor seco)",
+      "lat": 13.3,
+      "lon": -87.19,
+      "departamento": "Choluteca",
+      "tipo": "departamento",
+      "cultivos_zona": "sorgo,melon,maiz",
+      "suelo_alterno": {
+        "lat": 13.29394,
+        "lon": -87.18507,
+        "distancia_km": 0.9
+      }
+    },
+    {
+      "id": "danli",
+      "nombre": "Danli, El Paraiso",
+      "lat": 14.03,
+      "lon": -86.58,
+      "departamento": "El Paraiso",
+      "tipo": "departamento",
+      "cultivos_zona": "tabaco,cafe,frijol",
+      "suelo_alterno": {
+        "lat": 14.03056,
+        "lon": -86.58245,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "juticalpa",
+      "nombre": "Juticalpa, Olancho",
+      "lat": 14.66,
+      "lon": -86.22,
+      "departamento": "Olancho",
+      "tipo": "departamento",
+      "cultivos_zona": "maiz,ganaderia"
+    },
+    {
+      "id": "sula",
+      "nombre": "Valle de Sula",
+      "lat": 15.5,
+      "lon": -88.03,
+      "departamento": "Cortes",
+      "tipo": "departamento",
+      "cultivos_zona": "cana,banano,palma",
+      "suelo_alterno": {
+        "lat": 15.48808,
+        "lon": -88.03962,
+        "distancia_km": 1.6
+      }
+    },
+    {
+      "id": "olanchito",
+      "nombre": "Valle del Aguan",
+      "lat": 15.48,
+      "lon": -86.57,
+      "departamento": "Yoro",
+      "tipo": "departamento",
+      "cultivos_zona": "banano,palma,maiz",
+      "suelo_alterno": {
+        "lat": 15.48134,
+        "lon": -86.56258,
+        "distancia_km": 0.79
+      }
+    },
+    {
+      "id": "santa_rosa",
+      "nombre": "Santa Rosa de Copan",
+      "lat": 14.77,
+      "lon": -88.78,
+      "departamento": "Copan",
+      "tipo": "departamento",
+      "cultivos_zona": "cafe,tabaco",
+      "suelo_alterno": {
+        "lat": 14.77167,
+        "lon": -88.77908,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "la_esperanza",
+      "nombre": "La Esperanza, Intibuca",
+      "lat": 14.32,
+      "lon": -88.17,
+      "departamento": "Intibuca",
+      "tipo": "departamento",
+      "cultivos_zona": "papa,hortalizas"
+    },
+    {
+      "id": "la_ceiba",
+      "nombre": "La Ceiba",
+      "departamento": "Atlantida",
+      "lat": 15.78,
+      "lon": -86.8,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 15.78228,
+        "lon": -86.79953,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "trujillo",
+      "nombre": "Trujillo",
+      "departamento": "Colon",
+      "lat": 15.92,
+      "lon": -85.95,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 15.92376,
+        "lon": -85.94719,
+        "distancia_km": 0.56
+      }
+    },
+    {
+      "id": "tegucigalpa",
+      "nombre": "Tegucigalpa",
+      "departamento": "Francisco Morazan",
+      "lat": 14.07,
+      "lon": -87.19,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 14.07548,
+        "lon": -87.17485,
+        "distancia_km": 1.58
+      }
+    },
+    {
+      "id": "puerto_lempira",
+      "nombre": "Puerto Lempira",
+      "departamento": "Gracias a Dios",
+      "lat": 15.26,
+      "lon": -83.78,
+      "tipo": "departamento"
+    },
+    {
+      "id": "roatan",
+      "nombre": "Roatan (Coxen Hole)",
+      "departamento": "Islas de la Bahia",
+      "lat": 16.32,
+      "lon": -86.54,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 16.32127,
+        "lon": -86.5391,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "la_paz",
+      "nombre": "La Paz",
+      "departamento": "La Paz",
+      "lat": 14.32,
+      "lon": -87.68,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 14.32925,
+        "lon": -87.67968,
+        "distancia_km": 1.0
+      }
+    },
+    {
+      "id": "gracias",
+      "nombre": "Gracias",
+      "departamento": "Lempira",
+      "lat": 14.58,
+      "lon": -88.58,
+      "tipo": "departamento"
+    },
+    {
+      "id": "ocotepeque",
+      "nombre": "Ocotepeque",
+      "departamento": "Ocotepeque",
+      "lat": 14.43,
+      "lon": -89.18,
+      "tipo": "departamento"
+    },
+    {
+      "id": "santa_barbara",
+      "nombre": "Santa Barbara",
+      "departamento": "Santa Barbara",
+      "lat": 14.92,
+      "lon": -88.23,
+      "tipo": "departamento"
+    },
+    {
+      "id": "nacaome",
+      "nombre": "Nacaome",
+      "departamento": "Valle",
+      "lat": 13.53,
+      "lon": -87.49,
+      "tipo": "departamento",
+      "suelo_alterno": {
+        "lat": 13.52751,
+        "lon": -87.48906,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "marcala",
+      "nombre": "Marcala",
+      "departamento": "La Paz",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "cafe",
+      "lat": 14.15,
+      "lon": -88.03
+    },
+    {
+      "id": "copan_ruinas",
+      "nombre": "Copan Ruinas",
+      "departamento": "Copan",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "cafe",
+      "lat": 14.84,
+      "lon": -89.15
+    },
+    {
+      "id": "siguatepeque",
+      "nombre": "Siguatepeque",
+      "departamento": "Comayagua",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "hortalizas,cafe,maiz",
+      "lat": 14.6,
+      "lon": -87.83,
+      "suelo_alterno": {
+        "lat": 14.60773,
+        "lon": -87.83364,
+        "distancia_km": 0.9
+      }
+    },
+    {
+      "id": "lago_yojoa",
+      "nombre": "Lago de Yojoa",
+      "departamento": "Cortes",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "cafe,hortalizas",
+      "lat": 14.87,
+      "lon": -88.0
+    },
+    {
+      "id": "el_progreso",
+      "nombre": "El Progreso",
+      "departamento": "Yoro",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "cana,banano,maiz",
+      "lat": 15.4,
+      "lon": -87.81,
+      "suelo_alterno": {
+        "lat": 15.396,
+        "lon": -87.81432,
+        "distancia_km": 0.71
+      }
+    },
+    {
+      "id": "tela",
+      "nombre": "Tela",
+      "departamento": "Atlantida",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "palma,banano,coco",
+      "lat": 15.78,
+      "lon": -87.46,
+      "suelo_alterno": {
+        "lat": 15.78003,
+        "lon": -87.45545,
+        "distancia_km": 0.5
+      }
+    },
+    {
+      "id": "tocoa",
+      "nombre": "Tocoa (Valle del Aguan)",
+      "departamento": "Colon",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "palma,maiz,frijol",
+      "lat": 15.68,
+      "lon": -86.0
+    },
+    {
+      "id": "catacamas",
+      "nombre": "Catacamas",
+      "departamento": "Olancho",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "maiz,frijol,ganaderia",
+      "lat": 14.87,
+      "lon": -85.88
+    },
+    {
+      "id": "yoro",
+      "nombre": "Yoro",
+      "departamento": "Yoro",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "maiz,frijol",
+      "lat": 15.13,
+      "lon": -87.13,
+      "suelo_alterno": {
+        "lat": 15.131,
+        "lon": -87.13176,
+        "distancia_km": 0.25
+      }
+    },
+    {
+      "id": "san_marcos_colon",
+      "nombre": "San Marcos de Colon",
+      "departamento": "Choluteca",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "cafe",
+      "lat": 13.43,
+      "lon": -86.82
+    },
+    {
+      "id": "zamorano",
+      "nombre": "Valle del Zamorano",
+      "departamento": "El Paraiso",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "maiz,hortalizas,frijol",
+      "lat": 13.99,
+      "lon": -87.02
+    },
+    {
+      "id": "brus_laguna",
+      "nombre": "Brus Laguna (Mosquitia)",
+      "departamento": "Gracias a Dios",
+      "tipo": "zona_cultivo",
+      "cultivos_zona": "yuca,arroz,cacao",
+      "lat": 15.77,
+      "lon": -84.53
+    }
+  ]
+}
