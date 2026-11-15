@@ -10,6 +10,7 @@
 // Los datos null se tratan como neutros (no aportan al deficit ni al exceso).
 // Al final el puntaje se redondea y se acota a 0..100. Empates: orden fijo de IdOpcion.
 import { buscarCultivo, etapaEnSemana } from '../../datos/cultivos'
+import { traductor } from '../../i18n/traductor'
 import { condicionesMock } from './condiciones'
 import { puntoMasCercano } from './gps'
 import type {
@@ -117,7 +118,9 @@ interface Aporte {
   razon: string
 }
 
-export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = condicionesMock): Recomendacion {
+/** Los textos (nombres, razones y etapa) salen en `idioma`; por defecto, español. */
+export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = condicionesMock, idioma?: string | null): Recomendacion {
+  const t = traductor(idioma)
   const cultivo = buscarCultivo(r.cultivoId)
   if (!cultivo) throw new Error(`Cultivo desconocido: ${r.cultivoId}`)
   const semana = Math.floor(r.diasDesdeSiembra / 7)
@@ -127,11 +130,11 @@ export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = cond
   const sens = SENSIBILIDAD[etapa.sensibilidadAgua]
   const def = deficitAgua(punto)
   const exc = excesoAgua(punto)
-  const t = r.terreno
-  const etapaTxt = etapa.nombre.toLowerCase()
-  const cultivoTxt = cultivo.nombre.toLowerCase()
+  const terreno = r.terreno
+  const nombreEtapa = t(`cultivos.${cultivo.id}.etapas.${etapa.id}`, { defaultValue: etapa.nombre })
+  const etapaTxt = nombreEtapa.toLowerCase()
   const humedo = exc >= 0.4
-  const arcillaAlta = t.textura === 'arcilloso' || (punto.arcilla_pct !== null && punto.arcilla_pct >= PESOS.arcillaAltaPct)
+  const arcillaAlta = terreno.textura === 'arcilloso' || (punto.arcilla_pct !== null && punto.arcilla_pct >= PESOS.arcillaAltaPct)
 
   const ap: Record<IdOpcion, Aporte[]> = {
     riego_goteo: [],
@@ -146,54 +149,54 @@ export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = cond
   }
 
   // Deficit de agua
-  const txtSeco = `La tierra está más seca de lo normal y el ${cultivoTxt} está en ${etapaTxt}.`
-  sumar('riego_goteo', def * PESOS.deficitRiego, def >= 0.2 ? txtSeco : 'Hay algo de falta de agua en la zona.')
-  sumar('riego_auxiliar', def * PESOS.deficitRiego, def >= 0.2 ? 'Llueve menos de lo normal y un riego de auxilio ayuda a la planta.' : 'Hay algo de falta de agua en la zona.')
-  sumar('riego_goteo', def * sens * PESOS.deficitRiegoSensible.riego_goteo, `En ${etapaTxt} la planta necesita mucha agua y un goteo la reparte con poco gasto.`)
-  sumar('riego_auxiliar', def * sens * PESOS.deficitRiegoSensible.riego_auxiliar, `En ${etapaTxt} un riego a tiempo evita perder cosecha.`)
-  sumar('cobertura_rastrojo', def * PESOS.deficitCobertura, 'El rastrojo conserva la poca humedad que queda en la tierra.')
-  sumar('esperar_monitorear', def * PESOS.deficitEsperar * (0.5 + 0.5 * sens), 'Con tierra seca, esperar puede costar parte de la cosecha.')
+  const txtSeco = t('siembra.razones.seco', { el: t(`cultivos.${cultivo.id}.el`), etapa: etapaTxt })
+  sumar('riego_goteo', def * PESOS.deficitRiego, def >= 0.2 ? txtSeco : t('siembra.razones.algoFalta'))
+  sumar('riego_auxiliar', def * PESOS.deficitRiego, def >= 0.2 ? t('siembra.razones.lluveMenos') : t('siembra.razones.algoFalta'))
+  sumar('riego_goteo', def * sens * PESOS.deficitRiegoSensible.riego_goteo, t('siembra.razones.goteoEtapa', { etapa: etapaTxt }))
+  sumar('riego_auxiliar', def * sens * PESOS.deficitRiegoSensible.riego_auxiliar, t('siembra.razones.riegoEtapa', { etapa: etapaTxt }))
+  sumar('cobertura_rastrojo', def * PESOS.deficitCobertura, t('siembra.razones.rastrojo'))
+  sumar('esperar_monitorear', def * PESOS.deficitEsperar * (0.5 + 0.5 * sens), t('siembra.razones.esperarSeco'))
 
   // Exceso de agua
-  sumar('riego_goteo', exc * PESOS.excesoRiego, 'La tierra ya tiene mucha agua; regar más la danaria.')
-  sumar('riego_auxiliar', exc * PESOS.excesoRiego, 'Llovio más de lo normal; no hace falta regar.')
-  sumar('drenaje_surcos', exc * PESOS.excesoDrenaje, 'Hay exceso de agua y conviene sacarla del cultivo.')
-  sumar('cobertura_rastrojo', exc * PESOS.excesoCobertura, 'Con tanta agua, la cobertura ayuda poco.')
-  if (humedo || t.drenaje !== 'bueno') {
-    const dren = t.drenaje === 'malo' ? PESOS.drenajeMalo : t.drenaje === 'regular' ? PESOS.drenajeRegular : 0
-    sumar('drenaje_surcos', Math.max(exc, 0.3) * dren, t.drenaje === 'malo' ? 'Su terreno drena mal y el agua se queda encharcada.' : 'Su terreno drena regular y el agua puede estancarse.')
+  sumar('riego_goteo', exc * PESOS.excesoRiego, t('siembra.razones.muchaAgua'))
+  sumar('riego_auxiliar', exc * PESOS.excesoRiego, t('siembra.razones.llovioMas'))
+  sumar('drenaje_surcos', exc * PESOS.excesoDrenaje, t('siembra.razones.exceso'))
+  sumar('cobertura_rastrojo', exc * PESOS.excesoCobertura, t('siembra.razones.coberturaPoco'))
+  if (humedo || terreno.drenaje !== 'bueno') {
+    const dren = terreno.drenaje === 'malo' ? PESOS.drenajeMalo : terreno.drenaje === 'regular' ? PESOS.drenajeRegular : 0
+    sumar('drenaje_surcos', Math.max(exc, 0.3) * dren, terreno.drenaje === 'malo' ? t('siembra.razones.drenaMal') : t('siembra.razones.drenaRegular'))
   }
   if (arcillaAlta) {
-    sumar('drenaje_surcos', exc * PESOS.arcillaAlta, 'La tierra con mucha arcilla retiene el agua.')
+    sumar('drenaje_surcos', exc * PESOS.arcillaAlta, t('siembra.razones.arcilla'))
   }
 
   // Calma: ni seco ni humedo favorece esperar y vigilar
-  sumar('esperar_monitorear', (1 - Math.max(def, exc)) * PESOS.esperarCalma, 'Las condiciones estan cerca de lo normal.')
+  sumar('esperar_monitorear', (1 - Math.max(def, exc)) * PESOS.esperarCalma, t('siembra.razones.normal'))
 
   // Objetivo
   const tabla = PESOS.objetivo[r.objetivo]
-  const nombreObj = r.objetivo === 'agua' ? 'ahorrar agua' : r.objetivo === 'costo' ? 'gastar menos' : r.objetivo === 'suelo' ? 'cuidar la tierra' : 'cosechar más'
+  const meta = t(`siembra.metas.${r.objetivo}`)
   for (const id of ORDEN_OPCIONES) {
     const d = tabla[id]
-    if (d) sumar(id, d, d > 0 ? `Va con su meta de ${nombreObj}.` : `Va en contra de su meta de ${nombreObj}.`)
+    if (d) sumar(id, d, d > 0 ? t('siembra.razones.vaConMeta', { meta }) : t('siembra.razones.contraMeta', { meta }))
   }
 
   // Terreno
-  if (!t.tieneRiego) {
-    sumar('riego_goteo', PESOS.sinRiego, 'Usted no tiene como regar.')
-    sumar('riego_auxiliar', PESOS.sinRiego, 'Usted no tiene como regar.')
+  if (!terreno.tieneRiego) {
+    sumar('riego_goteo', PESOS.sinRiego, t('siembra.razones.sinRiego'))
+    sumar('riego_auxiliar', PESOS.sinRiego, t('siembra.razones.sinRiego'))
   }
-  if (t.textura === 'arenoso') {
-    sumar('cobertura_rastrojo', PESOS.arenoso.cobertura_rastrojo, 'La tierra arenosa pierde el agua rapido y la cobertura la protege.')
-    sumar('riego_goteo', PESOS.arenoso.riego_goteo, 'En tierra arenosa el goteo evita que el agua se pierda.')
+  if (terreno.textura === 'arenoso') {
+    sumar('cobertura_rastrojo', PESOS.arenoso.cobertura_rastrojo, t('siembra.razones.arenosaCobertura'))
+    sumar('riego_goteo', PESOS.arenoso.riego_goteo, t('siembra.razones.arenosaGoteo'))
   }
-  const dPend = PESOS.pendiente[t.pendiente]
-  sumar('curvas_nivel', dPend, t.pendiente === 'plana' ? 'El terreno es plano y no necesita curvas.' : t.pendiente === 'inclinada' ? 'El terreno es inclinado y el agua se lleva la tierra.' : 'El terreno tiene algo de pendiente.')
-  if (t.pendiente === 'inclinada') sumar('cobertura_rastrojo', PESOS.pendiente.coberturaInclinada, 'En pendiente, la cobertura frena la erosion.')
+  const dPend = PESOS.pendiente[terreno.pendiente]
+  sumar('curvas_nivel', dPend, terreno.pendiente === 'plana' ? t('siembra.razones.plano') : terreno.pendiente === 'inclinada' ? t('siembra.razones.inclinado') : t('siembra.razones.algoPendiente'))
+  if (terreno.pendiente === 'inclinada') sumar('cobertura_rastrojo', PESOS.pendiente.coberturaInclinada, t('siembra.razones.coberturaPendiente'))
 
   // Contexto sin aporte propio: aviso de datos faltantes
   if (punto.humedadSuelo_m3m3 === null && punto.lluvia30d_mm === null) {
-    sumar('esperar_monitorear', 0, 'No hay datos de agua cerca.')
+    sumar('esperar_monitorear', 0, t('siembra.razones.sinDatos'))
   }
 
   const opciones: OpcionPuntuada[] = ORDEN_OPCIONES.map((id) => {
@@ -203,7 +206,7 @@ export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = cond
       .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
       .slice(0, 3)
       .map((a) => a.razon)
-    return { id, nombre: NOMBRES_OPCION[id], puntaje: Math.round(acotar(total, 0, 100)), razones }
+    return { id, nombre: t(`siembra.opciones.${id}`), puntaje: Math.round(acotar(total, 0, 100)), razones }
   })
   // sort estable: a igual puntaje se conserva el orden fijo de ORDEN_OPCIONES
   opciones.sort((a, b) => b.puntaje - a.puntaje)
@@ -212,7 +215,7 @@ export function recomendar(r: RespuestasSiembra, cond: CondicionesArchivo = cond
     mejor: opciones[0],
     opciones,
     punto: { id: punto.id, nombre: punto.nombre, distanciaKm },
-    etapa: { id: etapa.id, nombre: etapa.nombre, sensibilidadAgua: etapa.sensibilidadAgua },
+    etapa: { id: etapa.id, nombre: nombreEtapa, sensibilidadAgua: etapa.sensibilidadAgua },
     origenDatos: cond.origen,
   }
 }

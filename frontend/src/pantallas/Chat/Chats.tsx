@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Boton } from '../../componentes/Boton'
 import { useConversacion } from '../../estado/Conversacion'
@@ -16,6 +17,7 @@ export default function Chats(props: PropsChat) {
   const { id } = useParams()
   const { chats, abrir, crear } = useConversacion()
   const navegar = useNavigate()
+  const { t } = useTranslation()
   const existe = id !== undefined && chats.some((c) => c.id === id)
 
   useEffect(() => {
@@ -32,9 +34,9 @@ export default function Chats(props: PropsChat) {
           <Chat key={id} {...props} />
         ) : (
           <div className={estilos.sinChat}>
-            <p>Elija un chat de la lista o empiece uno nuevo.</p>
+            <p>{t('chats.elija')}</p>
             <Boton variante="tonal" icono="add" onClick={() => navegar(`/chat/${crear()}`)}>
-              Nuevo chat
+              {t('chats.nuevoChat')}
             </Boton>
           </div>
         )}

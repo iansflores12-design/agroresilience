@@ -269,6 +269,8 @@ export function ranking(cultivoId: string | null, escenario: Escenario): PuestoD
 
 export interface ParteAptitud {
   clave: string
+  /** De donde sale la parte: el puntaje del departamento o el de la rotacion (para traducir su nombre). */
+  grupo?: 'factor' | 'rotacion'
   nombre: string
   peso: number
   valor: number
@@ -283,6 +285,8 @@ export interface Aptitud {
   partes: ParteAptitud[]
   /** Frase que completa "Lo que mas le cuesta: ...". */
   limite: string
+  /** Parte que mas limita (para traducir `limite`). */
+  claveLimite: ClaveFactor
 }
 
 /** Que tan bien se da un cultivo en un departamento, o null si falta alguno de los dos. */
@@ -298,8 +302,9 @@ export function aptitud(departamentoId: string | null, cultivoId: string | null,
     nivel: nivelDePuntaje(p.total),
     puesto: orden.findIndex((x) => x.id === d.id) + 1,
     de: orden.length,
-    partes: factores.map((f) => ({ clave: f.clave, nombre: f.nombre, peso: f.peso, valor: Math.round(p.partes[f.clave]) })),
+    partes: factores.map((f) => ({ clave: f.clave, grupo: 'factor' as const, nombre: f.nombre, peso: f.peso, valor: Math.round(p.partes[f.clave]) })),
     limite: peor.limite,
+    claveLimite: peor.clave,
   }
 }
 
@@ -369,7 +374,7 @@ export function rotacionesPara(departamentoId: string | null, cultivoId: string 
       clima: p.total,
       venta: limitar(r.mercado + (actual ? 0 : 8), 0, 100),
     }
-    const partes: ParteAptitud[] = partesRotacion.map((f) => ({ ...f, valor: Math.round(valores[f.clave]) }))
+    const partes: ParteAptitud[] = partesRotacion.map((f) => ({ ...f, grupo: 'rotacion' as const, valor: Math.round(valores[f.clave]) }))
     const total = Math.round(partesRotacion.reduce((s, f) => s + f.peso * valores[f.clave], 0))
     const rotacion: RotacionPuntuada = {
       id,

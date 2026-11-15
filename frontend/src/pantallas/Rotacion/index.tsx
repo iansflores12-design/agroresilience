@@ -1,4 +1,7 @@
 import { useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { useIdioma } from '../../i18n'
 import { useParams } from 'react-router-dom'
 import { BotonIcono } from '../../componentes/BotonIcono'
 import { Icono } from '../../componentes/Icono'
@@ -9,7 +12,6 @@ import { entradaDe, useEstadoApp } from '../../estado/EstadoApp'
 import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
-import { TEMPORADAS } from '../../lib/decision/parametros'
 import { buscarRotacion, fechaEnPalabras, respuestaRapida, resumenRapido } from '../../lib/decision/textos'
 import type { Decision, PasoPlan, RotacionDecidida } from '../../lib/decision/tipos'
 import { ChatSeguimiento } from './ChatSeguimiento'
@@ -17,27 +19,28 @@ import { AnilloPuntaje, BarraLineal, Pestanas } from './Indicadores'
 import { PanelAnalisis } from './PanelAnalisis'
 import estilos from './Rotacion.module.css'
 
-function apoyo(r: RotacionDecidida, d: Decision): string {
-  if (r.actual) return 'Es lo que hace hoy. Sirve de base para comparar.'
+function apoyo(t: TFunction, r: RotacionDecidida, d: Decision): string {
+  if (r.actual) return t('rotacion.baseComparar')
   const base =
     r.diferencia > 0
-      ? `${r.diferencia} puntos más que lo que hace hoy`
+      ? t('rotacion.masQueHoy', { n: r.diferencia })
       : r.diferencia < 0
-        ? `${-r.diferencia} puntos menos que lo que hace hoy`
-        : 'Igual que lo que hace hoy'
-  return r.mejor ? `La mejor de ${d.rotaciones.length} opciones. ${base}.` : `${base}.`
+        ? t('rotacion.menosQueHoy', { n: -r.diferencia })
+        : t('rotacion.igualQueHoy')
+  return r.mejor ? t('rotacion.laMejorDe', { n: d.rotaciones.length, base }) : t('rotacion.conPunto', { base })
 }
 
 /* ---------- Tarjeta heroe ---------- */
 
 function Heroe({ r, d }: { r: RotacionDecidida; d: Decision }) {
+  const { t } = useTranslation()
   return (
     <section className={estilos.heroe} aria-labelledby="titulo-rotacion">
       <AnilloPuntaje valor={r.puntaje} />
       <div className={estilos.heroeTexto}>
         <span className={estilos.sobretitulo}>
           <Icono nombre={r.mejor ? 'workspace_premium' : ICONO_CULTIVO[r.cultivoIcono] ?? 'grass'} tamano={20} />
-          {r.mejor ? 'La mejor para su parcela' : r.actual ? 'Lo que hace hoy' : `Opción para ${d.punto.nombre}`}
+          {r.mejor ? t('rotacion.laMejorParcela') : r.actual ? t('comun.loQueHaceHoy') : t('rotacion.opcionPara', { lugar: d.punto.nombre })}
         </span>
         <h1 id="titulo-rotacion" className={estilos.titular}>
           {r.nombre}
@@ -52,7 +55,7 @@ function Heroe({ r, d }: { r: RotacionDecidida; d: Decision }) {
             </span>
           )}
         </div>
-        <p className={estilos.apoyo}>{apoyo(r, d)}</p>
+        <p className={estilos.apoyo}>{apoyo(t, r, d)}</p>
       </div>
     </section>
   )
@@ -61,10 +64,11 @@ function Heroe({ r, d }: { r: RotacionDecidida; d: Decision }) {
 /* ---------- Por que ---------- */
 
 function PorQue({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
   return (
     <section className={estilos.tarjeta} aria-labelledby="titulo-por-que">
       <h2 id="titulo-por-que" className={estilos.tituloTarjeta}>
-        {r.mejor ? 'Por qué es la mejor' : 'Por qué tiene este puntaje'}
+        {r.mejor ? t('rotacion.porQueMejor') : t('rotacion.porQuePuntaje')}
       </h2>
       <ul className={estilos.lista}>
         {r.razones.map((x) => (
@@ -88,14 +92,15 @@ function cubre(p: PasoPlan): number | null {
 }
 
 function Calendario({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
   return (
     <section className={estilos.tarjeta} aria-labelledby="titulo-calendario">
       <h2 id="titulo-calendario" className={estilos.tituloTarjeta}>
-        Su año de siembra
+        {t('rotacion.anioSiembra')}
       </h2>
       <ol className={estilos.linea}>
         {r.pasos.map((p) => {
-          const pct = p.nombre.endsWith('(sigue)') ? null : cubre(p)
+          const pct = p.continua ? null : cubre(p)
           return (
             <li key={p.temporada} className={clases(estilos.temporada, !p.cultivoId && estilos.temporadaVacia)}>
               <span className={estilos.iconoTemporada}>
@@ -103,7 +108,7 @@ function Calendario({ r }: { r: RotacionDecidida }) {
               </span>
               <span className={estilos.textoElemento}>
                 <span className={estilos.sobrelinea}>
-                  {TEMPORADAS[p.temporada].nombre} · {p.meses.toLowerCase()}
+                  {t(`temporadas.${p.temporada}.nombre`)} · {p.meses.toLowerCase()}
                 </span>
                 <span className={estilos.titularElemento}>{p.nombre}</span>
                 {pct !== null && (
@@ -111,14 +116,15 @@ function Calendario({ r }: { r: RotacionDecidida }) {
                     <BarraLineal
                       valor={Math.min(pct, 100)}
                       tono="agua"
-                      etiqueta={`La lluvia prevista cubre ${pct} % del agua que pide`}
+                      etiqueta={t('rotacion.cubreAria', { pct })}
                     />
                     <span className={estilos.apoyoElemento}>
-                      Lluvia {p.lluviaMm} mm · pide {p.aguaPideMm} mm{pct >= 100 ? ' · alcanza' : ` · cubre ${pct} %`}
+                      {t('rotacion.lluviaPide', { lluvia: p.lluviaMm, pide: p.aguaPideMm })}
+                      {pct >= 100 ? t('rotacion.alcanza') : t('rotacion.cubre', { pct })}
                     </span>
                   </>
                 )}
-                {!p.cultivoId && <span className={estilos.apoyoElemento}>La tierra queda descubierta</span>}
+                {!p.cultivoId && <span className={estilos.apoyoElemento}>{t('rotacion.descubierta')}</span>}
               </span>
             </li>
           )
@@ -131,13 +137,14 @@ function Calendario({ r }: { r: RotacionDecidida }) {
 /* ---------- Partes del puntaje ---------- */
 
 function Partes({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
   const orden = [...r.factores].sort((a, b) => b.peso - a.peso)
   return (
     <section className={estilos.tarjeta} aria-labelledby="titulo-partes">
       <h2 id="titulo-partes" className={estilos.tituloTarjeta}>
-        Cómo se calculó
+        {t('rotacion.comoSeCalculo')}
       </h2>
-      <p className={estilos.apoyoTarjeta}>De lo que más pesa a lo que menos. Lo que usted marcó pesa el triple.</p>
+      <p className={estilos.apoyoTarjeta}>{t('rotacion.pesoTriple')}</p>
       <ul className={estilos.partes}>
         {orden.map((f) => (
           <li key={f.clave} className={estilos.parte}>
@@ -148,13 +155,13 @@ function Partes({ r }: { r: RotacionDecidida }) {
                 {f.objetivo && (
                   <span className={estilos.insignia}>
                     <Icono nombre="flag" tamano={16} />
-                    Su objetivo
+                    {t('rotacion.suObjetivo')}
                   </span>
                 )}
               </span>
               <span className={estilos.parteValor}>{f.valor}</span>
             </span>
-            <BarraLineal valor={f.valor} etiqueta={`${f.nombre}: ${f.valor} de 100`} />
+            <BarraLineal valor={f.valor} etiqueta={t('rotacion.parteAria', { nombre: f.nombre, valor: f.valor })} />
           </li>
         ))}
       </ul>
@@ -180,25 +187,26 @@ function ListaSimple({ puntos, icono }: { puntos: string[]; icono: 'check_circle
 }
 
 function Detalles({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
   return (
     <section className={estilos.tarjeta} aria-labelledby="titulo-detalles">
       <h2 id="titulo-detalles" className={estilos.tituloTarjeta}>
-        Lo bueno y lo que hay que cuidar
+        {t('rotacion.loBueno')}
       </h2>
       <Pestanas
-        etiqueta="Ventajas, cuidados y lo que falta saber"
+        etiqueta={t('rotacion.pestanasAria')}
         pestanas={[
-          { id: 'favor', etiqueta: 'A favor', icono: 'thumb_up', cuenta: r.beneficios.length, contenido: <ListaSimple puntos={r.beneficios} icono="check_circle" /> },
-          { id: 'cuidado', etiqueta: 'Cuidado', icono: 'warning', cuenta: r.riesgos.length, contenido: <ListaSimple puntos={r.riesgos} icono="warning" /> },
+          { id: 'favor', etiqueta: t('comun.aFavor'), icono: 'thumb_up', cuenta: r.beneficios.length, contenido: <ListaSimple puntos={r.beneficios} icono="check_circle" /> },
+          { id: 'cuidado', etiqueta: t('rotacion.cuidado'), icono: 'warning', cuenta: r.riesgos.length, contenido: <ListaSimple puntos={r.riesgos} icono="warning" /> },
           {
             id: 'falta',
-            etiqueta: 'Falta saber',
+            etiqueta: t('comun.faltaSaber'),
             icono: 'help',
             cuenta: r.faltaSaber.length,
             contenido: (
               <>
                 <ListaSimple puntos={r.faltaSaber} icono="help" />
-                <p className={estilos.apoyoTarjeta}>Revise estos puntos con su técnico antes de decidir.</p>
+                <p className={estilos.apoyoTarjeta}>{t('rotacion.reviseTecnico')}</p>
               </>
             ),
           },
@@ -211,6 +219,8 @@ function Detalles({ r }: { r: RotacionDecidida }) {
 /* ---------- De donde salen los datos ---------- */
 
 function Fuentes({ r, d }: { r: RotacionDecidida; d: Decision }) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   return (
     <details className={estilos.expandible}>
       <summary className="capa-estado">
@@ -218,9 +228,9 @@ function Fuentes({ r, d }: { r: RotacionDecidida; d: Decision }) {
           <Icono nombre="science" tamano={24} />
         </span>
         <span className={estilos.textoElemento}>
-          <span className={estilos.titularElemento}>De dónde salen los datos</span>
+          <span className={estilos.titularElemento}>{t('rotacion.deDonde')}</span>
           <span className={estilos.apoyoElemento}>
-            Kharis {d.punto.modelo} · datos hasta el {fechaEnPalabras(d.punto.fechaBase)} · confianza {r.confianza}
+            {t('rotacion.fuentesResumen', { modelo: d.punto.modelo, fecha: fechaEnPalabras(d.punto.fechaBase, idioma), confianza: t(`confianza.${r.confianza}`) })}
           </span>
         </span>
         <Icono nombre="expand_more" tamano={24} />
@@ -251,14 +261,15 @@ function Fuentes({ r, d }: { r: RotacionDecidida; d: Decision }) {
 
 function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
   const estado = useEstadoApp()
+  const idioma = useIdioma()
   const analisis = useAnalisis(d.entrada, r.id, d.punto.fechaBase)
   const resumen = resumenRapido(d, r.id)
   const contexto = useMemo(
     () => ({
-      ...armarContexto({ vista: 'cultivos', cultivoId: estado.cultivoId, edadSemanas: estado.edadSemanas, zonaId: estado.zonaId }),
+      ...armarContexto({ vista: 'cultivos', cultivoId: estado.cultivoId, edadSemanas: estado.edadSemanas, zonaId: estado.zonaId, idioma }),
       consulta: { entrada: d.entrada, rotacionId: r.id },
     }),
-    [estado.cultivoId, estado.edadSemanas, estado.zonaId, d.entrada, r.id],
+    [estado.cultivoId, estado.edadSemanas, estado.zonaId, d.entrada, r.id, idioma],
   )
 
   return (
@@ -279,7 +290,8 @@ function Contenido({ d, r }: { d: Decision; r: RotacionDecidida }) {
 
 export default function Rotacion() {
   const { id = '' } = useParams()
-  const entrada = entradaDe(useEstadoApp())
+  const { t } = useTranslation()
+  const entrada = entradaDe(useEstadoApp(), useIdioma())
   const decision = useDecision(entrada)
 
   useEffect(() => {
@@ -292,20 +304,20 @@ export default function Rotacion() {
     <div className="pantalla">
       <article className={estilos.medio} aria-busy={decision.estado === 'calculando'}>
         <div className={estilos.barra}>
-          <BotonIcono icono="arrow_back" etiqueta="Volver a las rotaciones" to="/" />
-          <span className={estilos.barraTitulo}>Rotación</span>
+          <BotonIcono icono="arrow_back" etiqueta={t('rotacion.volver')} to="/" />
+          <span className={estilos.barraTitulo}>{t('rotacion.titulo')}</span>
         </div>
         {decision.estado === 'sin_datos' && (
-          <p className={estilos.estado}>Primero conteste las preguntas de su parcela en la pantalla Plan.</p>
+          <p className={estilos.estado}>{t('rotacion.primeroConteste')}</p>
         )}
         {decision.estado === 'calculando' && (
           <p className={estilos.estado} role="status">
-            Comparando rotaciones…
+            {t('comun.calculando')}
           </p>
         )}
-        {decision.estado === 'error' && <p className={estilos.estado}>No se pudo leer el pronóstico de su lugar.</p>}
+        {decision.estado === 'error' && <p className={estilos.estado}>{t('comun.errorPronostico')}</p>}
         {decision.estado === 'listo' && !rotacion && (
-          <p className={estilos.estado}>Esta rotación ya no está entre las opciones. Vuelva a la lista.</p>
+          <p className={estilos.estado}>{t('rotacion.yaNoEsta')}</p>
         )}
         {decision.estado === 'listo' && rotacion && <Contenido key={rotacion.id} d={decision.decision} r={rotacion} />}
       </article>

@@ -1,5 +1,6 @@
 // Maquina de pasos del flujo de siembra. Logica pura, sin React.
 import { buscarCultivo } from '../../datos/cultivos'
+import { traductor } from '../../i18n/traductor'
 import { condicionesMock } from './condiciones'
 import { OBJETIVOS, PASOS } from './tipos'
 import type { PasoSiembra, RespuestasParciales, RespuestasSiembra } from './tipos'
@@ -10,35 +11,37 @@ const DRENAJES = ['bueno', 'regular', 'malo']
 
 const esNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 
-/** Mensaje de error en espanol sencillo, o null si el paso esta bien contestado. */
-export function validarPaso(paso: PasoSiembra, r: RespuestasParciales): string | null {
+/** Mensaje de error sencillo (en el idioma dado; por defecto, español), o null si el paso esta bien contestado. */
+export function validarPaso(paso: PasoSiembra, r: RespuestasParciales, idioma?: string | null): string | null {
+  const t = traductor(idioma)
+  const m = (clave: string) => t(`siembra.validar.${clave}`)
   switch (paso) {
     case 'cultivo':
-      return buscarCultivo(r.cultivoId ?? null) ? null : 'Elija un cultivo de la lista.'
+      return buscarCultivo(r.cultivoId ?? null) ? null : m('cultivo')
     case 'dias': {
       const d = r.diasDesdeSiembra
-      if (!esNum(d) || !Number.isInteger(d) || d < 0 || d > 365) return 'Escriba los días como un número entero entre 0 y 365.'
+      if (!esNum(d) || !Number.isInteger(d) || d < 0 || d > 365) return m('dias')
       const c = buscarCultivo(r.cultivoId ?? null)
-      if (c && d > c.cicloSemanas * 7 + 30) return 'Ese número de días es mucho para este cultivo. Revise la fecha de siembra.'
+      if (c && d > c.cicloSemanas * 7 + 30) return m('diasMuchos')
       return null
     }
     case 'objetivo':
-      return OBJETIVOS.some((o) => o.id === r.objetivo) ? null : 'Elija lo que quiere lograr.'
+      return OBJETIVOS.some((o) => o.id === r.objetivo) ? null : m('objetivo')
     case 'terreno': {
       const t = r.terreno
-      if (!t) return 'Cuéntenos cómo es su terreno.'
-      if (!TEXTURAS.includes(t.textura)) return 'Elija el tipo de tierra.'
-      if (!PENDIENTES.includes(t.pendiente)) return 'Elija qué tan inclinado es el terreno.'
-      if (!DRENAJES.includes(t.drenaje)) return 'Elija cómo se drena el agua en el terreno.'
-      if (typeof t.tieneRiego !== 'boolean') return 'Diga si tiene alguna forma de regar.'
+      if (!t) return m('terreno')
+      if (!TEXTURAS.includes(t.textura)) return m('textura')
+      if (!PENDIENTES.includes(t.pendiente)) return m('pendiente')
+      if (!DRENAJES.includes(t.drenaje)) return m('drenaje')
+      if (typeof t.tieneRiego !== 'boolean') return m('riego')
       return null
     }
     case 'ubicacion': {
       const u = r.ubicacion
-      if (!u || !esNum(u.lat) || !esNum(u.lon)) return 'Indique su ubicación con el GPS o escribiendo las coordenadas.'
+      if (!u || !esNum(u.lat) || !esNum(u.lon)) return m('ubicacion')
       const c = condicionesMock.caja
       if (u.lat < c.lat_min || u.lat > c.lat_max || u.lon < c.lon_min || u.lon > c.lon_max) {
-        return 'La ubicación está fuera de Honduras. Revise las coordenadas.'
+        return m('fuera')
       }
       return null
     }

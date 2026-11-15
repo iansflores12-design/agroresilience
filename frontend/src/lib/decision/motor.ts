@@ -2,12 +2,14 @@
 // Es determinista: los mismos datos dan siempre los mismos puntajes. Gemini (el modelo de
 // lenguaje) solo explica estos numeros; no los cambia.
 
+import type { TFunction } from 'i18next'
+import { esIdioma, LOCALE, normalizarIdioma } from '../../i18n/idiomas.js'
+import { lista as listaT, mayuscula, traductor } from '../../i18n/traductor.js'
 import { ajustarAParcela, dentroDeHonduras } from './escala.js'
 import {
   CULTIVOS,
   LUGARES,
   NOMBRES_PUNTOS,
-  NOMBRE_FACTOR,
   OBJETIVOS,
   ORDEN_TEMPORADAS,
   PESOS_BASE,
@@ -153,11 +155,11 @@ function candidatos(cultivoId: string): Candidato[] {
   return lista
 }
 
-function nombreCandidato(c: Candidato): string {
-  const nombres = c.cultivos.filter((x, i, a): x is string => x !== null && a.indexOf(x) === i).map((id) => CULTIVOS[id].nombre)
-  if (c.actual) return `${nombres[0]} y otra vez ${minus(nombres[0])}`
-  if (nombres.length === 2) return `${nombres[0]} y después ${minus(nombres[1])}`
-  return `${nombres[0]}, ${minus(nombres[1])} y ${minus(nombres[2])}`
+function nombreCandidato(t: TFunction, c: Candidato): string {
+  const nombres = c.cultivos.filter((x, i, a): x is string => x !== null && a.indexOf(x) === i).map((id) => nombre(t, id))
+  if (c.actual) return t('motor.nombreActual', { a: nombres[0], b: minus(nombres[0]) })
+  if (nombres.length === 2) return t('motor.nombreDos', { a: nombres[0], b: minus(nombres[1]) })
+  return t('motor.nombreTres', { a: nombres[0], b: minus(nombres[1]), c: minus(nombres[2]) })
 }
 
 /* ---------- Puntaje ---------- */
@@ -264,95 +266,101 @@ function factoresDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]):
 
 /* ---------- Textos ---------- */
 
-function articulo(id: string): string {
-  return CULTIVOS[id].nombre.startsWith('Frijol terciopelo') ? 'el frijol terciopelo' : `el ${minus(CULTIVOS[id].nombre)}`
-}
+// Los textos salen de `src/i18n/recursos/` en el idioma de la entrada (por defecto, español).
 
-function pasoPlan(x: PasoCalculado): PasoPlan {
-  const t = TEMPORADAS[x.temporada]
+const nombre = (t: TFunction, id: string) => t(`cultivos.${id}.nombre`)
+const el = (t: TFunction, id: string) => t(`cultivos.${id}.el`)
+const del = (t: TFunction, id: string) => t(`cultivos.${id}.del`)
+const nombreTemporada = (t: TFunction, x: Temporada) => t(`temporadas.${x}.nombre`)
+const nombreTerreno = (t: TFunction, x: Terreno) => t(`terrenos.${x}.nombre`)
+
+function pasoPlan(t: TFunction, x: PasoCalculado): PasoPlan {
+  const meses = t(`temporadas.${x.temporada}.texto`)
   if (!x.cultivoId) {
-    return { cultivoId: null, nombre: 'Tierra sin cultivo', temporada: x.temporada, meses: t.texto, lluviaMm: null, aguaPideMm: null, diasCalor: null }
+    return { cultivoId: null, nombre: t('motor.sinCultivo'), temporada: x.temporada, meses, lluviaMm: null, aguaPideMm: null, diasCalor: null }
   }
   return {
     cultivoId: x.cultivoId,
-    nombre: x.continua ? `${CULTIVOS[x.cultivoId].nombre} (sigue)` : CULTIVOS[x.cultivoId].nombre,
+    nombre: x.continua ? t('motor.sigue', { nombre: nombre(t, x.cultivoId) }) : nombre(t, x.cultivoId),
+    ...(x.continua ? { continua: true } : {}),
     temporada: x.temporada,
-    meses: t.texto,
+    meses,
     lluviaMm: x.v ? redondo(x.v.lluvia) : null,
     aguaPideMm: x.v ? redondo(x.v.etc) : null,
     diasCalor: x.v ? x.v.diasCalor : null,
   }
 }
 
-function evidenciaDe(p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]): Evidencia[] {
+function evidenciaDe(t: TFunction, p: PuntoKharis, e: EntradaDecision, pasos: PasoCalculado[]): Evidencia[] {
   const lista: Evidencia[] = []
   for (const x of pasos) {
     if (!x.cultivoId || !x.v || x.continua) continue
     const c = CULTIVOS[x.cultivoId]
+    const temporada = nombreTemporada(t, x.temporada)
     lista.push({
-      texto: `${TEMPORADAS[x.temporada].nombre} ${x.v.anio}: lluvia prevista ${redondo(x.v.lluvia)} mm; ${articulo(x.cultivoId)} pide unos ${redondo(x.v.etc)} mm.`,
-      fuente: 'Kharis, media del conjunto; agua del cultivo con Kc FAO-56',
+      texto: t('motor.evidencia.lluvia', { temporada, anio: x.v.anio, lluvia: redondo(x.v.lluvia), el: el(t, x.cultivoId), etc: redondo(x.v.etc) }),
+      fuente: t('motor.evidencia.lluviaFuente'),
     })
     lista.push({
-      texto: `${TEMPORADAS[x.temporada].nombre}: ${x.v.diasCalor} días con máxima sobre ${c.tCalor} °C en la floración ${articulo(x.cultivoId).replace(/^el /, 'del ')}.`,
-      fuente: 'Kharis, temperatura máxima prevista (media y p90)',
+      texto: t('motor.evidencia.calor', { temporada, dias: x.v.diasCalor, limite: c.tCalor, del: del(t, x.cultivoId) }),
+      fuente: t('motor.evidencia.calorFuente'),
     })
   }
-  const p2 = senal(p, 'P2')
-  if (p2) lista.push({ texto: `Probabilidad de una canícula larga: ${redondo(p2.probabilidad * 100)} %.`, fuente: 'Kharis, señal P2' })
-  const p7 = senal(p, 'P7')
-  if (p7) lista.push({ texto: `Probabilidad de lluvias o vientos extremos: ${redondo(p7.probabilidad * 100)} %.`, fuente: 'Kharis, señal P7' })
-  const p8 = senal(p, 'P8')
-  if (p8) lista.push({ texto: `Parecido con un año de El Niño: ${redondo(p8.probabilidad * 100)} % de los escenarios.`, fuente: 'Kharis, señal P8' })
-  const t = TERRENOS[e.terreno]
+  for (const clave of ['P2', 'P7', 'P8'] as const) {
+    const s = senal(p, clave)
+    if (s) {
+      lista.push({
+        texto: t(`motor.evidencia.${clave.toLowerCase()}`, { pct: redondo(s.probabilidad * 100) }),
+        fuente: t('motor.evidencia.senalFuente', { senal: clave }),
+      })
+    }
+  }
   lista.push({
-    texto: `Terreno ${minus(t.nombre)}: se aprovecha cerca de ${redondo(t.lluviaUtil * 100)} % de la lluvia.`,
-    fuente: 'Supuesto del modelo, a validar en campo',
+    texto: t('motor.evidencia.terreno', { terreno: minus(nombreTerreno(t, e.terreno)), pct: redondo(TERRENOS[e.terreno].lluviaUtil * 100) }),
+    fuente: t('motor.evidencia.terrenoFuente'),
   })
   return lista
 }
 
-function razonFactor(clave: ClaveFactor, e: EntradaDecision, pasos: PasoCalculado[], cand: Candidato): string | null {
+function razonFactor(t: TFunction, clave: ClaveFactor, e: EntradaDecision, pasos: PasoCalculado[], cand: Candidato): string | null {
   const nuevo = pasos.find((x, i) => i > 0 && x.cultivoId && x.cultivoId !== e.cultivoId && !x.continua)
-  const nombreNuevo = nuevo?.cultivoId ? articulo(nuevo.cultivoId) : null
+  const idNuevo = nuevo?.cultivoId ?? null
   switch (clave) {
     case 'agua': {
       const x = nuevo ?? pasos.find((y) => y.cultivoId)
       if (!x?.v || !x.cultivoId) return null
       const pct = x.v.etc > 0 ? redondo((100 * x.v.lluvia * TERRENOS[e.terreno].lluviaUtil) / x.v.etc) : 100
-      return `En ${minus(TEMPORADAS[x.temporada].nombre)} la lluvia prevista cubre cerca de ${Math.min(pct, 999)} % del agua que pide ${articulo(x.cultivoId)}.`
+      return t('motor.razones.agua', { temporada: minus(nombreTemporada(t, x.temporada)), pct: Math.min(pct, 999), el: el(t, x.cultivoId) })
     }
     case 'calor':
-      return 'Casi no le tocan días de calor dañino en las fechas de siembra.'
+      return t('motor.razones.calor')
     case 'suelo':
-      return nombreNuevo ? `Con ${nombreNuevo} la tierra gana materia orgánica y no se cansa.` : null
+      return idNuevo ? t('motor.razones.suelo', { el: el(t, idNuevo) }) : null
     case 'erosion':
-      return cand.cultivos.every((c) => c !== null)
-        ? `La tierra no queda desnuda en todo el año: protege su terreno ${minus(TERRENOS[e.terreno].nombre)} de la lluvia fuerte.`
-        : null
+      return cand.cultivos.every((c) => c !== null) ? t('motor.razones.erosion', { terreno: minus(nombreTerreno(t, e.terreno)) }) : null
     case 'venta':
-      return nombreNuevo && nuevo?.cultivoId && CULTIVOS[nuevo.cultivoId].cosecha ? `Suma una cosecha de ${minus(CULTIVOS[nuevo.cultivoId].nombre)} para vender.` : null
+      return idNuevo && CULTIVOS[idNuevo].cosecha ? t('motor.razones.venta', { cultivo: minus(nombre(t, idNuevo)) }) : null
     case 'forraje':
-      return nombreNuevo && nuevo?.cultivoId && CULTIVOS[nuevo.cultivoId].forraje >= 50 ? `${nombreNuevo.charAt(0).toUpperCase()}${nombreNuevo.slice(1)} sirve de comida para los animales.` : null
+      return idNuevo && CULTIVOS[idNuevo].forraje >= 50 ? t('motor.razones.forraje', { el: mayuscula(el(t, idNuevo)) }) : null
     case 'plagas':
-      return nombreNuevo ? `Pasar ${nombreNuevo.replace(/^el /, 'al ')} corta el ciclo de las plagas del ${minus(CULTIVOS[e.cultivoId].nombre)}.` : null
+      return idNuevo ? t('motor.razones.plagas', { al: t(`cultivos.${idNuevo}.al`), delActual: del(t, e.cultivoId) }) : null
     case 'nitrogeno':
-      return nombreNuevo ? 'Deja abono natural: las leguminosas fijan nitrógeno del aire.' : null
+      return idNuevo ? t('motor.razones.nitrogeno') : null
   }
 }
 
-function riesgosDe(pasos: PasoCalculado[], e: EntradaDecision): string[] {
+function riesgosDe(t: TFunction, pasos: PasoCalculado[], e: EntradaDecision): string[] {
   const lista: string[] = []
   for (const x of pasos) {
     if (!x.cultivoId || x.continua) continue
     const c = CULTIVOS[x.cultivoId]
-    const temporada = minus(TEMPORADAS[x.temporada].nombre)
-    if ((x.agua ?? 100) < 40) lista.push(`En ${temporada} la lluvia prevista no alcanza para ${articulo(x.cultivoId)}: sin riego se puede perder.`)
-    if ((x.v?.diasCalor ?? 0) >= 6) lista.push(`En ${temporada} hay ${x.v?.diasCalor} días de calor fuerte en la floración ${articulo(x.cultivoId).replace(/^el /, 'del ')}.`)
-    if (c.encharca && TERRENOS[e.terreno].encharca && x.temporada !== 'verano') lista.push(`En terreno bajo ${articulo(x.cultivoId)} sufre si se encharca.`)
+    const temporada = minus(nombreTemporada(t, x.temporada))
+    if ((x.agua ?? 100) < 40) lista.push(t('motor.riesgos.sinAgua', { temporada, el: el(t, x.cultivoId) }))
+    if ((x.v?.diasCalor ?? 0) >= 6) lista.push(t('motor.riesgos.calor', { temporada, dias: x.v?.diasCalor, del: del(t, x.cultivoId) }))
+    if (c.encharca && TERRENOS[e.terreno].encharca && x.temporada !== 'verano') lista.push(t('motor.riesgos.encharca', { el: el(t, x.cultivoId) }))
   }
   if (pasos.some((x) => x.cultivoId === null) && TERRENOS[e.terreno].erosion >= 0.6) {
-    lista.push('La tierra queda desnuda una temporada y en su terreno la lluvia se la puede llevar.')
+    lista.push(t('motor.riesgos.desnuda'))
   }
   return lista
 }
@@ -368,6 +376,7 @@ export interface MetaKharis {
 }
 
 export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKharis): Decision {
+  const t = traductor(e.idioma)
   const w = pesos(e.objetivos)
   const claves = Object.keys(PESOS_BASE) as ClaveFactor[]
 
@@ -398,7 +407,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
   const rotaciones: RotacionDecidida[] = ordenadas.map((x) => {
     const factores: Factor[] = claves.map((k) => ({
       clave: k,
-      nombre: NOMBRE_FACTOR[k],
+      nombre: t(`factores.${k}`),
       peso: Math.round(w[k] * 100) / 100,
       valor: redondo(x.valores[k]),
       objetivo: e.objetivos.some((o) => OBJETIVOS[o].factor === k),
@@ -411,27 +420,28 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
       .filter((a) => x.cand.actual || a.d > 0.4)
       .sort((a, b) => (x.cand.actual ? w[b.k] * x.valores[b.k] - w[a.k] * x.valores[a.k] : b.d - a.d))
     const razones: Razon[] = []
-    if (x.cand.actual) razones.push({ tipo: 'actual', texto: 'Es lo que hace hoy: sirve para comparar las otras opciones.' })
-    else if (diferencia > 0) razones.push({ tipo: 'comparacion', texto: `Saca ${diferencia} puntos más que lo que hace hoy.` })
-    else if (diferencia < 0) razones.push({ tipo: 'comparacion', texto: `Saca ${-diferencia} puntos menos que lo que hace hoy.` })
+    if (x.cand.actual) razones.push({ tipo: 'actual', texto: t('motor.razones.actual') })
+    else if (diferencia > 0) razones.push({ tipo: 'comparacion', texto: t('motor.razones.mas', { n: diferencia }) })
+    else if (diferencia < 0) razones.push({ tipo: 'comparacion', texto: t('motor.razones.menos', { n: -diferencia }) })
     for (const a of aporte) {
-      const texto = razonFactor(a.k, e, x.pasos, x.cand)
+      const texto = razonFactor(t, a.k, e, x.pasos, x.cand)
       if (texto && !razones.some((r) => r.texto === texto)) razones.push({ tipo: a.k, texto })
       if (razones.length >= 4) break
     }
-    const cumplidos = e.objetivos.filter((o) => x.valores[OBJETIVOS[o].factor] >= 70).map((o) => minus(OBJETIVOS[o].nombre))
-    if (cumplidos.length) razones.push({ tipo: 'objetivos', texto: `Va con lo que usted quiere: ${cumplidos.join(', ')}.` })
+    const cumplidos = e.objetivos.filter((o) => x.valores[OBJETIVOS[o].factor] >= 70).map((o) => minus(t(`objetivos.${o}.nombre`)))
+    if (cumplidos.length) razones.push({ tipo: 'objetivos', texto: t('motor.razones.objetivos', { lista: cumplidos.join(', ') }) })
 
     const usados = [...new Set(x.pasos.map((y) => y.cultivoId).filter((y): y is string => y !== null))]
     const nuevos = usados.filter((id) => id !== e.cultivoId)
-    const beneficios = (x.cand.actual ? CULTIVOS[e.cultivoId].beneficios : nuevos.flatMap((id) => CULTIVOS[id].beneficios)).slice(0, 4)
-    const riesgos = [...riesgosDe(x.pasos, e), ...usados.flatMap((id) => CULTIVOS[id].riesgos)]
-    const faltaSaber = [...new Set([...usados.flatMap((id) => CULTIVOS[id].falta), 'Cómo le fue en su parcela en años pasados'])]
+    const textos = (id: string, clave: 'beneficios' | 'riesgos' | 'falta') => listaT(t, `cultivos.${id}.${clave}`)
+    const beneficios = (x.cand.actual ? textos(e.cultivoId, 'beneficios') : nuevos.flatMap((id) => textos(id, 'beneficios'))).slice(0, 4)
+    const riesgos = [...riesgosDe(t, x.pasos, e), ...usados.flatMap((id) => textos(id, 'riesgos'))]
+    const faltaSaber = [...new Set([...usados.flatMap((id) => textos(id, 'falta')), t('motor.faltaPasado')])]
     const confianza: Confianza = x.inviable || usados.some((id) => CULTIVOS[id].riego) ? 'baja' : 'media'
 
     return {
       id: x.cand.id,
-      nombre: nombreCandidato(x.cand),
+      nombre: nombreCandidato(t, x.cand),
       cultivoIcono: x.cand.icono,
       actual: x.cand.actual,
       mejor: x === mejor,
@@ -439,13 +449,13 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
       rating: ratingDePuntaje(x.puntaje),
       diferencia,
       confianza,
-      pasos: x.pasos.map(pasoPlan),
+      pasos: x.pasos.map((y) => pasoPlan(t, y)),
       factores,
       razones,
       beneficios,
       riesgos: [...new Set(riesgos)].slice(0, 5),
       faltaSaber: faltaSaber.slice(0, 4),
-      evidencia: [...(parcela ? evidenciaParcela(parcela) : []), ...evidenciaDe(p, e, x.pasos)],
+      evidencia: [...(parcela ? evidenciaParcela(t, LOCALE[normalizarIdioma(e.idioma)], parcela) : []), ...evidenciaDe(t, p, e, x.pasos)],
     }
   })
 
@@ -455,7 +465,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     entrada: e,
     punto: {
       id: p.punto,
-      nombre: parcela ? `su parcela, cerca de ${parcela.puntoNombre}` : lugar?.nombre ?? p.punto,
+      nombre: parcela ? t('motor.puntoParcela', { lugar: parcela.puntoNombre }) : lugar?.nombre ?? p.punto,
       fechaBase: meta.fechaBase,
       modelo: meta.modelo,
       fraccionPronosticada: fraccionPronosticada(p),
@@ -463,11 +473,7 @@ export function decidir(e: EntradaDecision, pKharis: PuntoKharis, meta: MetaKhar
     },
     rotaciones,
     mejorId: mejor.cand.id,
-    avisos: [
-      'Más allá de dos meses el pronóstico se parece al clima normal del lugar: sirve para la temporada, no para un día exacto.',
-      'El agua de cada cultivo sale de FAO-56 y los precios de referencia de SIMPAH 2026: revise los de su mercado. El forraje y el frijol terciopelo son aproximados.',
-      'Es una ayuda para pensar: la decisión final es suya y de su técnico.',
-    ],
+    avisos: listaT(t, 'motor.avisos'),
   }
 }
 
@@ -493,6 +499,7 @@ export function validarEntrada(x: unknown): EntradaDecision | null {
     temporada: d.temporada as Temporada,
     objetivos,
   }
+  if (esIdioma(d.idioma)) salida.idioma = d.idioma
   const pc = d.parcela as { lat?: unknown; lon?: unknown } | undefined
   if (pc && typeof pc === 'object') {
     const lat = Number(pc.lat)
@@ -506,21 +513,31 @@ export function validarEntrada(x: unknown): EntradaDecision | null {
 
 /* ---------- Escala de parcela ---------- */
 
-function evidenciaParcela(i: InfoParcela): Evidencia[] {
+function evidenciaParcela(t: TFunction, locale: string, i: InfoParcela): Evidencia[] {
   const lista: Evidencia[] = [
     {
       texto: i.alturaM === null
-        ? `Se usa el punto de Kharis más cercano: ${i.puntoNombre}, a ${i.distanciaKm} km. No hay altura para su ubicación.`
-        : `Su parcela está a unos ${Math.round(i.alturaM).toLocaleString('es-HN')} m de altura; la zona de Kharis más cercana (${i.puntoNombre}, a ${i.distanciaKm} km) promedia ${i.alturaCeldaM.toLocaleString('es-HN')} m.`,
-      fuente: 'NASADEM (SRTM 30 m) promediado a 2 km; punto de Kharis más cercano',
+        ? t('motor.parcela.sinAltura', { punto: i.puntoNombre, km: i.distanciaKm })
+        : t('motor.parcela.conAltura', {
+            altura: Math.round(i.alturaM).toLocaleString(locale),
+            punto: i.puntoNombre,
+            km: i.distanciaKm,
+            alturaCelda: i.alturaCeldaM.toLocaleString(locale),
+          }),
+      fuente: t('motor.parcela.alturaFuente'),
     },
   ]
   if (i.alturaM !== null && (i.cambioTmin !== 0 || i.cambioEt0Pct !== 0)) {
-    const grados = (x: number, f: string, c: string) => `${Math.abs(x).toLocaleString('es-HN')} °C más ${x <= 0 ? f : c}`
+    const grados = (x: number, f: string, c: string) =>
+      t('motor.parcela.grados', { n: Math.abs(x).toLocaleString(locale), palabra: t(`motor.parcela.${x <= 0 ? f : c}`) })
     lista.push({
-      texto: `Por la altura, sus noches salen ${grados(i.cambioTmin, 'frescas', 'cálidas')} y el día en promedio ${grados(i.cambioTmedia, 'fresco', 'cálido')}. ` +
-        `La tierra pierde ${Math.abs(i.cambioEt0Pct)} % ${i.cambioEt0Pct <= 0 ? 'menos agua, así que el cultivo pide menos' : 'más agua'}.`,
-      fuente: 'Gradiente por altura validado dejando un punto fuera (mínima +51 %, media +41 %); máxima y lluvia sin ajuste',
+      texto: t('motor.parcela.ajuste', {
+        noches: grados(i.cambioTmin, 'frescas', 'calidas'),
+        dia: grados(i.cambioTmedia, 'fresco', 'calido'),
+        pct: Math.abs(i.cambioEt0Pct),
+        agua: t(i.cambioEt0Pct <= 0 ? 'motor.parcela.menosAgua' : 'motor.parcela.masAgua'),
+      }),
+      fuente: t('motor.parcela.ajusteFuente'),
     })
   }
   return lista

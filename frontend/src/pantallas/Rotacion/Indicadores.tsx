@@ -1,4 +1,5 @@
 import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { clases } from '../../componentes/clases'
 import { Icono } from '../../componentes/Icono'
 import type { NombreIcono } from '../../componentes/iconos'
@@ -9,6 +10,7 @@ import estilos from './Indicadores.module.css'
  * va en el centro. Es dato, no control: va en tinta, no en color de senal.
  */
 export function AnilloPuntaje({ valor, tamano = 152 }: { valor: number; tamano?: number }) {
+  const { t } = useTranslation()
   const grosor = 12
   const hueco = 6
   const r = (tamano - grosor) / 2
@@ -18,7 +20,7 @@ export function AnilloPuntaje({ valor, tamano = 152 }: { valor: number; tamano?:
   const largoActivo = Math.max(0, activo - grosor)
   const largoPista = c - activo - 2 * hueco - grosor
   return (
-    <div className={estilos.anillo} style={{ width: tamano, height: tamano }} role="img" aria-label={`${v} de 100`}>
+    <div className={estilos.anillo} style={{ width: tamano, height: tamano }} role="img" aria-label={t('comun.deCien', { valor: v })}>
       <svg viewBox={`0 0 ${tamano} ${tamano}`} aria-hidden="true">
         <g transform={`rotate(-90 ${tamano / 2} ${tamano / 2})`} strokeWidth={grosor} strokeLinecap="round" fill="none">
           {largoPista > 0 && (
@@ -45,7 +47,7 @@ export function AnilloPuntaje({ valor, tamano = 152 }: { valor: number; tamano?:
       </svg>
       <span className={estilos.centro} aria-hidden="true">
         <span className={estilos.numero}>{v}</span>
-        <span className={estilos.deCien}>de 100</span>
+        <span className={estilos.deCien}>{t('comun.deCien', { valor: '' }).trim()}</span>
       </span>
     </div>
   )

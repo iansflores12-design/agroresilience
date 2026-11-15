@@ -43,7 +43,9 @@ export function gastarUno() {
 export function claveAnalisis(entrada: EntradaDecision, rotacionId: string, fechaBase: string): string {
   const objetivos = [...entrada.objetivos].sort().join(',')
   const parcela = entrada.parcela ? `${entrada.parcela.lat},${entrada.parcela.lon}` : ''
-  return [entrada.zonaId, parcela, entrada.terreno, entrada.cultivoId, entrada.temporada, objetivos, rotacionId, fechaBase].join('|')
+  // En español la clave queda como antes, para no perder los analisis ya guardados.
+  const idioma = entrada.idioma && entrada.idioma !== 'es' ? [entrada.idioma] : []
+  return [entrada.zonaId, parcela, entrada.terreno, entrada.cultivoId, entrada.temporada, objetivos, rotacionId, fechaBase, ...idioma].join('|')
 }
 
 export function analisisGuardado(clave: string): string | null {

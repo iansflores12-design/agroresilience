@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router-dom'
 import { BarraNavegacion } from './BarraNavegacion'
 import { BarraSuperior } from './BarraSuperior'
@@ -7,6 +8,7 @@ import estilos from './Estructura.module.css'
 /** Armazon de la aplicacion: enlace de salto, barra superior, contenido y navegacion. */
 export function Estructura() {
   const { pathname } = useLocation()
+  const { t } = useTranslation()
   const principal = useRef<HTMLElement>(null)
   const previa = useRef(pathname)
   const [contraido, setContraido] = useState(() => {
@@ -43,7 +45,7 @@ export function Estructura() {
       data-inmersivo={/^\/chat\/.+/.test(pathname) || undefined}
     >
       <a className={estilos.salto} href="#contenido">
-        Saltar al contenido
+        {t('app.saltar')}
       </a>
       <BarraSuperior />
       <BarraNavegacion contraido={contraido} alContraer={alternarMenu} />

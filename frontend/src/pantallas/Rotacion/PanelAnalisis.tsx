@@ -1,23 +1,25 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Boton } from '../../componentes/Boton'
 import { Icono } from '../../componentes/Icono'
 import type { NombreIcono } from '../../componentes/iconos'
-import { textoCausa, type EstadoAnalisis, type Fase } from '../../lib/decision/estadoAnalisis'
+import type { EstadoAnalisis, Fase } from '../../lib/decision/estadoAnalisis'
 import { avisar } from '../../lib/avisos'
 import { Girando } from './Indicadores'
 import estilos from './Rotacion.module.css'
 
-const ESTADO: Record<Fase, { texto: string; icono: NombreIcono }> = {
-  pasos: { texto: 'Preparando', icono: 'hourglass_top' },
-  escribiendo: { texto: 'Escribiendo', icono: 'edit' },
-  resumen: { texto: 'Resumen rápido', icono: 'schedule' },
-  listo: { texto: 'Listo', icono: 'check_circle' },
-  fallo: { texto: 'Resumen rápido', icono: 'info' },
+const ICONO_FASE: Record<Fase, NombreIcono> = {
+  pasos: 'hourglass_top',
+  escribiendo: 'edit',
+  resumen: 'schedule',
+  listo: 'check_circle',
+  fallo: 'info',
 }
 
 function Pasos({ pasos }: { pasos: EstadoAnalisis['pasos'] }) {
+  const { t } = useTranslation()
   return (
-    <ol className={estilos.lista} aria-label="Lo que se está haciendo">
+    <ol className={estilos.lista} aria-label={t('analisis.loQueSeHace')}>
       {pasos.map((p) => (
         <li key={p.id} className={estilos.elementoCompacto}>
           <span className={estilos.marcaPaso}>{p.hecho ? <Icono nombre="check" tamano={20} /> : <Girando />}</span>
@@ -35,13 +37,14 @@ function Pasos({ pasos }: { pasos: EstadoAnalisis['pasos'] }) {
 export function PanelAnalisis({
   analisis,
   resumen,
-  titulo = 'Análisis a fondo',
-  apoyo = 'La IA explica los números; no los cambia.',
-  aviso = { titulo: 'Análisis a fondo listo', descripcion: 'La IA terminó de revisar esta rotación.' },
-  espera = 'La IA sigue preparando el análisis a fondo. Le avisamos cuando esté.',
+  titulo,
+  apoyo,
+  aviso,
+  espera,
 }: {
   analisis: EstadoAnalisis & { reintentar: () => void }
   resumen: string
+  /** Los textos opcionales tienen por defecto los del analisis de una rotacion, en el idioma actual. */
   titulo?: string
   apoyo?: string
   /** Aviso que salta cuando el análisis llega después del resumen rápido. */
@@ -50,19 +53,19 @@ export function PanelAnalisis({
 }) {
   const { fase, pasos, texto, causa, llegoTarde, guardado, reintentar } = analisis
   const ancla = useRef<HTMLElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (fase !== 'listo' || !llegoTarde) return
     avisar.exito({
-      titulo: aviso.titulo,
-      descripcion: aviso.descripcion,
-      accion: { texto: 'Ver', alPulsar: () => ancla.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) },
+      titulo: aviso?.titulo ?? t('analisis.listoTitulo'),
+      descripcion: aviso?.descripcion ?? t('analisis.listoDescripcion'),
+      accion: { texto: t('comun.ver'), alPulsar: () => ancla.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) },
     })
-    // El aviso salta una vez por análisis; sus textos no cambian mientras tanto.
+    // El aviso sale una vez, en el idioma del momento.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fase, llegoTarde])
 
-  const estado = ESTADO[fase]
   const ocupado = fase === 'pasos' || fase === 'escribiendo' || fase === 'resumen'
 
   return (
@@ -73,13 +76,13 @@ export function PanelAnalisis({
         </span>
         <span className={estilos.textoElemento}>
           <h2 id="titulo-analisis" className={estilos.tituloTarjeta}>
-            {titulo}
+            {titulo ?? t('analisis.titulo')}
           </h2>
-          <span className={estilos.apoyoElemento}>{apoyo}</span>
+          <span className={estilos.apoyoElemento}>{apoyo ?? t('analisis.explica')}</span>
         </span>
         <span className={estilos.chipEstado}>
-          {ocupado && fase !== 'resumen' ? <Girando /> : <Icono nombre={estado.icono} tamano={18} />}
-          {guardado && fase === 'listo' ? 'Guardado' : estado.texto}
+          {ocupado && fase !== 'resumen' ? <Girando /> : <Icono nombre={ICONO_FASE[fase]} tamano={18} />}
+          {guardado && fase === 'listo' ? t('analisis.guardado') : t(`analisis.fases.${fase}`)}
         </span>
       </header>
 
@@ -97,7 +100,7 @@ export function PanelAnalisis({
           <p className={estilos.textoGemini}>{resumen}</p>
           <p className={estilos.nota} role="status">
             <Girando />
-            {espera}
+            {espera ?? t('analisis.sigue')}
           </p>
         </>
       )}
@@ -114,12 +117,12 @@ export function PanelAnalisis({
           <div className={estilos.aviso} role="alert">
             <Icono nombre="info" tamano={24} />
             <span className={estilos.textoElemento}>
-              <span>{textoCausa(causa)}</span>
-              <span className={estilos.apoyoElemento}>Este intento no cuenta en su límite del día.</span>
+              <span>{t(`analisis.causas.${causa && causa !== 'servidor' ? causa : 'otra'}`)}</span>
+              <span className={estilos.apoyoElemento}>{t('analisis.noCuenta')}</span>
             </span>
             {causa !== 'cuota_local' && (
               <Boton variante="texto" icono="refresh" onClick={reintentar}>
-                Reintentar
+                {t('comun.reintentar')}
               </Boton>
             )}
           </div>

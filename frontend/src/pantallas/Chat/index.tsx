@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type TouchEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useIdioma } from '../../i18n'
 import { Boton } from '../../componentes/Boton'
 import { BotonIcono } from '../../componentes/BotonIcono'
 import { Chip } from '../../componentes/Chip'
-import { buscarZona, estadoHumedad, humedadPorcentaje } from '../../datos/zonas'
+import { buscarZona, humedadPorcentaje } from '../../datos/zonas'
+import { claveEstadoHumedad } from '../Zona/formato'
 import { TITULO_NUEVO, useConversacion, type MensajeChat } from '../../estado/Conversacion'
 import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
@@ -22,7 +26,7 @@ export interface PropsChat {
   modoDemo?: boolean
 }
 
-function avisarDemoUnaVez() {
+function avisarDemoUnaVez(t: TFunction) {
   try {
     if (window.sessionStorage.getItem(CLAVE_AVISO_DEMO)) return
     window.sessionStorage.setItem(CLAVE_AVISO_DEMO, '1')
@@ -30,22 +34,25 @@ function avisarDemoUnaVez() {
     // Sin sessionStorage se avisa en cada carga de la pagina.
   }
   avisar.info({
-    titulo: 'Modo de demostración',
-    descripcion: 'Las respuestas son locales: el asistente real se conectará al backend.',
+    titulo: t('chat.demoTitulo'),
+    descripcion: t('chat.demoDescripcion'),
   })
 }
 
-function descripcionError(e: unknown): string {
+function descripcionError(t: TFunction, e: unknown): string {
   if (e instanceof ErrorChat) {
-    if (e.causa === 'red') return 'Revisa tu conexión e inténtalo de nuevo.'
-    if (e.causa === 'servidor') return 'El servidor no pudo responder en este momento.'
-    if (e.causa === 'respuesta') return 'El servidor envió una respuesta que no se entiende.'
+    if (e.causa === 'red') return t('chat.errorRed')
+    if (e.causa === 'servidor') return t('chat.errorServidor')
+    if (e.causa === 'respuesta') return t('chat.errorRespuesta')
   }
-  return 'Inténtalo de nuevo.'
+  return t('chat.errorOtro')
 }
 
 export default function Chat({ cliente, modoDemo }: PropsChat) {
   const [params] = useSearchParams()
+  const { t } = useTranslation()
+  const idioma = useIdioma()
+  const tActual = useRef(t)
   const { cultivoId, zonaId, edadSemanas } = useEstadoApp()
   const { id } = useParams()
   const navegar = useNavigate()
@@ -57,13 +64,13 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   const desde = params.get('desde')
   const vista = VISTAS.find((v) => v === desde) ?? 'chat'
   const contexto = useMemo(
-    () => armarContexto({ vista, cultivoId, edadSemanas, zonaId }),
-    [vista, cultivoId, edadSemanas, zonaId],
+    () => armarContexto({ vista, cultivoId, edadSemanas, zonaId, idioma }),
+    [vista, cultivoId, edadSemanas, zonaId, idioma],
   )
   const sugerencias = useMemo(() => armarSugerencias(contexto), [contexto])
   const zona = buscarZona(zonaId)
   const pctHumedad = zona ? humedadPorcentaje(zona) : null
-  const estadoZona = zona ? estadoHumedad(zona).toLowerCase() : ''
+  const estadoZona = zona ? t(`zona.estado.${claveEstadoHumedad(zona)}`).toLowerCase() : ''
 
   const [texto, setTexto] = useState('')
   const [esperando, setEsperando] = useState(false)
@@ -82,7 +89,8 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
     contextoActual.current = contexto
     mensajesActuales.current = mensajes
     demoActual.current = demo
-  }, [cliente, contexto, mensajes, demo])
+    tActual.current = t
+  }, [cliente, contexto, mensajes, demo, t])
 
   // Al salir de la pantalla se aborta la peticion en curso.
   useEffect(() => {
@@ -124,9 +132,9 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
       } catch (e) {
         if (controlador.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
         avisar.error({
-          titulo: 'No se pudo enviar',
-          descripcion: descripcionError(e),
-          accion: { texto: 'Reintentar', alPulsar: alReintentar },
+          titulo: tActual.current('chat.noEnviar'),
+          descripcion: descripcionError(tActual.current, e),
+          accion: { texto: tActual.current('comun.reintentar'), alPulsar: alReintentar },
         })
       } finally {
         if (abortar.current === controlador) {
@@ -148,7 +156,7 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   function enviar(contenido: string) {
     const limpio = contenido.trim()
     if (!limpio || abortar.current) return
-    if (demoActual.current) avisarDemoUnaVez()
+    if (demoActual.current) avisarDemoUnaVez(t)
     const nuevo = agregar({ rol: 'usuario', texto: limpio })
     setTexto('')
     campo.current?.focus()
@@ -171,15 +179,15 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
   // Gesto para volver: deslizar hacia la derecha desde el borde izquierdo de la pantalla.
   function alTocar(e: TouchEvent) {
-    const t = e.touches[0]
-    toque.current = t.clientX <= 28 ? { x: t.clientX, y: t.clientY } : null
+    const dedo = e.touches[0]
+    toque.current = dedo.clientX <= 28 ? { x: dedo.clientX, y: dedo.clientY } : null
   }
   function alSoltar(e: TouchEvent) {
     const inicio = toque.current
     toque.current = null
     if (!inicio) return
-    const t = e.changedTouches[0]
-    if (t.clientX - inicio.x > 72 && Math.abs(t.clientY - inicio.y) < 56) navegar('/chat')
+    const dedo = e.changedTouches[0]
+    if (dedo.clientX - inicio.x > 72 && Math.abs(dedo.clientY - inicio.y) < 56) navegar('/chat')
   }
 
   function borrarConversacion() {
@@ -190,61 +198,61 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
     setEsperando(false)
     borrar()
     avisar.exito({
-      titulo: 'Conversación borrada',
-      accion: { texto: 'Deshacer', alPulsar: () => reemplazar(previos) },
+      titulo: t('chat.borrada'),
+      accion: { texto: t('chat.deshacer'), alPulsar: () => reemplazar(previos) },
     })
   }
 
   return (
     <div className={`pantalla ${estilos.chat}`} onTouchStart={alTocar} onTouchEnd={alSoltar}>
       <div className={estilos.barraChat}>
-        <BotonIcono icono="arrow_back" etiqueta="Volver a los chats" to="/chat" />
-        <span className={estilos.tituloChat}>{chat?.titulo ?? TITULO_NUEVO}</span>
+        <BotonIcono icono="arrow_back" etiqueta={t('chats.volver')} to="/chat" />
+        <span className={estilos.tituloChat}>{!chat || chat.titulo === TITULO_NUEVO ? t('chats.nuevo') : chat.titulo}</span>
         {chat && (
           <BotonIcono
             icono="keep"
             variante={chat.fijado ? 'tonal' : 'estandar'}
-            etiqueta={chat.fijado ? 'Quitar de fijados' : 'Fijar este chat arriba'}
+            etiqueta={chat.fijado ? t('chats.quitarFijado') : t('chats.fijarEste')}
             onClick={() => fijar(chat.id, !chat.fijado)}
           />
         )}
       </div>
       <section className={`plano-medio ${estilos.medio}`} aria-labelledby="chat-titulo">
         <h1 className={estilos.pregunta} id="chat-titulo">
-          Pregunte lo que quiera
+          {t('chat.titulo')}
         </h1>
         <div className={estilos.tira}>
           <p className={estilos.tiraEtiqueta} id="chat-ve-esto">
-            El asistente sabe que
+            {t('chat.sabeQue')}
           </p>
           <div className={estilos.chips} role="group" aria-labelledby="chat-ve-esto">
             <Chip to="/" icono="grass">
               {contexto.cultivo
-                ? `${contexto.cultivo.nombre} · semana ${contexto.edadSemanas ?? 0} · ${contexto.etapa ?? ''}`
-                : 'Sin cultivo'}
+                ? t('chat.cultivoChip', { cultivo: contexto.cultivo.nombre, semana: contexto.edadSemanas ?? 0, etapa: contexto.etapa ?? '' })
+                : t('chat.sinCultivo')}
             </Chip>
             <Chip to={zona ? '/zona' : '/mapa'} icono="location_on">
-              {zona ? zona.nombre : 'Sin zona'}
+              {zona ? zona.nombre : t('chat.sinZona')}
             </Chip>
             {zona && (
               <Chip to="/zona" icono="water_drop">
                 {contexto.humedad && pctHumedad !== null
-                  ? `Tierra: ${estadoZona}`
-                  : 'Sin lectura de humedad'}
+                  ? t('chat.tierraChip', { estado: estadoZona })
+                  : t('chat.sinHumedad')}
               </Chip>
             )}
           </div>
           {mensajes.length > 0 && (
             <Boton variante="texto" icono="delete" className={estilos.borrar} onClick={borrarConversacion}>
-              Borrar conversación
+              {t('chat.borrar')}
             </Boton>
           )}
         </div>
 
         {mensajes.length === 0 && (
           <div className={estilos.vacio}>
-            <p className={estilos.ayuda}>Toque una pregunta o escriba la suya abajo.</p>
-            <div className={estilos.sugerencias} role="group" aria-label="Sugerencias">
+            <p className={estilos.ayuda}>{t('chat.toquePregunta')}</p>
+            <div className={estilos.sugerencias} role="group" aria-label={t('comun.sugerencias')}>
               {sugerencias.map((s) => (
                 <Chip key={s} className={estilos.sugerencia} onClick={() => enviar(s)}>
                   {s}
@@ -254,13 +262,13 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
           </div>
         )}
 
-        <div className={estilos.lista} role="log" aria-live="polite" aria-label="Conversación con el asistente">
+        <div className={estilos.lista} role="log" aria-live="polite" aria-label={t('chat.conversacion')}>
           {mensajes.map((m) => (
             <div
               key={m.id}
               className={`${estilos.fila} ${m.rol === 'usuario' ? estilos.filaUsuario : estilos.filaAsistente}`}
             >
-              {m.rol === 'asistente' && <span className={estilos.etiqueta}>Asistente</span>}
+              {m.rol === 'asistente' && <span className={estilos.etiqueta}>{t('chat.asistente')}</span>}
               {m.rol === 'usuario' ? (
                 <p className={`${estilos.burbuja} ${estilos.burbujaUsuario}`}>{m.texto}</p>
               ) : (
@@ -276,14 +284,14 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
           ))}
           {esperando && (
             <div className={`${estilos.fila} ${estilos.filaAsistente}`}>
-              <span className={estilos.etiqueta}>Asistente</span>
+              <span className={estilos.etiqueta}>{t('chat.asistente')}</span>
               <div className={`${estilos.burbuja} ${estilos.burbujaAsistente}`}>
                 <span className={estilos.puntos} aria-hidden="true">
                   <span className={estilos.punto} />
                   <span className={estilos.punto} />
                   <span className={estilos.punto} />
                 </span>
-                <span className="solo-lectores">El asistente está escribiendo</span>
+                <span className="solo-lectores">{t('chat.escribiendo')}</span>
               </div>
             </div>
           )}
@@ -293,23 +301,23 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
       <div className={`plano-superior ${estilos.redactor}`}>
         <div className={estilos.redactorInterior}>
-          {demo && <span className={estilos.insignia}>Modo de prueba: todavía sin conexión al asistente real</span>}
+          {demo && <span className={estilos.insignia}>{t('chat.modoPrueba')}</span>}
           <div className={estilos.campoFila}>
             <textarea
               ref={campo}
               className={estilos.campo}
-              aria-label="Mensaje"
-              placeholder="Escriba su pregunta"
+              aria-label={t('chat.mensaje')}
+              placeholder={t('comun.escribaPregunta')}
               rows={1}
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
               onKeyDown={alTeclear}
             />
             {esperando ? (
-              <BotonIcono icono="stop" etiqueta="Detener" variante="relleno" onClick={detener} />
+              <BotonIcono icono="stop" etiqueta={t('comun.detener')} variante="relleno" onClick={detener} />
             ) : (
               <Boton icono="send" disabled={texto.trim() === ''} onClick={() => enviar(texto)}>
-                Enviar
+                {t('comun.enviar')}
               </Boton>
             )}
           </div>

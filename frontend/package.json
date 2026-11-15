@@ -14,9 +14,12 @@
   },
   "dependencies": {
     "@fontsource-variable/google-sans-flex": "^5.3.2",
+    "i18next": "^27.1.2",
+    "i18next-browser-languagedetector": "^8.3.0",
     "leaflet": "^1.9.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.1",
     "react-router-dom": "^7.18.5",
     "sileo": "^0.1.6"
   },

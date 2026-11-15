@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { useIdioma, useLocale } from '../../i18n'
+import { lista as listaT } from '../../i18n/traductor'
 import { Boton } from '../../componentes/Boton'
 import { Chip } from '../../componentes/Chip'
 import { Control } from '../../componentes/Control'
@@ -14,7 +18,7 @@ import { useAnalisis } from '../../estado/useAnalisis'
 import { useDecision } from '../../estado/useDecision'
 import { armarContexto } from '../../lib/chat'
 import { analisisGuardado, claveAnalisis } from '../../lib/decision/memoria'
-import { CULTIVOS, LUGARES, OBJETIVOS, PALABRA_RATING, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
+import { CULTIVOS, LUGARES } from '../../lib/decision/parametros'
 import type { Decision, EntradaDecision, InfoParcela, RotacionDecidida } from '../../lib/decision/tipos'
 import { TOP3, fechaEnPalabras, respuestaRapida, resumenRapido, tresMejores } from '../../lib/decision/textos'
 import { ChatSeguimiento } from '../Rotacion/ChatSeguimiento'
@@ -23,18 +27,18 @@ import { Cuestionario, type ClavePregunta } from './Cuestionario'
 import estilos from './Inicio.module.css'
 
 /** "Su parcela · 1,240 m, cerca de Siguatepeque" */
-function textoParcela(p: InfoParcela | undefined): string {
-  if (!p) return 'Su parcela (ubicación)'
-  const altura = p.alturaM === null ? '' : ` · ${Math.round(p.alturaM).toLocaleString('es-HN')} m`
-  return `Su parcela${altura}, cerca de ${p.puntoNombre}`
+function textoParcela(t: TFunction, locale: string, p: InfoParcela | undefined): string {
+  if (!p) return t('inicio.parcelaSinDatos')
+  const altura = p.alturaM === null ? '' : ` · ${Math.round(p.alturaM).toLocaleString(locale)} m`
+  return t('inicio.parcela', { altura, lugar: p.puntoNombre })
 }
 
 /** "Ahorrar agua", "Ahorrar agua y 2 más" o "Sin objetivos". */
-function textoObjetivos(e: EntradaDecision): string {
+function textoObjetivos(t: TFunction, e: EntradaDecision): string {
   const [primero, ...resto] = e.objetivos
-  if (!primero) return 'Sin objetivos'
-  const nombre = OBJETIVOS[primero].nombre
-  return resto.length ? `${nombre} y ${resto.length} más` : nombre
+  if (!primero) return t('plan.sinObjetivos')
+  const nombre = t(`objetivos.${primero}.nombre`)
+  return resto.length ? t('plan.objetivoYMas', { nombre, n: resto.length }) : nombre
 }
 
 /**
@@ -52,30 +56,36 @@ function SusRespuestas({
   parcela: InfoParcela | undefined
   alCambiar: (clave: ClavePregunta) => void
 }) {
-  const lugar = entrada.parcela ? textoParcela(parcela) : LUGARES[entrada.zonaId].nombre
-  const cultivo = `${CULTIVOS[entrada.cultivoId].nombre}, ${semanas === 1 ? '1 semana' : `${semanas} semanas`}`
-  const terreno = `Terreno ${TERRENOS[entrada.terreno].nombre.toLowerCase()}`
-  const siembra = `Siembra de ${TEMPORADAS[entrada.temporada].nombre.toLowerCase()}`
-  const objetivos = textoObjetivos(entrada)
+  const { t } = useTranslation()
+  const locale = useLocale()
+  const lugar = entrada.parcela ? textoParcela(t, locale, parcela) : LUGARES[entrada.zonaId].nombre
+  const cultivo = t('plan.cultivoSemanas', {
+    cultivo: t(`cultivos.${entrada.cultivoId}.nombre`),
+    semanas: semanas === 1 ? t('plan.unaSemana') : t('plan.semanas', { n: semanas }),
+  })
+  const terreno = t('inicio.terreno', { terreno: t(`terrenos.${entrada.terreno}.nombre`).toLowerCase() })
+  const siembra = t('inicio.siembraDe', { temporada: t(`temporadas.${entrada.temporada}.nombre`).toLowerCase() })
+  const objetivos = textoObjetivos(t, entrada)
+  const cambiar = (dato: string) => t('plan.cambiar', { dato })
   return (
     <div className={estilos.respuestas} role="group" aria-labelledby="titulo-respuestas">
       <p id="titulo-respuestas" className="tipo-nota">
-        Sus respuestas. Toque una para cambiarla.
+        {t('plan.susRespuestas')}
       </p>
       <div className={estilos.chipsRespuestas}>
-        <Chip icono={entrada.parcela ? 'my_location' : 'location_on'} aria-label={`Lugar: ${lugar}. Cambiar`} onClick={() => alCambiar('zonaId')}>
+        <Chip icono={entrada.parcela ? 'my_location' : 'location_on'} aria-label={cambiar(t('plan.lugar', { lugar }))} onClick={() => alCambiar('zonaId')}>
           {lugar}
         </Chip>
-        <Chip icono={ICONO_TERRENO[entrada.terreno]} aria-label={`${terreno}. Cambiar`} onClick={() => alCambiar('terreno')}>
+        <Chip icono={ICONO_TERRENO[entrada.terreno]} aria-label={cambiar(terreno)} onClick={() => alCambiar('terreno')}>
           {terreno}
         </Chip>
-        <Chip icono={ICONO_CULTIVO[entrada.cultivoId] ?? 'grass'} aria-label={`Cultivo: ${cultivo}. Cambiar`} onClick={() => alCambiar('cultivoId')}>
+        <Chip icono={ICONO_CULTIVO[entrada.cultivoId] ?? 'grass'} aria-label={cambiar(t('plan.cultivo', { cultivo }))} onClick={() => alCambiar('cultivoId')}>
           {cultivo}
         </Chip>
-        <Chip icono={ICONO_TEMPORADA[entrada.temporada]} aria-label={`${siembra}. Cambiar`} onClick={() => alCambiar('temporada')}>
+        <Chip icono={ICONO_TEMPORADA[entrada.temporada]} aria-label={cambiar(siembra)} onClick={() => alCambiar('temporada')}>
           {siembra}
         </Chip>
-        <Chip icono="flag" aria-label={`Quiere lograr: ${objetivos}. Cambiar`} onClick={() => alCambiar('objetivos')}>
+        <Chip icono="flag" aria-label={cambiar(t('plan.quiereLograr', { objetivos }))} onClick={() => alCambiar('objetivos')}>
           {objetivos}
         </Chip>
       </div>
@@ -85,8 +95,9 @@ function SusRespuestas({
 
 /** El cultivo, como etiquetas con icono que se deslizan de lado. Al tocar una cambian el mapa y las rotaciones. */
 function EtiquetasCultivo({ elegido, alElegir }: { elegido: string; alElegir: (id: string) => void }) {
+  const { t } = useTranslation()
   return (
-    <div className={estilos.etiquetas} role="group" aria-label="Su cultivo">
+    <div className={estilos.etiquetas} role="group" aria-label={t('plan.suCultivo')}>
       {cultivos.map((c) => (
         <Chip
           key={c.id}
@@ -95,28 +106,34 @@ function EtiquetasCultivo({ elegido, alElegir }: { elegido: string; alElegir: (i
           seleccionado={c.id === elegido}
           onClick={() => alElegir(c.id)}
         >
-          {c.nombre}
+          {t(`cultivos.${c.id}.nombre`)}
         </Chip>
       ))}
     </div>
   )
 }
 
-function etiqueta(r: RotacionDecidida): string | null {
-  if (r.mejor) return 'La mejor'
-  if (r.actual) return 'Lo que hace hoy'
+function etiqueta(t: TFunction, r: RotacionDecidida): string | null {
+  if (r.mejor) return t('inicio.laMejor')
+  if (r.actual) return t('comun.loQueHaceHoy')
   return null
+}
+
+/** "Maíz y después frijol. 86 de 100, alta. La mejor. Ver por qué" */
+function ariaRotacion(t: TFunction, r: RotacionDecidida, marca: string | null): string {
+  return t('inicio.tarjetaAria', { nombre: r.nombre, puntaje: r.puntaje, rating: t(`rating.${r.rating}`).toLowerCase(), marca: marca ? ` ${marca}.` : '' })
 }
 
 /** Una de las tres mejores: icono del cultivo, nombre, puntaje y rating. Al tocarla se abre su detalle. */
 function TarjetaRotacion({ r }: { r: RotacionDecidida }) {
-  const marca = etiqueta(r)
+  const { t } = useTranslation()
+  const marca = etiqueta(t, r)
   return (
     <li>
       <Control
         to={`/rotacion/${r.id}`}
         className={clases(estilos.tarjeta, r.mejor && estilos.tarjetaMejor, 'capa-estado')}
-        aria-label={`${r.nombre}. ${r.puntaje} de 100, ${PALABRA_RATING[r.rating].toLowerCase()}.${marca ? ` ${marca}.` : ''} Ver por qué`}
+        aria-label={ariaRotacion(t, r, marca)}
       >
         <span className={estilos.tarjetaArriba}>
           <span className={estilos.iconoRotacion}>
@@ -144,18 +161,19 @@ function TarjetaRotacion({ r }: { r: RotacionDecidida }) {
 
 /** Una de las demás opciones: un cuadrado con icono, nombre y porcentaje. */
 function CuadroRotacion({ r }: { r: RotacionDecidida }) {
+  const { t } = useTranslation()
   return (
     <li>
       <Control
         to={`/rotacion/${r.id}`}
         className={clases(estilos.cuadro, 'capa-estado')}
-        aria-label={`${r.nombre}. ${r.puntaje} de 100, ${PALABRA_RATING[r.rating].toLowerCase()}.${r.actual ? ' Lo que hace hoy.' : ''} Ver por qué`}
+        aria-label={ariaRotacion(t, r, r.actual ? t('comun.loQueHaceHoy') : null)}
       >
         <span className={estilos.iconoCuadro}>
           <Icono nombre={ICONO_CULTIVO[r.cultivoIcono] ?? 'grass'} tamano={24} />
         </span>
         <span className={estilos.nombreCuadro}>{r.nombre}</span>
-        {r.actual && <span className="tipo-nota">Lo que hace hoy</span>}
+        {r.actual && <span className="tipo-nota">{t('comun.loQueHaceHoy')}</span>}
         <span className={estilos.puntajeCuadro}>
           {r.puntaje}
           <span>%</span>
@@ -168,14 +186,14 @@ function CuadroRotacion({ r }: { r: RotacionDecidida }) {
 /** Espera antes de llamar a Gemini: si el productor sigue cambiando objetivos, no se gasta una consulta por toque. */
 const ESPERA_MS = 1200
 
-const PREGUNTAS_TOP3 = ['¿Por qué la primera es la mejor?', '¿Y si llueve menos de lo previsto?', '¿Qué necesito para empezar?']
-
 /**
  * Gemini explica por qué estas tres quedaron arriba con el clima de la zona, con la misma línea
  * de tiempo del análisis de una rotación: pasos en vivo, texto en vivo o resumen rápido a los
  * 6 s, aviso si llega tarde, reintento si falla y, al terminar, chat de seguimiento.
  */
 function PorQueTop3({ d }: { d: Decision }) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   const estado = useEstadoApp()
   const clave = claveAnalisis(d.entrada, TOP3, d.punto.fechaBase)
   // Un análisis ya guardado se muestra de una vez; uno nuevo espera a que la consulta se asiente.
@@ -189,10 +207,10 @@ function PorQueTop3({ d }: { d: Decision }) {
   const analisis = useAnalisis(asentada ? d.entrada : null, TOP3, asentada ? d.punto.fechaBase : null)
   const contexto = useMemo(
     () => ({
-      ...armarContexto({ vista: 'cultivos', cultivoId: estado.cultivoId, edadSemanas: estado.edadSemanas, zonaId: estado.zonaId }),
+      ...armarContexto({ vista: 'cultivos', cultivoId: estado.cultivoId, edadSemanas: estado.edadSemanas, zonaId: estado.zonaId, idioma }),
       consulta: { entrada: d.entrada, rotacionId: TOP3 },
     }),
-    [estado.cultivoId, estado.edadSemanas, estado.zonaId, d.entrada],
+    [estado.cultivoId, estado.edadSemanas, estado.zonaId, d.entrada, idioma],
   )
 
   return (
@@ -200,16 +218,16 @@ function PorQueTop3({ d }: { d: Decision }) {
       <PanelAnalisis
         analisis={analisis}
         resumen={resumenRapido(d, TOP3)}
-        titulo="Por qué estas tres"
-        apoyo={`La IA lo explica con el clima de ${d.punto.nombre}. No cambia los puntajes.`}
-        aviso={{ titulo: 'Explicación lista', descripcion: 'La IA terminó de explicar las tres mejores.' }}
-        espera="La IA sigue preparando la explicación. Le avisamos cuando esté."
+        titulo={t('plan.top3Titulo')}
+        apoyo={t('plan.top3Apoyo', { lugar: d.punto.nombre })}
+        aviso={{ titulo: t('plan.top3AvisoTitulo'), descripcion: t('plan.top3AvisoDescripcion') }}
+        espera={t('plan.top3Espera')}
       />
       {analisis.fase === 'listo' && (
         <ChatSeguimiento
           contexto={contexto}
-          titulo="Pregunte sobre estas rotaciones"
-          sugerencias={PREGUNTAS_TOP3}
+          titulo={t('plan.top3Chat')}
+          sugerencias={listaT(t, 'plan.top3Preguntas')}
           respaldo={(pregunta) => respuestaRapida(d, TOP3, pregunta)}
         />
       )}
@@ -218,13 +236,14 @@ function PorQueTop3({ d }: { d: Decision }) {
 }
 
 function Rotaciones({ d }: { d: Decision }) {
+  const { t } = useTranslation()
   const tres = tresMejores(d)
   const otras = d.rotaciones.slice(tres.length)
   return (
     <>
       <section className={estilos.seccion} aria-labelledby="titulo-mejores">
         <h2 id="titulo-mejores" className="tipo-titulo">
-          Las tres mejores
+          {t('plan.tresMejores')}
         </h2>
         <ol className={estilos.podio} aria-labelledby="titulo-mejores">
           {tres.map((r) => (
@@ -235,7 +254,7 @@ function Rotaciones({ d }: { d: Decision }) {
       {otras.length > 0 && (
         <section className={estilos.seccion} aria-labelledby="titulo-otras">
           <h2 id="titulo-otras" className="tipo-titulo">
-            Más opciones
+            {t('plan.masOpciones')}
           </h2>
           <ul className={estilos.cuadros} aria-labelledby="titulo-otras">
             {otras.map((r) => (
@@ -249,9 +268,11 @@ function Rotaciones({ d }: { d: Decision }) {
 }
 
 export default function Inicio() {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   const estado = useEstadoApp()
   const { fijarPerfil, objetivos, edadSemanas, elegirCultivo } = estado
-  const entrada = entradaDe(estado)
+  const entrada = entradaDe(estado, idioma)
   const cultivo = buscarCultivo(entrada?.cultivoId ?? null)
   // 'todo' = el cuestionario completo; una clave = solo esa pregunta, abierta desde un chip.
   const [editando, fijarEditando] = useState<ClavePregunta | 'todo' | null>(null)
@@ -291,7 +312,7 @@ export default function Inicio() {
     <div className="pantalla">
       <div className={estilos.medio} aria-busy={decision.estado === 'calculando'}>
         <header className={estilos.seccion}>
-          <h1 className={estilos.pregunta}>¿Qué sembrar después?</h1>
+          <h1 className={estilos.pregunta}>{t('plan.queSembrarDespues')}</h1>
           <EtiquetasCultivo
             elegido={entrada.cultivoId}
             alElegir={(id) => {
@@ -307,7 +328,7 @@ export default function Inicio() {
         {decision.estado === 'calculando' && (
           <section className={estilos.seccion}>
             <p className={estilos.ayuda} role="status">
-              Comparando rotaciones…
+              {t('comun.calculando')}
             </p>
             <ul className={estilos.podio} aria-hidden="true">
               {[0, 1, 2].map((i) => (
@@ -318,9 +339,9 @@ export default function Inicio() {
         )}
         {decision.estado === 'error' && (
           <div className={estilos.error} role="alert">
-            <p>No se pudo leer el pronóstico de su lugar.</p>
+            <p>{t('comun.errorPronostico')}</p>
             <Boton variante="tonal" icono="refresh" onClick={() => fijarIntento((i) => i + 1)}>
-              Reintentar
+              {t('comun.reintentar')}
             </Boton>
           </div>
         )}
@@ -331,8 +352,8 @@ export default function Inicio() {
         <SusRespuestas entrada={entrada} semanas={edadSemanas} parcela={d?.punto.parcela} alCambiar={fijarEditando} />
 
         <p className="tipo-nota">
-          Es una ayuda para pensar: la decisión final es suya y de su técnico.
-          {d && ` Pronóstico de Kharis con datos hasta el ${fechaEnPalabras(d.punto.fechaBase)}.`}
+          {t('comun.ayudaPensar')}
+          {d && t('plan.pronostico', { fecha: fechaEnPalabras(d.punto.fechaBase, idioma) })}
         </p>
       </div>
     </div>

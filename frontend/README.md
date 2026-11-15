@@ -61,3 +61,27 @@ límites reales de geoBoundaries y OpenStreetMap (ODbL), simplificados.
 El contenido de `cultivos.ts` y `rotaciones.ts` es ilustrativo y está pendiente de validación
 agronómica. `zonas.generado.json` lo produce `scripts/generar_datos_zonas.py` a partir de
 `data/processed/`; no se edita a mano.
+
+## Idiomas (i18n)
+
+La aplicación está en español, portugués e inglés con [i18next](https://www.i18next.com/) y
+`react-i18next`. El idioma se elige en la barra superior y se recuerda en `localStorage`
+(`agroresilience.idioma`). Al entrar se usa, en este orden: `?lang=pt` en la URL, lo guardado y el
+idioma del navegador; si no es ninguno de los tres, español.
+
+- `src/i18n/recursos/es.ts`, `pt.ts`, `en.ts`: los textos. `es.ts` es la base; `pt` y `en` se tipan
+  con su forma (`Recursos`), así que **si falta una clave, `npm run typecheck` falla**. La prueba
+  `src/i18n/i18n.test.tsx` comprueba además que las variables `{{x}}` coincidan.
+- `src/i18n/index.ts`: instancia del navegador (React + detección). En componentes:
+  `const { t } = useTranslation()`; `useIdioma()` da el idioma actual.
+- `src/i18n/traductor.ts`: `traductor(idioma)` sin React ni DOM. Lo usan el motor de decisión, los
+  textos de Gemini y las funciones de `api/`.
+- `src/i18n/dominio.ts`: nombres de cultivos, etapas y partes del puntaje. Los datos de `src/datos/`
+  siguen en español y se traducen al mostrarlos, por su id.
+
+La entrada de Gemini Decision lleva un campo opcional `idioma`: el motor escribe razones, riesgos y
+evidencia en ese idioma (los puntajes no cambian) y Gemini recibe sus instrucciones en él. Los nombres
+de lugares y departamentos no se traducen.
+
+Para agregar un idioma: copiar `es.ts`, traducirlo, registrarlo en `IDIOMAS` y `LOCALE`
+(`src/i18n/idiomas.ts`), en `recursos` (`src/i18n/traductor.ts`) y en `app.idiomas` de cada recurso.

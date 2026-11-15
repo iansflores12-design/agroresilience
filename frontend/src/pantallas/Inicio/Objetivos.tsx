@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
@@ -8,8 +9,9 @@ import estilos from './Inicio.module.css'
 
 /** Los objetivos del productor: se marcan y desmarcan. Los usan el cuestionario y la pantalla Plan. */
 export function Objetivos({ elegidos, alternar }: { elegidos: Objetivo[]; alternar: (o: Objetivo) => void }) {
+  const { t } = useTranslation()
   return (
-    <ul className={estilos.objetivos} aria-label="Objetivos">
+    <ul className={estilos.objetivos} aria-label={t('inicio.objetivos')}>
       {(Object.keys(OBJETIVOS) as Objetivo[]).map((o) => {
         const marcado = elegidos.includes(o)
         return (
@@ -23,8 +25,8 @@ export function Objetivos({ elegidos, alternar }: { elegidos: Objetivo[]; altern
                 <Icono nombre={marcado ? 'check' : ICONO_OBJETIVO[o]} tamano={24} />
               </span>
               <span className={estilos.textoOpcion}>
-                <span className={estilos.nombreOpcion}>{OBJETIVOS[o].nombre}</span>
-                <span className="tipo-nota">{OBJETIVOS[o].descripcion}</span>
+                <span className={estilos.nombreOpcion}>{t(`objetivos.${o}.nombre`)}</span>
+                <span className="tipo-nota">{t(`objetivos.${o}.descripcion`)}</span>
               </span>
             </Control>
           </li>

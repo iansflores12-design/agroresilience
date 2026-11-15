@@ -1,4 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useIdioma } from '../../i18n'
+import { nombreCultivo, nombreEtapa } from '../../i18n/dominio'
 import { Boton } from '../../componentes/Boton'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { buscarCultivo, cultivos, etapaEnSemana } from '../../datos/cultivos'
@@ -30,30 +33,10 @@ export interface PropsSiembra {
   geo?: Pick<Geolocation, 'getCurrentPosition'>
 }
 
-const TITULOS: Record<PasoSiembra, string> = {
-  cultivo: '¿Qué sembró?',
-  dias: '¿Hace cuánto sembró?',
-  objetivo: '¿Qué quiere lograr?',
-  terreno: 'Cuéntenos de su terreno',
-  ubicacion: '¿Dónde está su terreno?',
-  resultado: 'Lo que le recomendamos',
-}
-
-const TEXTURAS: { id: Textura; nombre: string }[] = [
-  { id: 'arenoso', nombre: 'Arenosa (suelta)' },
-  { id: 'franco', nombre: 'Media (franca)' },
-  { id: 'arcilloso', nombre: 'Arcillosa (pesada)' },
-]
-const PENDIENTES: { id: Pendiente; nombre: string }[] = [
-  { id: 'plana', nombre: 'Plana' },
-  { id: 'ondulada', nombre: 'Algo inclinada' },
-  { id: 'inclinada', nombre: 'Muy inclinada' },
-]
-const DRENAJES: { id: Drenaje; nombre: string }[] = [
-  { id: 'bueno', nombre: 'El agua se va rápido' },
-  { id: 'regular', nombre: 'El agua se va despacio' },
-  { id: 'malo', nombre: 'El agua se queda encharcada' },
-]
+// Los nombres de cada opcion salen de `siembra.*` en el idioma actual.
+const TEXTURAS: Textura[] = ['arenoso', 'franco', 'arcilloso']
+const PENDIENTES: Pendiente[] = ['plana', 'ondulada', 'inclinada']
+const DRENAJES: Drenaje[] = ['bueno', 'regular', 'malo']
 
 interface PropsGrupo<T extends string> {
   leyenda: string
@@ -84,14 +67,17 @@ function formatoGrados(n: number) {
 }
 
 export default function Siembra({ geo }: PropsSiembra) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
   const [respuestas, setRespuestas] = useState<RespuestasParciales>({})
   const [paso, setPaso] = useState<PasoSiembra>('cultivo')
-  const [error, setError] = useState<string | null>(null)
+  // Hay un error de validacion a la vista: el mensaje se vuelve a calcular en el idioma actual.
+  const [conError, setConError] = useState(false)
   const [diasTexto, setDiasTexto] = useState('')
   const [cargandoGps, setCargandoGps] = useState(false)
   const [errorGps, setErrorGps] = useState<ErrorGps | null>(null)
   const [textoCoord, setTextoCoord] = useState('')
-  const [errorCoord, setErrorCoord] = useState<string | null>(null)
+  const [errorCoord, setErrorCoord] = useState<'coordNoEntendidas' | 'coordFuera' | null>(null)
   const encabezado = useRef<HTMLHeadingElement>(null)
   const idDias = useId()
   const idCoord = useId()
@@ -106,18 +92,18 @@ export default function Siembra({ geo }: PropsSiembra) {
   const etapaCalculada = cultivo && dias !== undefined ? etapaEnSemana(cultivo, dias / 7) : null
 
   const resultado = useMemo(
-    () => (paso === 'resultado' && respuestasCompletas(respuestas) ? recomendar(respuestas) : null),
-    [paso, respuestas],
+    () => (paso === 'resultado' && respuestasCompletas(respuestas) ? recomendar(respuestas, undefined, idioma) : null),
+    [paso, respuestas, idioma],
   )
 
   const cambiar = (parcial: RespuestasParciales) => {
     setRespuestas((r) => ({ ...r, ...parcial }))
-    setError(null)
+    setConError(false)
   }
 
   const cambiarTerreno = (parcial: Partial<Terreno>) => {
     setRespuestas((r) => ({ ...r, terreno: { ...r.terreno, ...parcial } as Terreno }))
-    setError(null)
+    setConError(false)
   }
 
   const escribirDias = (texto: string) => {
@@ -125,28 +111,27 @@ export default function Siembra({ geo }: PropsSiembra) {
     const limpio = texto.trim()
     const n = Number(limpio)
     setRespuestas((r) => ({ ...r, diasDesdeSiembra: limpio !== '' && Number.isFinite(n) ? n : undefined }))
-    setError(null)
+    setConError(false)
   }
 
   const siguiente = () => {
-    const msg = validarPaso(paso, respuestas)
-    if (msg) {
-      setError(msg)
+    if (validarPaso(paso, respuestas)) {
+      setConError(true)
       return
     }
-    setError(null)
+    setConError(false)
     setPaso(siguientePaso(paso))
   }
 
   const atras = () => {
-    setError(null)
+    setConError(false)
     setPaso(pasoAnterior(paso))
   }
 
   const reiniciar = () => {
     setRespuestas({})
     setDiasTexto('')
-    setError(null)
+    setConError(false)
     setErrorGps(null)
     setErrorCoord(null)
     setTextoCoord('')
@@ -169,11 +154,11 @@ export default function Siembra({ geo }: PropsSiembra) {
   const usarCoordenadas = () => {
     const c = parsearCoordenadas(textoCoord)
     if (!c) {
-      setErrorCoord('No entendimos las coordenadas. Escriba latitud y longitud, por ejemplo: 14.65, -86.21.')
+      setErrorCoord('coordNoEntendidas')
       return
     }
     if (!dentroDeCaja(c.lat, c.lon, condicionesMock.caja)) {
-      setErrorCoord('Esas coordenadas están fuera de Honduras. Revíselas.')
+      setErrorCoord('coordFuera')
       return
     }
     setErrorCoord(null)
@@ -183,22 +168,24 @@ export default function Siembra({ geo }: PropsSiembra) {
 
   const ubicacion: Ubicacion | undefined = respuestas.ubicacion
   const numero = Math.min(PASOS_NUMERADOS.indexOf(paso) + 1, 5)
+  const error = conError ? validarPaso(paso, respuestas, idioma) : null
+  const opciones = <T extends string>(ids: T[], grupo: string) => ids.map((id) => ({ id, nombre: t(`siembra.${grupo}.${id as string}`) }))
 
   return (
     <div className={estilos.medio}>
-      <h1 className={estilos.titulo}>Recomendación de siembra</h1>
-      {paso !== 'resultado' && <p className={estilos.progreso}>Paso {numero} de 5</p>}
+      <h1 className={estilos.titulo}>{t('siembra.titulo')}</h1>
+      {paso !== 'resultado' && <p className={estilos.progreso}>{t('siembra.paso', { n: numero })}</p>}
 
       <section className={estilos.paso} aria-labelledby="titulo-paso">
         <h2 id="titulo-paso" ref={encabezado} tabIndex={-1} className={estilos.encabezado}>
-          {TITULOS[paso]}
+          {t(`siembra.titulos.${paso}`)}
         </h2>
 
         {paso === 'cultivo' && (
           <GrupoRadios
-            leyenda="Cultivo"
+            leyenda={t('siembra.leyendaCultivo')}
             nombre="cultivo"
-            opciones={cultivos.map((c) => ({ id: c.id, nombre: c.nombre }))}
+            opciones={cultivos.map((c) => ({ id: c.id, nombre: nombreCultivo(t, c.id) }))}
             valor={respuestas.cultivoId}
             alElegir={(id) => cambiar({ cultivoId: id })}
           />
@@ -206,7 +193,7 @@ export default function Siembra({ geo }: PropsSiembra) {
 
         {paso === 'dias' && (
           <div className={estilos.campo}>
-            <label htmlFor={idDias}>Días desde la siembra</label>
+            <label htmlFor={idDias}>{t('siembra.diasDesde')}</label>
             <input
               id={idDias}
               type="text"
@@ -215,16 +202,16 @@ export default function Siembra({ geo }: PropsSiembra) {
               onChange={(e) => escribirDias(e.target.value)}
             />
             {etapaCalculada && (
-              <p className={estilos.nota}>Su cultivo está en la etapa: {etapaCalculada.nombre}.</p>
+              <p className={estilos.nota}>{t('siembra.etapa', { etapa: cultivo ? nombreEtapa(t, cultivo.id, etapaCalculada) : etapaCalculada.nombre })}</p>
             )}
           </div>
         )}
 
         {paso === 'objetivo' && (
           <GrupoRadios
-            leyenda="Objetivo"
+            leyenda={t('siembra.leyendaObjetivo')}
             nombre="objetivo"
-            opciones={OBJETIVOS}
+            opciones={OBJETIVOS.map((o) => ({ id: o.id, nombre: t(`siembra.objetivos.${o.id}`) }))}
             valor={respuestas.objetivo}
             alElegir={(id) => cambiar({ objetivo: id })}
           />
@@ -233,32 +220,32 @@ export default function Siembra({ geo }: PropsSiembra) {
         {paso === 'terreno' && (
           <>
             <GrupoRadios
-              leyenda="Tierra"
+              leyenda={t('siembra.leyendaTierra')}
               nombre="textura"
-              opciones={TEXTURAS}
+              opciones={opciones(TEXTURAS, 'texturas')}
               valor={respuestas.terreno?.textura}
               alElegir={(id) => cambiarTerreno({ textura: id })}
             />
             <GrupoRadios
-              leyenda="Pendiente"
+              leyenda={t('siembra.leyendaPendiente')}
               nombre="pendiente"
-              opciones={PENDIENTES}
+              opciones={opciones(PENDIENTES, 'pendientes')}
               valor={respuestas.terreno?.pendiente}
               alElegir={(id) => cambiarTerreno({ pendiente: id })}
             />
             <GrupoRadios
-              leyenda="Drenaje"
+              leyenda={t('siembra.leyendaDrenaje')}
               nombre="drenaje"
-              opciones={DRENAJES}
+              opciones={opciones(DRENAJES, 'drenajes')}
               valor={respuestas.terreno?.drenaje}
               alElegir={(id) => cambiarTerreno({ drenaje: id })}
             />
             <GrupoRadios
-              leyenda="¿Tiene riego?"
+              leyenda={t('siembra.tieneRiego')}
               nombre="riego"
               opciones={[
-                { id: 'si', nombre: 'Sí' },
-                { id: 'no', nombre: 'No' },
+                { id: 'si', nombre: t('siembra.si') },
+                { id: 'no', nombre: t('siembra.no') },
               ]}
               valor={
                 respuestas.terreno?.tieneRiego === undefined ? undefined : respuestas.terreno.tieneRiego ? 'si' : 'no'
@@ -272,23 +259,23 @@ export default function Siembra({ geo }: PropsSiembra) {
           <>
             <div className={estilos.gps}>
               <Boton variante="tonal" icono="my_location" onClick={usarGps} disabled={cargandoGps} aria-busy={cargandoGps}>
-                Usar mi ubicación (GPS)
+                {t('siembra.usarGps')}
               </Boton>
-              {cargandoGps && <p className={estilos.estadoGps}>Buscando su ubicación…</p>}
+              {cargandoGps && <p className={estilos.estadoGps}>{t('siembra.buscando')}</p>}
               {errorGps && (
                 <p className={estilos.error} role="status">
-                  {mensajeErrorGps(errorGps)}
+                  {mensajeErrorGps(errorGps, idioma)}
                 </p>
               )}
               {ubicacion && !cargandoGps && (
                 <p className={estilos.estadoGps}>
-                  Ubicación: {formatoGrados(ubicacion.lat)}, {formatoGrados(ubicacion.lon)}
-                  {ubicacion.precisionM !== null && ` (precisión de ${Math.round(ubicacion.precisionM)} m)`}
+                  {t('siembra.ubicacion', { lat: formatoGrados(ubicacion.lat), lon: formatoGrados(ubicacion.lon) })}
+                  {ubicacion.precisionM !== null && t('siembra.precision', { m: Math.round(ubicacion.precisionM) })}
                 </p>
               )}
             </div>
             <div className={estilos.campo}>
-              <label htmlFor={idCoord}>O escriba las coordenadas</label>
+              <label htmlFor={idCoord}>{t('siembra.oCoordenadas')}</label>
               <input
                 id={idCoord}
                 type="text"
@@ -297,11 +284,11 @@ export default function Siembra({ geo }: PropsSiembra) {
                 onChange={(e) => setTextoCoord(e.target.value)}
               />
               <Boton variante="contorno" onClick={usarCoordenadas}>
-                Usar estas coordenadas
+                {t('siembra.usarCoordenadas')}
               </Boton>
               {errorCoord && (
                 <p className={estilos.error} role="alert">
-                  {errorCoord}
+                  {t(`siembra.${errorCoord}`)}
                 </p>
               )}
             </div>
@@ -311,37 +298,37 @@ export default function Siembra({ geo }: PropsSiembra) {
         {paso === 'resultado' && resultado && (
           <>
             {resultado.origenDatos === 'mockup' && (
-              <p className={estilos.aviso}>Datos de ejemplo (mockup): no son mediciones reales</p>
+              <p className={estilos.aviso}>{t('siembra.mockup')}</p>
             )}
-            <Tarjeta como="section" className={estilos.destacada} aria-label="Mejor opción">
+            <Tarjeta como="section" className={estilos.destacada} aria-label={t('siembra.mejorOpcion')}>
               <p className={estilos.nombreMejor}>{resultado.mejor.nombre}</p>
-              <p className={estilos.puntaje}>{resultado.mejor.puntaje} de 100</p>
+              <p className={estilos.puntaje}>{t('comun.deCien', { valor: resultado.mejor.puntaje })}</p>
               <ul className={estilos.razones}>
                 {resultado.mejor.razones.map((r) => (
                   <li key={r}>{r}</li>
                 ))}
               </ul>
             </Tarjeta>
-            <h3 className={estilos.leyenda}>Otras opciones</h3>
+            <h3 className={estilos.leyenda}>{t('siembra.otrasOpciones')}</h3>
             <ol className={estilos.lista}>
               {resultado.opciones
                 .filter((o) => o.id !== resultado.mejor.id)
                 .map((o) => (
                   <li key={o.id} className={estilos.item}>
-                    {o.nombre}: {o.puntaje} de 100
+                    {t('siembra.opcionPuntaje', { nombre: o.nombre, puntaje: o.puntaje })}
                   </li>
                 ))}
             </ol>
             <p className={estilos.nota}>
-              Datos del punto: {resultado.punto.nombre}, a {resultado.punto.distanciaKm.toFixed(1)} km de su terreno.
+              {t('siembra.datosPunto', { punto: resultado.punto.nombre, km: resultado.punto.distanciaKm.toFixed(1) })}
             </p>
-            <p className={estilos.nota}>Etapa del cultivo: {resultado.etapa.nombre}.</p>
+            <p className={estilos.nota}>{t('siembra.etapaCultivo', { etapa: resultado.etapa.nombre })}</p>
           </>
         )}
 
         {paso === 'resultado' && !resultado && (
           <p className={estilos.error} role="alert">
-            Faltan respuestas para recomendar.
+            {t('siembra.faltan')}
           </p>
         )}
 
@@ -356,21 +343,21 @@ export default function Siembra({ geo }: PropsSiembra) {
             <>
               {!resultado && (
                 <Boton variante="tonal" onClick={() => setPaso(primerPasoIncompleto(respuestas))}>
-                  Completar respuestas
+                  {t('siembra.completar')}
                 </Boton>
               )}
               <Boton variante="relleno" icono="refresh" onClick={reiniciar}>
-                Empezar de nuevo
+                {t('siembra.empezar')}
               </Boton>
             </>
           ) : (
             <>
               {paso !== 'cultivo' && (
                 <Boton variante="contorno" onClick={atras}>
-                  Atrás
+                  {t('comun.atras')}
                 </Boton>
               )}
-              <Boton onClick={siguiente}>Siguiente</Boton>
+              <Boton onClick={siguiente}>{t('comun.siguiente')}</Boton>
             </>
           )}
         </div>

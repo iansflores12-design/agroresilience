@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { lista as listaT } from '../../i18n/traductor'
 import { Boton } from '../../componentes/Boton'
 import { BotonIcono } from '../../componentes/BotonIcono'
 import { Chip } from '../../componentes/Chip'
@@ -8,29 +10,31 @@ import { crearClienteHttp } from '../../lib/chat/clienteHttp'
 import { ContenidoMensaje, MensajeEscribiendose } from '../Chat/Enriquecido'
 import estilos from './Rotacion.module.css'
 
-const SUGERENCIAS = ['¿Qué necesito para empezar?', '¿Y si llueve menos de lo previsto?', '¿Por qué no la otra opción?']
-
 let siguienteId = 0
 
 /** Chat de seguimiento sobre una rotacion. Gemini recibe el ranking y la evidencia de la consulta. */
 export function ChatSeguimiento({
   contexto,
   cliente,
-  titulo = 'Pregunte sobre esta rotación',
-  sugerencias = SUGERENCIAS,
+  titulo: tituloDado,
+  sugerencias: sugerenciasDadas,
   respaldo,
 }: {
   contexto: ContextoChat
   cliente?: ClienteChat
+  /** Por defecto, "Pregunte sobre esta rotación" en el idioma actual. */
   titulo?: string
   sugerencias?: string[]
   /** Respuesta preparada de antemano con los datos de la decisión, por si Gemini no contesta. */
   respaldo?: (pregunta: string) => string
 }) {
+  const { t } = useTranslation()
+  const titulo = tituloDado ?? t('chatSeguimiento.titulo')
+  const sugerencias = sugerenciasDadas ?? listaT(t, 'chatSeguimiento.sugerencias')
   const [mensajes, fijarMensajes] = useState<MensajeChat[]>([])
   const [texto, fijarTexto] = useState('')
   const [esperando, fijarEsperando] = useState(false)
-  const [error, fijarError] = useState<string | null>(null)
+  const [error, fijarError] = useState<'no' | 'reintentar' | 'respaldo'>('no')
   const control = useRef<AbortController | null>(null)
   const clienteReal = useRef<ClienteChat>(cliente ?? crearClienteHttp('/api'))
 
@@ -43,7 +47,7 @@ export function ChatSeguimiento({
     const conNuevo = [...lista, nuevo]
     fijarMensajes(conNuevo)
     fijarTexto('')
-    fijarError(null)
+    fijarError('no')
     const c = new AbortController()
     control.current = c
     fijarEsperando(true)
@@ -54,10 +58,10 @@ export function ChatSeguimiento({
       if (c.signal.aborted || (e instanceof ErrorChat && e.causa === 'cancelado')) return
       if (respaldo) {
         fijarMensajes((m) => [...m, { id: `s${++siguienteId}`, rol: 'asistente', texto: respaldo(limpio), fecha: new Date().toISOString() }])
-        fijarError('La IA no contestó. Le dejamos un resumen rápido con los datos de su consulta.')
+        fijarError('respaldo')
         return
       }
-      fijarError('La IA no contestó. Su pregunta quedó escrita: puede reintentar.')
+      fijarError('reintentar')
       fijarMensajes(lista)
       fijarTexto(limpio)
     } finally {
@@ -78,7 +82,7 @@ export function ChatSeguimiento({
         {titulo}
       </h2>
       {mensajes.length === 0 && (
-        <div className={estilos.sugerencias} role="group" aria-label="Sugerencias">
+        <div className={estilos.sugerencias} role="group" aria-label={t('comun.sugerencias')}>
           {sugerencias.map((s) => (
             <Chip key={s} onClick={() => void enviar(s)}>
               {s}
@@ -86,7 +90,7 @@ export function ChatSeguimiento({
           ))}
         </div>
       )}
-      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={`Conversación: ${titulo}`}>
+      <div className={estilos.mensajes} role="log" aria-live="polite" aria-label={t('chatSeguimiento.conversacion', { titulo })}>
         {mensajes.map((m, i) => (
           m.rol === 'usuario' ? (
             <p key={m.id} className={estilos.burbujaUsuario}>
@@ -104,31 +108,31 @@ export function ChatSeguimiento({
         ))}
         {esperando && (
           <p className={estilos.burbujaAsistente}>
-            <span className="solo-lectores">La IA está escribiendo</span>
+            <span className="solo-lectores">{t('chatSeguimiento.escribiendo')}</span>
             <span aria-hidden="true">…</span>
           </p>
         )}
       </div>
-      {error && (
+      {error !== 'no' && (
         <p className={estilos.fallo} role="alert">
-          {error}
+          {t(error === 'respaldo' ? 'chatSeguimiento.errorRespaldo' : 'chatSeguimiento.error')}
         </p>
       )}
       <div className={estilos.redactor}>
         <textarea
           className={estilos.campo}
-          aria-label="Su pregunta"
-          placeholder="Escriba su pregunta"
+          aria-label={t('chatSeguimiento.suPregunta')}
+          placeholder={t('comun.escribaPregunta')}
           rows={2}
           value={texto}
           onChange={(e) => fijarTexto(e.target.value)}
           onKeyDown={alTeclear}
         />
         {esperando ? (
-          <BotonIcono icono="stop" etiqueta="Detener" variante="relleno" onClick={() => control.current?.abort()} />
+          <BotonIcono icono="stop" etiqueta={t('comun.detener')} variante="relleno" onClick={() => control.current?.abort()} />
         ) : (
           <Boton icono="send" disabled={texto.trim() === ''} onClick={() => void enviar(texto)}>
-            Enviar
+            {t('comun.enviar')}
           </Boton>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { asentar, tic, vibrar } from '../../lib/sonido'
 import { BotonIcono } from '../BotonIcono'
 import estilos from './SelectorDeslizable.module.css'
@@ -86,6 +87,7 @@ export function SelectorDeslizable({
   alSoltar,
   textoValor,
 }: PropsSelectorDeslizable) {
+  const { t } = useTranslation()
   const total = Math.max(0, Math.round((max - min) / paso))
   const raiz = useRef<HTMLDivElement>(null)
   const regla = useRef<HTMLDivElement>(null)
@@ -343,7 +345,7 @@ export function SelectorDeslizable({
     <div className={estilos.conjunto}>
       <BotonIcono
         icono="remove"
-        etiqueta={`Disminuir ${etiqueta.toLowerCase()}`}
+        etiqueta={t('selector.disminuir', { etiqueta: etiqueta.toLowerCase() })}
         variante="tonal"
         disabled={idxValor <= 0}
         onClick={() => irA(motor.current.objetivo - 1)}
@@ -382,7 +384,7 @@ export function SelectorDeslizable({
       </div>
       <BotonIcono
         icono="add"
-        etiqueta={`Aumentar ${etiqueta.toLowerCase()}`}
+        etiqueta={t('selector.aumentar', { etiqueta: etiqueta.toLowerCase() })}
         variante="tonal"
         disabled={idxValor >= total}
         onClick={() => irA(motor.current.objetivo + 1)}
