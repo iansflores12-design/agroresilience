@@ -13,6 +13,8 @@
 
 html {
   background-color: var(--md-sys-color-surface);
+  /* Movil primero: sin rebote ni "tirar para recargar" al llegar al borde. */
+  overscroll-behavior-y: none;
 }
 
 body {

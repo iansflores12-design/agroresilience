@@ -5,7 +5,9 @@ import { leerKharis } from './kharis'
 import { decidir } from './motor'
 import type { Decision, EntradaDecision } from './tipos'
 
-const API = '/api'
+// Misma base que el chat: '/api' en la web; URL absoluta (o vacia, sin backend) en Android.
+const urlApi: unknown = import.meta.env.VITE_API_URL
+const API = (typeof urlApi === 'string' ? urlApi.trim() : '/api').replace(/\/+$/, '')
 const KHARIS = '/kharis/'
 
 function esDecision(x: unknown): x is Decision {
@@ -24,6 +26,7 @@ export async function decidirLocal(entrada: EntradaDecision): Promise<Decision> 
  * funcion), la calcula aqui: el resultado es identico porque el codigo es el mismo.
  */
 export async function pedirDecision(entrada: EntradaDecision, signal?: AbortSignal): Promise<Decision> {
+  if (!API) return decidirLocal(entrada)
   try {
     const r = await fetch(`${API}/decision`, {
       method: 'POST',
@@ -57,6 +60,10 @@ export async function pedirAnalisis(
   alEvento: (e: EventoServidor) => void,
   signal: AbortSignal,
 ): Promise<void> {
+  if (!API) {
+    alEvento({ tipo: 'error', causa: 'servidor' })
+    return
+  }
   let r: Response
   try {
     r = await fetch(`${API}/analisis`, {

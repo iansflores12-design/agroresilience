@@ -13,6 +13,7 @@ import { TOP3, buscarRotacion, datosParaGemini, instruccionesGemini, pedidoPara 
 import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiEnVivo, hayClave } from './_gemini.js'
 import { decisionPara, historicoPara, json, leerCuerpo } from './_comun.js'
+export { OPTIONS } from './_comun.js'
 
 export async function POST(request: Request): Promise<Response> {
   const cuerpo = await leerCuerpo(request)

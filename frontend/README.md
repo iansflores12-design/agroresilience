@@ -35,6 +35,26 @@ src/
   pruebas/          configuración de Vitest y ayudantes
 ```
 
+## App nativa de Android (rama `mobile`)
+
+La misma interfaz, móvil primero, empaquetada con [Capacitor](https://capacitorjs.com) en
+`android/` (id `hn.agroresilience.app`). Requiere Node 22 o superior y Android Studio con su SDK.
+
+```sh
+npm run build:android   # compila en modo "android" y copia dist/ al proyecto nativo
+npm run android         # lo anterior y abre el proyecto en Android Studio (Run ▶ para el teléfono)
+npm run apk             # APK de depuración en android/app/build/outputs/apk/debug/
+```
+
+- **Backend:** la app corre desde `https://localhost`, así que `VITE_API_URL` va en
+  `.env.android` con URL absoluta (`https://<dominio>/api`). `vercel.json` y `api/_comun.ts`
+  (`OPTIONS`) permiten ese origen. Vacía, la app funciona sin red: la decisión se calcula en el
+  teléfono y el chat queda en modo demostración.
+- **Ubicación:** el manifiesto pide `ACCESS_FINE_LOCATION`; Android pregunta la primera vez que
+  se toca "Usar mi ubicación".
+- Tras cambiar la web, `npm run build:android` otra vez; `android/app/src/main/assets/public` se
+  regenera y no se versiona.
+
 ## Gemini Decision y backend
 
 `api/` tiene las funciones del backend (`decision`, `analisis`, `chat`). En local, `npm run dev`

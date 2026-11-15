@@ -44,6 +44,22 @@ export async function historicoPara(decision: Decision, urlPeticion: string): Pr
   return recorteHistorico(await leerHistorico(new URL('/historico/', urlPeticion).href, decision.punto.id, leerArchivo), decision)
 }
 
+/**
+ * Preflight CORS de la app nativa de Android (corre desde https://localhost). Las cabeceras de
+ * las respuestas normales las pone vercel.json.
+ */
+export function OPTIONS(): Response {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://localhost',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  })
+}
+
 export function json(dato: unknown, estado = 200): Response {
   return new Response(JSON.stringify(dato), {
     status: estado,

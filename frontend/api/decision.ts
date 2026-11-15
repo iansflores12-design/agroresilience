@@ -4,6 +4,7 @@
 
 import { validarEntrada } from '../src/lib/decision/motor.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
+export { OPTIONS } from './_comun.js'
 
 export async function POST(request: Request): Promise<Response> {
   const cuerpo = await leerCuerpo(request)

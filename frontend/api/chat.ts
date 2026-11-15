@@ -8,6 +8,7 @@ import { normalizarIdioma, type Idioma } from '../src/i18n/idiomas.js'
 import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiTexto, type MensajeGemini } from './_gemini.js'
 import { decisionPara, historicoPara, json, leerCuerpo } from './_comun.js'
+export { OPTIONS } from './_comun.js'
 
 const MAX_MENSAJES = 20
 // Lo que el chat sabe dibujar ademas de texto (ver src/pantallas/Chat/Enriquecido.tsx): `geminiTop3.piezasVisuales`.
