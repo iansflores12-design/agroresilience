@@ -27,6 +27,12 @@ const pt: Recursos = {
     validando: 'Verificando…',
     error: 'Não foi possível verificar. Confira sua conexão e tente de novo.',
   },
+  verificacion: {
+    titulo: 'Um momento',
+    texto: 'Verificamos que você é uma pessoa antes de abrir o AgroResilience.',
+    validando: 'Verificando…',
+    error: 'Não foi possível verificar. Confira sua conexão e tente de novo.',
+  },
   nav: {
     reordenarAyuda: 'Arraste para mudar a ordem, ou use Alt e as setas.',
     movido: '{{destino}}: posição {{n}} de {{total}}',

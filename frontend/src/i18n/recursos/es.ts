@@ -24,6 +24,12 @@ const es = {
     validando: 'Verificando…',
     error: 'No se pudo verificar. Revise su conexión e inténtelo de nuevo.',
   },
+  verificacion: {
+    titulo: 'Un momento',
+    texto: 'Comprobamos que es una persona antes de abrir AgroResilience.',
+    validando: 'Verificando…',
+    error: 'No se pudo verificar. Revise su conexión e inténtelo de nuevo.',
+  },
   nav: {
     reordenarAyuda: 'Arrastre para cambiar el orden, o use Alt y las flechas.',
     movido: '{{destino}}: posición {{n}} de {{total}}',

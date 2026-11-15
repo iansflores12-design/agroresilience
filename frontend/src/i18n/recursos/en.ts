@@ -27,6 +27,12 @@ const en: Recursos = {
     validando: 'Verifying…',
     error: 'Verification failed. Check your connection and try again.',
   },
+  verificacion: {
+    titulo: 'One moment',
+    texto: 'We are checking that you are a person before opening AgroResilience.',
+    validando: 'Verifying…',
+    error: 'Verification failed. Check your connection and try again.',
+  },
   nav: {
     reordenarAyuda: 'Drag to change the order, or use Alt and the arrow keys.',
     movido: '{{destino}}: position {{n}} of {{total}}',
