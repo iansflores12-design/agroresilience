@@ -1,0 +1,34 @@
+.descarga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3) var(--esp-4);
+}
+
+.icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.texto {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.apoyo {
+  font: var(--tipo-cuerpo);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.accion {
+  flex: none;
+}

@@ -7,6 +7,7 @@ import { lista as listaT } from '../../i18n/traductor'
 import { Boton } from '../../componentes/Boton'
 import { Chip } from '../../componentes/Chip'
 import { Control } from '../../componentes/Control'
+import { DescargaAndroid } from '../../componentes/DescargaAndroid'
 import { Icono } from '../../componentes/Icono'
 import { clases } from '../../componentes/clases'
 import { DondeSeDa } from '../../componentes/decision/DondeSeDa'
@@ -322,6 +323,7 @@ export default function Inicio() {
               fijarEditando(null)
             }}
           />
+          {!entrada && <DescargaAndroid />}
         </div>
       </div>
     )
@@ -397,6 +399,8 @@ export default function Inicio() {
         >
           {t('plan.volverInicio')}
         </Boton>
+
+        <DescargaAndroid />
       </div>
     </div>
   )

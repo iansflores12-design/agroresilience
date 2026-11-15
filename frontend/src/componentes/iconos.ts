@@ -38,6 +38,8 @@ import Psychiatry from '@material-symbols/svg-400/rounded/psychiatry.svg?react'
 import Stop from '@material-symbols/svg-400/rounded/stop.svg?react'
 import LocationOn from '@material-symbols/svg-400/rounded/location_on.svg?react'
 import Science from '@material-symbols/svg-400/rounded/science.svg?react'
+import Android from '@material-symbols/svg-400/rounded/android.svg?react'
+import Download from '@material-symbols/svg-400/rounded/download.svg?react'
 import Schedule from '@material-symbols/svg-400/rounded/schedule.svg?react'
 import Person from '@material-symbols/svg-400/rounded/person.svg?react'
 import ExpandMore from '@material-symbols/svg-400/rounded/keyboard_arrow_down.svg?react' // equivalente de expand_more
@@ -120,6 +122,8 @@ export const iconos = {
   stop: Stop,
   location_on: LocationOn,
   science: Science,
+  android: Android,
+  download: Download,
   schedule: Schedule,
   person: Person,
   expand_more: ExpandMore,
