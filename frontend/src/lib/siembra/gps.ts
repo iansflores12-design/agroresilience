@@ -1,4 +1,5 @@
 // GPS y utilidades de ubicacion. Logica pura, sin React.
+import { traductor } from '../../i18n/traductor'
 import { condicionesMock } from './condiciones'
 import type { CondicionesArchivo, ErrorGps, PuntoCondiciones, Ubicacion } from './tipos'
 
@@ -10,19 +11,9 @@ export function esErrorGps(e: unknown): e is Error & { message: ErrorGps } {
   return e instanceof Error && (ERRORES as string[]).includes(e.message)
 }
 
-export function mensajeErrorGps(e: ErrorGps): string {
-  switch (e) {
-    case 'no_disponible':
-      return 'Este aparato no tiene GPS disponible. Puede escribir las coordenadas a mano.'
-    case 'permiso':
-      return 'No dio permiso para usar su ubicación. Puede escribir las coordenadas a mano.'
-    case 'posicion':
-      return 'No pudimos encontrar su posición. Intente de nuevo o escriba las coordenadas a mano.'
-    case 'tiempo':
-      return 'El GPS tardó demasiado. Intente de nuevo, salga a un lugar abierto o escriba las coordenadas a mano.'
-    case 'fuera_de_zona':
-      return 'Su ubicación está fuera de Honduras. Revise o escriba las coordenadas a mano.'
-  }
+/** Mensaje del error de GPS en el idioma dado (por defecto, español). */
+export function mensajeErrorGps(e: ErrorGps, idioma?: string | null): string {
+  return traductor(idioma)(`siembra.gps.${e}`)
 }
 
 export function dentroDeCaja(lat: number, lon: number, caja: Caja): boolean {

@@ -1,4 +1,8 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { useIdioma } from '../../i18n'
+import { nombreCultivo, nombreEtapa } from '../../i18n/dominio'
 import { Boton } from '../../componentes/Boton'
 import { Chip } from '../../componentes/Chip'
 import { Heroe } from '../../componentes/Heroe'
@@ -9,14 +13,13 @@ import { nivelDePercentil } from '../../componentes/nivelMedidor'
 import { Tarjeta } from '../../componentes/Tarjeta'
 import { buscarCultivo, etapaEnSemana } from '../../datos/cultivos'
 import {
-  estadoHumedad,
   fechaGeneracion,
   fuentes as fuentesBase,
   humedadPorcentaje,
   type Zona,
 } from '../../datos/zonas'
 import { coordenadas } from '../../componentes/mapa/formato'
-import { acidez, decimal, fechaLarga, hace, texturaUsda } from './formato'
+import { acidez, claveEstadoHumedad, decimal, fechaLarga, hace, texturaUsda } from './formato'
 import { GraficaHumedad } from './GraficaHumedad'
 import estilos from './Zona.module.css'
 
@@ -53,49 +56,40 @@ function Ficha({
 }
 
 function SinLectura({ razon }: { razon: string }) {
+  const { t } = useTranslation()
   return (
     <>
-      <p className={estilos.valor}>Sin lectura</p>
+      <p className={estilos.valor}>{t('zona.sinLectura')}</p>
       <p className="tipo-nota">{razon}</p>
     </>
   )
 }
 
 /** Lluvia frente a lo normal, en palabras. */
-function compararLluvia(valor: number, normal: number | null): string {
-  if (normal === null || normal <= 0) return 'Sin normal histórica para comparar.'
+function compararLluvia(t: TFunction, valor: number, normal: number | null): string {
+  if (normal === null || normal <= 0) return t('zona.sinNormal')
   const razon = valor / normal
-  if (razon >= 2) return `Más del doble de lo normal (${decimal(normal)} mm).`
+  if (razon >= 2) return t('zona.masDelDoble', { normal: decimal(normal) })
   const dif = Math.round((razon - 1) * 100)
-  if (Math.abs(dif) < 5) return `Igual a lo normal (${decimal(normal)} mm).`
-  return `${Math.abs(dif)} % ${dif > 0 ? 'más' : 'menos'} que lo normal (${decimal(normal)} mm).`
-}
-
-const FRASE_SENSIBILIDAD = {
-  baja: 'Necesita poca agua en esta etapa.',
-  media: 'Necesita agua con regularidad en esta etapa.',
-  alta: 'Esta etapa es delicada: no le puede faltar agua.',
-} as const
-
-const FRASE_ESTADO: Record<string, string> = {
-  'Más seca de lo normal': 'Más seca que lo normal para esta época',
-  'Dentro de lo normal': 'Normal para esta época',
-  'Más húmeda de lo normal': 'Más húmeda que lo normal para esta época',
-  'Sin referencia histórica': 'Sin referencia para comparar',
+  if (Math.abs(dif) < 5) return t('zona.igualNormal', { normal: decimal(normal) })
+  return t(dif > 0 ? 'zona.masQueNormal' : 'zona.menosQueNormal', { pct: Math.abs(dif), normal: decimal(normal) })
 }
 
 /** Hoja de informacion de una zona: respuesta, numero, grafica, fichas y cultivo. Solo presenta datos. */
 export function HojaZona({ zona, cultivoId, edadSemanas, fuentes = fuentesBase, alCopiar }: PropsHojaZona) {
+  const { t } = useTranslation()
+  const idioma = useIdioma()
+  const sinFuente = t('comun.sinFuente')
   const { humedad, lluvia30d, temperatura, suelo } = zona
   const pct = humedadPorcentaje(zona)
   const cultivo = buscarCultivo(cultivoId)
   const etapa = cultivo ? etapaEnSemana(cultivo, edadSemanas) : null
-  const estado = estadoHumedad(zona)
+  const estado = claveEstadoHumedad(zona)
 
   const notaHumedad = humedad
     ? [
-        humedad.normal === null ? null : `Lo normal en estas fechas: ${decimal(humedad.normal * 100)} %`,
-        `Medido ${hace(humedad.fecha, fechaGeneracion).toLowerCase()}`,
+        humedad.normal === null ? null : t('zona.normalFechas', { pct: decimal(humedad.normal * 100) }),
+        t('zona.medido', { cuando: hace(humedad.fecha, fechaGeneracion, idioma).toLowerCase() }),
       ]
         .filter(Boolean)
         .join('. ')
@@ -104,25 +98,25 @@ export function HojaZona({ zona, cultivoId, edadSemanas, fuentes = fuentesBase, 
   return (
     <div className={estilos.hoja}>
       <div className={estilos.columnaPrincipal}>
-        <section className={estilos.humedad} aria-label="Humedad del suelo">
+        <section className={estilos.humedad} aria-label={t('zona.humedadSuelo')}>
           {humedad && (
             <div className={estilos.respuesta}>
               <Medidor nivel={nivelDePercentil(humedad.percentil)} grande />
-              <p className={estilos.frase}>{FRASE_ESTADO[estado]}</p>
+              <p className={estilos.frase}>{t(`zona.frase.${estado}`)}</p>
             </div>
           )}
           {pct !== null ? (
-            <Heroe valor={decimal(pct)} unidad="% de agua en la tierra" nota={notaHumedad} />
+            <Heroe valor={decimal(pct)} unidad={t('zona.aguaTierra')} nota={notaHumedad} />
           ) : (
             <Heroe
-              valor="Sin lectura"
-              unidad="Humedad de la tierra"
-              nota="No hay lectura de humedad para este lugar en los datos procesados."
+              valor={t('zona.sinLectura')}
+              unidad={t('zona.humedadTierra')}
+              nota={t('zona.sinLecturaLugar')}
             />
           )}
           {humedad && (
             <Tarjeta variante="contorno" className={estilos.tarjetaGrafica}>
-              <h2 className="tipo-titulo">Últimos 4 meses</h2>
+              <h2 className="tipo-titulo">{t('zona.ultimos4')}</h2>
               <GraficaHumedad serie={humedad.serie} normal={humedad.normal} />
             </Tarjeta>
           )}
@@ -130,34 +124,34 @@ export function HojaZona({ zona, cultivoId, edadSemanas, fuentes = fuentesBase, 
       </div>
 
       <div className={estilos.columnaLateral}>
-        <section className={estilos.fichas} aria-label="Otros datos del lugar">
-          <Ficha icono="rainy" tono="agua" titulo="Lluvia">
+        <section className={estilos.fichas} aria-label={t('zona.otrosDatos')}>
+          <Ficha icono="rainy" tono="agua" titulo={t('zona.lluvia')}>
             {lluvia30d ? (
               <>
-                <p className={estilos.valor}>{decimal(lluvia30d.valor_mm, 0)} mm en 30 días</p>
-                <p className="tipo-nota">{compararLluvia(lluvia30d.valor_mm, lluvia30d.normal_mm)}</p>
+                <p className={estilos.valor}>{t('zona.lluvia30', { mm: decimal(lluvia30d.valor_mm, 0) })}</p>
+                <p className="tipo-nota">{compararLluvia(t, lluvia30d.valor_mm, lluvia30d.normal_mm)}</p>
               </>
             ) : (
-              <SinLectura razon="No hay datos de lluvia para este lugar." />
+              <SinLectura razon={t('zona.sinLluvia')} />
             )}
           </Ficha>
 
-          <Ficha icono="thermostat" tono="tierra" titulo="Temperatura">
+          <Ficha icono="thermostat" tono="tierra" titulo={t('zona.temperatura')}>
             {temperatura ? (
-              <p className={estilos.valor}>{decimal(temperatura.valor_c, 0)} °C en promedio esta semana</p>
+              <p className={estilos.valor}>{t('zona.tempSemana', { c: decimal(temperatura.valor_c, 0) })}</p>
             ) : (
-              <SinLectura razon="No hay datos de temperatura para este lugar." />
+              <SinLectura razon={t('zona.sinTemp')} />
             )}
           </Ficha>
 
-          <Ficha icono="landscape" tono="tierra" titulo="Tipo de tierra">
+          <Ficha icono="landscape" tono="tierra" titulo={t('zona.tipoTierra')}>
             {suelo ? (
               <p className={estilos.valor}>
-                {texturaUsda(suelo.arena_pct, suelo.limo_pct, suelo.arcilla_pct)}, pH {decimal(suelo.ph)},{' '}
-                {acidez(suelo.ph)}
+                {texturaUsda(suelo.arena_pct, suelo.limo_pct, suelo.arcilla_pct, idioma)}, pH {decimal(suelo.ph)},{' '}
+                {acidez(suelo.ph, idioma)}
               </p>
             ) : (
-              <SinLectura razon="No hay datos de suelo para este lugar." />
+              <SinLectura razon={t('zona.sinSuelo')} />
             )}
           </Ficha>
         </section>
@@ -165,44 +159,44 @@ export function HojaZona({ zona, cultivoId, edadSemanas, fuentes = fuentesBase, 
         {cultivo && etapa ? (
           <Tarjeta variante="elevada" className={estilos.cultivo}>
             <p className={estilos.valor}>
-              {cultivo.nombre}, semana {edadSemanas}: {etapa.nombre.toLowerCase()}
+              {t('zona.cultivoSemana', { cultivo: nombreCultivo(t, cultivo.id), semana: edadSemanas, etapa: nombreEtapa(t, cultivo.id, etapa).toLowerCase() })}
             </p>
-            <p>{FRASE_SENSIBILIDAD[etapa.sensibilidadAgua]}</p>
-            <p className="tipo-nota">Referencia, pendiente de validación agronómica.</p>
+            <p>{t(`zona.sensibilidad.${etapa.sensibilidadAgua}`)}</p>
+            <p className="tipo-nota">{t('zona.referencia')}</p>
           </Tarjeta>
         ) : (
           <Tarjeta variante="elevada" className={estilos.sinCultivo}>
-            <p className={estilos.valor}>Sin cultivo elegido</p>
+            <p className={estilos.valor}>{t('zona.sinCultivo')}</p>
             <Chip to="/" icono="grass">
-              Elegir cultivo
+              {t('contexto.elegirCultivo')}
             </Chip>
           </Tarjeta>
         )}
 
         <details className={estilos.detalles}>
-          <summary>Ver de dónde salen estos datos</summary>
+          <summary>{t('zona.verFuentes')}</summary>
           <ul className={estilos.fuentes}>
             <li>
-              <strong>Humedad:</strong> {fuentes.humedad ?? 'sin fuente'}.
-              {humedad && ` Lectura del ${fechaLarga(humedad.fecha)}, ${humedad.muestras} muestras.`}
-              {humedad?.percentil != null && ` Percentil ${decimal(humedad.percentil, 0)} frente a lo normal.`} Mide solo los
-              primeros 5 cm de la tierra.
+              <strong>{t('zona.fHumedad')}</strong> {fuentes.humedad ?? sinFuente}.
+              {humedad && t('zona.fLectura', { fecha: fechaLarga(humedad.fecha, idioma), n: humedad.muestras })}
+              {humedad?.percentil != null && t('zona.fPercentil', { p: decimal(humedad.percentil, 0) })}
+              {t('zona.fCinco')}
             </li>
             <li>
-              <strong>Lluvia:</strong> {fuentes.lluvia ?? 'sin fuente'}.
-              {lluvia30d && ` Hasta el ${fechaLarga(lluvia30d.hasta)}.`}
+              <strong>{t('zona.fLluvia')}</strong> {fuentes.lluvia ?? sinFuente}.
+              {lluvia30d && t('zona.fHasta', { fecha: fechaLarga(lluvia30d.hasta, idioma) })}
             </li>
             <li>
-              <strong>Temperatura:</strong> {fuentes.temperatura ?? 'sin fuente'}.
-              {temperatura && ` Hasta el ${fechaLarga(temperatura.hasta)}.`}
+              <strong>{t('zona.fTemperatura')}</strong> {fuentes.temperatura ?? sinFuente}.
+              {temperatura && t('zona.fHasta', { fecha: fechaLarga(temperatura.hasta, idioma) })}
             </li>
             <li>
-              <strong>Tierra:</strong> {fuentes.suelo ?? 'sin fuente'}. Punto más cercano con datos; no está
-              verificado como agrícola.
-              {suelo && ` Arena ${decimal(suelo.arena_pct)} %, limo ${decimal(suelo.limo_pct)} %, arcilla ${decimal(suelo.arcilla_pct)} %.`}
+              <strong>{t('zona.fTierra')}</strong> {fuentes.suelo ?? sinFuente}.
+              {t('zona.fTierraNota')}
+              {suelo && t('zona.fTextura', { arena: decimal(suelo.arena_pct), limo: decimal(suelo.limo_pct), arcilla: decimal(suelo.arcilla_pct) })}
             </li>
             <li>
-              <strong>Ubicación:</strong> {coordenadas(zona.lat, zona.lon)}.
+              <strong>{t('zona.fUbicacion')}</strong> {coordenadas(zona.lat, zona.lon, idioma)}.
             </li>
           </ul>
         </details>
@@ -210,10 +204,10 @@ export function HojaZona({ zona, cultivoId, edadSemanas, fuentes = fuentesBase, 
         {alCopiar && (
           <div className={estilos.acciones}>
             <Boton to="/chat?desde=zona" icono="forum">
-              Preguntar sobre esta tierra
+              {t('zona.preguntar')}
             </Boton>
             <Boton variante="tonal" icono="content_copy" onClick={alCopiar}>
-              Copiar resumen
+              {t('zona.copiar')}
             </Boton>
           </div>
         )}

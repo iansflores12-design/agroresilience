@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    'marca sonido'
+    'marca acciones'
     'tira tira';
   align-items: center;
   gap: var(--esp-1) var(--esp-3);
@@ -35,12 +35,19 @@
 }
 
 .nombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font: var(--tipo-titulo);
   color: var(--md-sys-color-on-surface);
 }
 
-.sonido {
-  grid-area: sonido;
+.acciones {
+  grid-area: acciones;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
 }
 
 .barra > :nth-child(2) {
@@ -68,7 +75,7 @@
 
   .barra {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'tira sonido';
+    grid-template-areas: 'tira acciones';
     gap: var(--esp-6);
     padding-block: calc(var(--esp-3) + env(safe-area-inset-top)) var(--esp-3);
   }

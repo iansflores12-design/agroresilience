@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { BarraFlotante } from '../../componentes/BarraFlotante'
 import { Boton } from '../../componentes/Boton'
@@ -20,7 +21,6 @@ import {
   aptitud,
   buscarDepartamento,
   departamentoDeZona,
-  escenarios,
   rotacionesPara,
   tieneAptitud,
   type Escenario,
@@ -34,12 +34,6 @@ import { Rotaciones } from './Rotaciones'
 
 const ORDEN_ESCENARIOS: Escenario[] = ['seco', 'normal', 'lluvioso']
 
-/** "Año seco" -> "Seco": la pregunta de arriba ya dice "año". */
-function nombreCorto(nombre: string) {
-  const sinAnio = nombre.replace(/^Año\s+/, '')
-  return sinAnio.charAt(0).toUpperCase() + sinAnio.slice(1)
-}
-
 /** En pantallas anchas la lista cabe al lado del mapa; en el telefono empieza cerrada. */
 function esPantallaAncha() {
   return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 840px)').matches
@@ -47,14 +41,15 @@ function esPantallaAncha() {
 
 /** Que significan los colores de la capa de satelite activa: una barra de menos a mas. */
 function LeyendaDatos({ capa }: { capa: CapaDatos }) {
+  const { t } = useTranslation()
   const def = DATOS[capa]
   return (
     <p className={estilos.leyendaDatos}>
-      <span>{def.descripcion}</span>
+      <span>{t(`mapa.capas.datos.${capa}.descripcion`)}</span>
       <span className={estilos.escala}>
-        {def.menos}
+        {t(`mapa.capas.datos.${capa}.menos`)}
         <span className={estilos.barraEscala} style={{ backgroundImage: `linear-gradient(to right, ${def.colores.join(', ')})` }} aria-hidden="true" />
-        {def.mas}
+        {t(`mapa.capas.datos.${capa}.mas`)}
       </span>
     </p>
   )
@@ -63,6 +58,7 @@ function LeyendaDatos({ capa }: { capa: CapaDatos }) {
 export default function Mapa() {
   const { zonaId, cultivoId, elegirZona } = useEstadoApp()
   const navegar = useNavigate()
+  const { t } = useTranslation()
   const [escenario, fijarEscenario] = useEscenario()
   const [departamentoTocado, fijarDepartamentoTocado] = useState<string | null>(null)
   const controlMapa = useRef<ControlMapa>(null)
@@ -74,7 +70,7 @@ export default function Mapa() {
   const zona = buscarZona(zonaId)
   const humedad = zona ? humedadPorcentaje(zona) : null
   const cultivo = tieneAptitud(cultivoId) ? buscarCultivo(cultivoId) : null
-  const nombreCultivo = cultivo?.nombre.toLowerCase() ?? ''
+  const elCultivo = cultivo ? t(`cultivos.${cultivo.id}.el`) : ''
   // Sin tocar un departamento, se muestra el del lugar elegido.
   const departamentoId = departamentoTocado ?? departamentoDeZona(zonaId)
   const departamento = buscarDepartamento(departamentoId)
@@ -88,14 +84,14 @@ export default function Mapa() {
     if (id === zonaId) return
     elegirZona(id)
     avisar.exito({
-      titulo: `Lugar: ${elegida.nombre}`,
-      accion: { texto: 'Ver la tierra', alPulsar: () => navegar('/zona') },
+      titulo: t('mapa.lugarAviso', { lugar: elegida.nombre }),
+      accion: { texto: t('mapa.verTierra'), alPulsar: () => navegar('/zona') },
     })
   }
 
   function buscarMiUbicacion() {
     const sinUbicacion = () =>
-      avisar.alerta({ titulo: 'No se pudo saber dónde está', descripcion: 'Elija su lugar en la lista.' })
+      avisar.alerta({ titulo: t('mapa.sinUbicacion'), descripcion: t('mapa.elijaLista') })
     if (!('geolocation' in navigator)) return sinUbicacion()
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
@@ -103,7 +99,7 @@ export default function Mapa() {
         const dentro =
           lat >= cajaHonduras.lat_min && lat <= cajaHonduras.lat_max && lon >= cajaHonduras.lon_min && lon <= cajaHonduras.lon_max
         if (!dentro) {
-          avisar.info({ titulo: 'Está fuera de Honduras', descripcion: 'Elija su lugar en la lista.' })
+          avisar.info({ titulo: t('mapa.fueraHonduras'), descripcion: t('mapa.elijaLista') })
           return
         }
         const distancia = (z: (typeof zonas)[number]) => (z.lat - lat) ** 2 + (z.lon - lon) ** 2
@@ -119,8 +115,8 @@ export default function Mapa() {
   return (
     <div className={clases('pantalla', estilos.pantalla)}>
       <div className={estilos.encabezado}>
-        <h1 className={estilos.pregunta}>¿Dónde está su parcela?</h1>
-        <p className={estilos.vacio}>Toque un punto del mapa o use su ubicación.</p>
+        <h1 className={estilos.pregunta}>{t('mapa.dondeParcela')}</h1>
+        <p className={estilos.vacio}>{t('mapa.toquePunto')}</p>
       </div>
       <div className={estilos.cuerpo}>
         <div className={estilos.columnaMapa}>
@@ -138,13 +134,13 @@ export default function Mapa() {
               base={base}
               datos={datos}
             />
-            <BarraFlotante className={estilos.controles} role="group" aria-label="Controles del mapa">
-              <BotonIcono icono="add" etiqueta="Acercar" onClick={() => controlMapa.current?.acercar()} />
-              <BotonIcono icono="remove" etiqueta="Alejar" onClick={() => controlMapa.current?.alejar()} />
-              <BotonIcono icono="my_location" etiqueta="Mi ubicación" onClick={buscarMiUbicacion} />
+            <BarraFlotante className={estilos.controles} role="group" aria-label={t('mapa.controles')}>
+              <BotonIcono icono="add" etiqueta={t('mapa.acercar')} onClick={() => controlMapa.current?.acercar()} />
+              <BotonIcono icono="remove" etiqueta={t('mapa.alejar')} onClick={() => controlMapa.current?.alejar()} />
+              <BotonIcono icono="my_location" etiqueta={t('mapa.miUbicacion')} onClick={buscarMiUbicacion} />
               <BotonIcono
                 icono="layers"
-                etiqueta="Capas del mapa"
+                etiqueta={t('mapa.capas.boton')}
                 seleccionado={capasAbiertas}
                 aria-expanded={capasAbiertas}
                 aria-controls="capas-mapa"
@@ -154,17 +150,17 @@ export default function Mapa() {
           </div>
           {capasAbiertas && (
             <div id="capas-mapa" className={estilos.capas}>
-              <div className={estilos.grupoCapas} role="group" aria-label="Tipo de mapa">
+              <div className={estilos.grupoCapas} role="group" aria-label={t('mapa.capas.tipo')}>
                 {ORDEN_BASES.map((b) => (
                   <Chip key={b} variante="filtro" seleccionado={b === base} onClick={() => fijarBase(b)}>
-                    {BASES[b].nombre}
+                    {t(`mapa.capas.bases.${b}.nombre`)}
                   </Chip>
                 ))}
               </div>
-              <div className={estilos.grupoCapas} role="group" aria-label="Datos de satélite">
+              <div className={estilos.grupoCapas} role="group" aria-label={t('mapa.capas.satelite')}>
                 {ORDEN_DATOS.map((c) => (
                   <Chip key={c} variante="filtro" seleccionado={c === datos} onClick={() => fijarDatos(c === datos ? null : c)}>
-                    {DATOS[c].nombre}
+                    {t(`mapa.capas.datos.${c}.nombre`)}
                   </Chip>
                 ))}
               </div>
@@ -174,33 +170,33 @@ export default function Mapa() {
         </div>
 
         <div className={estilos.lateral}>
-          <Tarjeta como="aside" variante="elevada" className={estilos.tarjeta} aria-label="Lugar elegido">
+          <Tarjeta como="aside" variante="elevada" className={estilos.tarjeta} aria-label={t('mapa.lugarElegido')}>
             {zona ? (
               <>
                 <div className={estilos.datos}>
                   <p className="tipo-titulo">{zona.nombre}</p>
                   <Medidor nivel={nivelDePercentil(zona.humedad?.percentil)} grande />
                   <p className="tipo-nota">
-                    {humedad === null ? 'Sin lectura de humedad' : `${humedad.toFixed(1)} % de agua en la tierra`}
+                    {humedad === null ? t('mapa.sinHumedad') : t('mapa.aguaTierra', { pct: humedad.toFixed(1) })}
                   </p>
                 </div>
                 <Boton to="/zona" icono="arrow_forward">
-                  Ver cómo está la tierra
+                  {t('mapa.verComoTierra')}
                 </Boton>
               </>
             ) : (
-              <p className={estilos.vacio}>Todavía no eligió un lugar.</p>
+              <p className={estilos.vacio}>{t('mapa.sinLugar')}</p>
             )}
             {!cultivo && (
               <Boton to="/" variante="tonal" icono="grass">
-                Elegir cultivo
+                {t('contexto.elegirCultivo')}
               </Boton>
             )}
           </Tarjeta>
 
           <details className={estilos.plegable} open={listaAbierta}>
             <summary>
-              <span className="tipo-titulo">Todos los lugares ({zonas.length})</span>
+              <span className="tipo-titulo">{t('mapa.todosLugares', { n: zonas.length })}</span>
               <Icono nombre="expand_more" />
             </summary>
             <ul className={estilos.lista}>
@@ -227,36 +223,36 @@ export default function Mapa() {
       {cultivo && (
         <section className={estilos.seccion} aria-labelledby="titulo-aptitud">
           <h2 id="titulo-aptitud" className="tipo-titulo">
-            {departamento ? `¿Se da bien el ${nombreCultivo} en ${departamento.nombre}?` : `¿Dónde se da bien el ${nombreCultivo}?`}
+            {departamento ? t('mapa.seDaBienEn', { el: elCultivo, departamento: departamento.nombre }) : t('mapa.dondeSeDa', { el: elCultivo })}
           </h2>
           {resultado ? (
             <Tarjeta variante="elevada" className={estilos.tarjeta}>
               <div className={estilos.datos}>
                 <NivelAptitud nivel={resultado.nivel} grande />
                 <p className={estilos.puntos}>
-                  {resultado.total} de 100. Puesto {resultado.puesto} de {resultado.de} departamentos.
+                  {t('mapa.puesto', { total: resultado.total, puesto: resultado.puesto, de: resultado.de })}
                 </p>
-                <p className={estilos.vacio}>Lo que más le cuesta: {resultado.limite}.</p>
+                <p className={estilos.vacio}>{t('mapa.loQueCuesta', { limite: t(`aptitud.factores.${resultado.claveLimite}.limite`) })}</p>
               </div>
               <div className={estilos.anio}>
                 <p className="tipo-nota" id="titulo-anio">
-                  ¿Cómo viene el año?
+                  {t('mapa.comoAnio')}
                 </p>
                 <div className={estilos.escenarios} role="group" aria-labelledby="titulo-anio">
                   {ORDEN_ESCENARIOS.map((e) => (
                     <Chip key={e} variante="filtro" seleccionado={e === escenario} onClick={() => fijarEscenario(e)}>
-                      {nombreCorto(escenarios[e].nombre)}
+                      {t(`aptitud.escenarios.${e}`)}
                     </Chip>
                   ))}
                 </div>
               </div>
               <details className={estilos.detalle}>
-                <summary>Ver el puntaje por partes</summary>
-                <Partes partes={resultado.partes} etiqueta={`Puntaje por partes en ${resultado.departamento.nombre}`} />
+                <summary>{t('mapa.verPartes')}</summary>
+                <Partes partes={resultado.partes} etiqueta={t('mapa.partesEn', { departamento: resultado.departamento.nombre })} />
               </details>
             </Tarjeta>
           ) : (
-            <p className={estilos.vacio}>Toque un departamento del mapa para ver cómo se da ahí.</p>
+            <p className={estilos.vacio}>{t('mapa.toqueDepartamento')}</p>
           )}
         </section>
       )}
@@ -264,19 +260,20 @@ export default function Mapa() {
       {cultivo && departamento && rotaciones.length > 0 && (
         <details className={estilos.plegable}>
           <summary>
-            <h2 className="tipo-titulo">Qué sembrar después en {departamento.nombre}</h2>
+            <h2 className="tipo-titulo">{t('mapa.queSembrarDespues', { departamento: departamento.nombre })}</h2>
             <Icono nombre="expand_more" />
           </summary>
-          <section className={estilos.seccion} aria-label={`Qué sembrar después en ${departamento.nombre}`}>
+          <section className={estilos.seccion} aria-label={t('mapa.queSembrarDespues', { departamento: departamento.nombre })}>
             <Rotaciones key={`${departamento.id}-${cultivo.id}`} rotaciones={rotaciones} />
           </section>
         </details>
       )}
 
       <p className="tipo-nota">
-        {cultivo && 'Puntajes de ejemplo, todavía sin validar. Consulte a su técnico. '}
-        Límites: geoBoundaries y OpenStreetMap.
-        {[BASES[base].credito, datos && DATOS[datos].credito].filter(Boolean).map((c) => ` ${c}.`)}
+        {cultivo && t('mapa.ejemplo')}
+        {t('mapa.limites')}
+        {BASES[base].url && ` ${t(`mapa.capas.bases.${base}.credito`)}.`}
+        {datos && ` ${t(`mapa.capas.datos.${datos}.credito`)}.`}
       </p>
     </div>
   )

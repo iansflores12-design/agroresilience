@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Boton } from '../../componentes/Boton'
 import { Control } from '../../componentes/Control'
 import { Icono } from '../../componentes/Icono'
@@ -9,7 +11,7 @@ import { buscarCultivo } from '../../datos/cultivos'
 import { zonas } from '../../datos/zonas'
 import { dentroDeHonduras, distanciaKm } from '../../lib/decision/escala'
 import { ICONO_CULTIVO, ICONO_TEMPORADA, ICONO_TERRENO } from '../../componentes/decision/visual'
-import { CULTIVOS, LUGARES, ORDEN_TEMPORADAS, TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
+import { CULTIVOS, LUGARES, ORDEN_TEMPORADAS, TERRENOS } from '../../lib/decision/parametros'
 import type { Objetivo, Temporada, Terreno } from '../../lib/decision/tipos'
 import type { Perfil } from '../../estado/EstadoApp'
 import { confirmar } from '../../lib/sonido'
@@ -34,46 +36,48 @@ interface Pregunta {
   opciones: Opcion[]
 }
 
-const PREGUNTAS: Pregunta[] = [
+const preguntas = (t: TFunction): Pregunta[] => [
   {
     clave: 'zonaId',
-    titulo: '¿Dónde está su parcela?',
+    titulo: t('cuestionario.dondeParcela'),
     opciones: Object.entries(LUGARES).map(([id, l]) => ({ id, nombre: l.nombre, icono: 'location_on' as const })),
   },
   {
     clave: 'terreno',
-    titulo: '¿Cómo es su terreno?',
+    titulo: t('cuestionario.comoTerreno'),
     opciones: (Object.keys(TERRENOS) as Terreno[]).map((id) => ({
       id,
-      nombre: TERRENOS[id].nombre,
-      nota: TERRENOS[id].descripcion,
+      nombre: t(`terrenos.${id}.nombre`),
+      nota: t(`terrenos.${id}.descripcion`),
       icono: ICONO_TERRENO[id],
     })),
   },
   {
     clave: 'cultivoId',
-    titulo: '¿Qué siembra ahora?',
+    titulo: t('cuestionario.queSiembra'),
     opciones: Object.entries(CULTIVOS).map(([id, c]) => ({
       id,
-      nombre: c.nombre,
-      nota: `Unas ${c.cicloSemanas} semanas`,
+      nombre: t(`cultivos.${id}.nombre`),
+      nota: t('comun.unasSemanas', { n: c.cicloSemanas }),
       icono: ICONO_CULTIVO[id] ?? 'grass',
     })),
   },
   {
     clave: 'temporada',
-    titulo: '¿Cuándo lo siembra?',
+    titulo: t('cuestionario.cuandoSiembra'),
     opciones: ORDEN_TEMPORADAS.map((id: Temporada) => ({
       id,
-      nombre: `De ${TEMPORADAS[id].nombre.toLowerCase()}`,
-      nota: TEMPORADAS[id].texto,
+      nombre: t('cuestionario.deTemporada', { temporada: t(`temporadas.${id}.nombre`).toLowerCase() }),
+      nota: t(`temporadas.${id}.texto`),
       icono: ICONO_TEMPORADA[id],
     })),
   },
-  { clave: 'objetivos', titulo: '¿Qué quiere lograr?', opciones: [] },
+  { clave: 'objetivos', titulo: t('inicio.queQuiere'), opciones: [] },
 ]
 
-const ULTIMA = PREGUNTAS.length - 1
+/** Las claves de las preguntas, en orden (no dependen del idioma). */
+const CLAVES: ClavePregunta[] = ['zonaId', 'terreno', 'cultivoId', 'temporada', 'objetivos']
+const ULTIMA = CLAVES.length - 1
 
 /** "Danlí" y "danli" deben encontrarse igual. */
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -98,8 +102,11 @@ export function Cuestionario({
   alCancelar?: () => void
   soloPaso?: ClavePregunta
 }) {
-  const [paso, fijarPaso] = useState(() => (soloPaso ? Math.max(0, PREGUNTAS.findIndex((p) => p.clave === soloPaso)) : 0))
+  const { t } = useTranslation()
+  const PREGUNTAS = useMemo(() => preguntas(t), [t])
+  const [paso, fijarPaso] = useState(() => (soloPaso ? Math.max(0, CLAVES.indexOf(soloPaso)) : 0))
   const [respuestas, fijarRespuestas] = useState<Respuestas>(inicial)
+  // 'listo', 'buscando' o la clave de traduccion del error.
   const [gps, fijarGps] = useState<'listo' | 'buscando' | string>('listo')
   const [busqueda, fijarBusqueda] = useState('')
   const pidioGps = useRef(false)
@@ -169,7 +176,7 @@ export function Cuestionario({
   /** `auto`: pedida sin que el productor toque nada; si falla, no se muestra error ni se cambia de pregunta. */
   function usarUbicacion(auto = false) {
     if (!('geolocation' in navigator)) {
-      if (!auto) fijarGps('Este teléfono no da la ubicación. Elija su lugar en la lista.')
+      if (!auto) fijarGps('cuestionario.sinGps')
       return
     }
     fijarGps('buscando')
@@ -178,7 +185,7 @@ export function Cuestionario({
         const lat = Math.round(pos.coords.latitude * 1000) / 1000
         const lon = Math.round(pos.coords.longitude * 1000) / 1000
         if (!dentroDeHonduras(lat, lon)) {
-          fijarGps(auto ? 'listo' : 'Su ubicación está fuera de Honduras. Elija su lugar en la lista.')
+          fijarGps(auto ? 'listo' : 'cuestionario.fueraHonduras')
           return
         }
         // El lugar del sitio mas cercano da el nombre y la tierra; el pronostico usa el punto de Kharis mas cercano.
@@ -187,7 +194,7 @@ export function Cuestionario({
         if (auto) fijarRespuestas((r) => ({ ...r, zonaId: cerca.id, parcela: { lat, lon } }))
         else avanzar({ ...respuestas, zonaId: cerca.id, parcela: { lat, lon } })
       },
-      () => fijarGps(auto ? 'listo' : 'No se pudo leer la ubicación. Revise el permiso o elija su lugar en la lista.'),
+      () => fijarGps(auto ? 'listo' : 'cuestionario.errorGps'),
       { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 },
     )
   }
@@ -197,7 +204,7 @@ export function Cuestionario({
       {!soloPaso && (
         <div className={estilos.progreso}>
           <span className="tipo-nota">
-            Pregunta {paso + 1} de {PREGUNTAS.length}
+            {t('cuestionario.progreso', { paso: paso + 1, total: PREGUNTAS.length })}
           </span>
           <span className={estilos.barraProgreso} aria-hidden="true">
             <span style={{ transform: `scaleX(${(paso + 1) / PREGUNTAS.length})` }} />
@@ -206,7 +213,7 @@ export function Cuestionario({
       )}
       {paso === 0 && !soloPaso && (
         <p className={estilos.intro}>
-          Con cinco respuestas comparamos rotaciones con el pronóstico de su zona.
+          {t('cuestionario.intro')}
         </p>
       )}
       <h1 id="pregunta-cuestionario" ref={titulo} tabIndex={-1} className={estilos.pregunta}>
@@ -225,36 +232,36 @@ export function Cuestionario({
             </span>
             <span className={estilos.textoOpcion}>
               <span className={estilos.nombreOpcion}>
-                {gps === 'buscando' ? 'Buscando su ubicación…' : conGps ? 'Usando su ubicación' : 'Usar mi ubicación'}
+                {gps === 'buscando' ? t('cuestionario.buscando') : conGps ? t('plan.usandoUbicacion') : t('cuestionario.usarUbicacion')}
               </span>
               <span className="tipo-nota">
                 {conGps && respuestas.zonaId
-                  ? `Cerca de ${LUGARES[respuestas.zonaId].nombre}. El pronóstico se ajusta a la altura de su parcela`
-                  : 'Más preciso: ajusta el pronóstico a la altura de su parcela'}
+                  ? t('plan.cercaDe', { lugar: LUGARES[respuestas.zonaId].nombre })
+                  : t('cuestionario.masPreciso')}
               </span>
             </span>
             {conGps && <Icono nombre="check" tamano={22} />}
           </Control>
           {gps !== 'listo' && gps !== 'buscando' && (
             <p className={estilos.ayuda} role="alert">
-              {gps}
+              {t(gps)}
             </p>
           )}
           <label className={estilos.buscador}>
             <Icono nombre="search" tamano={24} />
-            <span className="solo-lectores">Escriba su lugar</span>
+            <span className="solo-lectores">{t('plan.escribaLugar')}</span>
             <input
               type="search"
               value={busqueda}
               onChange={(e) => fijarBusqueda(e.target.value)}
-              placeholder="Escriba su lugar"
+              placeholder={t('plan.escribaLugar')}
               autoComplete="off"
               enterKeyHint="search"
             />
           </label>
           {opciones.length === 0 && (
             <p className={estilos.ayuda} role="status">
-              Ese lugar no está en la lista. Pruebe con el pueblo o la ciudad más cercana, o use su ubicación.
+              {t('plan.noEnLista')}
             </p>
           )}
         </div>
@@ -275,7 +282,7 @@ export function Cuestionario({
       )}
       {pregunta.clave === 'objetivos' && (
         <>
-          <p className={estilos.ayuda}>Toque uno o varios. Las rotaciones se ordenan según lo que elija.</p>
+          <p className={estilos.ayuda}>{t('inicio.toqueVarios')}</p>
           <Objetivos elegidos={respuestas.objetivos ?? []} alternar={alternarObjetivo} />
         </>
       )}
@@ -307,12 +314,12 @@ export function Cuestionario({
       <div ref={pie} className={estilos.accionesCuestionario}>
         {paso > 0 && !soloPaso ? (
           <Boton variante="texto" icono="arrow_back" onClick={() => fijarPaso(paso - 1)}>
-            Atrás
+            {t('comun.atras')}
           </Boton>
         ) : (
           alCancelar && (
             <Boton variante="texto" icono="close" onClick={alCancelar}>
-              Cancelar
+              {t('comun.cancelar')}
             </Boton>
           )
         )}
@@ -322,17 +329,17 @@ export function Cuestionario({
             icono="arrow_forward"
             onClick={() => fijarPaso(paso + 1)}
           >
-            Siguiente
+            {t('comun.siguiente')}
           </Boton>
         )}
         {!soloPaso && paso === ULTIMA && (
           <Boton icono="check" onClick={() => avanzar(respuestas)}>
-            Ver mis rotaciones
+            {t('plan.verRotaciones')}
           </Boton>
         )}
         {soloPaso && (pregunta.clave === 'cultivoId' || pregunta.clave === 'objetivos') && (
           <Boton icono="check" onClick={() => avanzar(respuestas)}>
-            Guardar
+            {t('plan.guardar')}
           </Boton>
         )}
       </div>

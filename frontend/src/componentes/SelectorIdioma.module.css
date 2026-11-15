@@ -1,0 +1,61 @@
+.selector {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.lista {
+  appearance: none;
+  min-height: var(--zona-tactil);
+  padding: 0 calc(var(--esp-2) + 20px + var(--esp-2)) 0 calc(var(--esp-3) + 20px + var(--esp-2));
+  border: 0;
+  border-radius: var(--forma-completa);
+  background-color: var(--md-sys-color-secondary-container);
+  color: inherit;
+  font: var(--tipo-etiqueta);
+  cursor: pointer;
+  transition: filter var(--mov-efecto) var(--curva-efecto);
+}
+
+@media (hover: hover) {
+  .lista:hover {
+    filter: brightness(0.96);
+  }
+}
+
+.lista:focus-visible {
+  outline: var(--anillo-foco) solid var(--md-sys-color-secondary);
+  outline-offset: var(--anillo-foco-separacion);
+}
+
+.icono,
+.flecha {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.icono {
+  left: var(--esp-3);
+}
+
+.flecha {
+  right: var(--esp-2);
+}
+
+/* En el telefono el selector comparte fila con la marca: letra y margenes mas chicos. */
+@media (max-width: 599px) {
+  .lista {
+    padding: 0 calc(var(--esp-1) + 20px) 0 calc(var(--esp-2) + 20px + var(--esp-1));
+    font: var(--tipo-nota);
+  }
+
+  .icono {
+    left: var(--esp-2);
+  }
+
+  .flecha {
+    right: var(--esp-1);
+  }
+}

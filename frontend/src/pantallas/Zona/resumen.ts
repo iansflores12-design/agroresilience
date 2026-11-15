@@ -1,26 +1,30 @@
-import { estadoHumedad, humedadPorcentaje, type Zona } from '../../datos/zonas'
-import { decimal, fechaLarga } from './formato'
+import { humedadPorcentaje, type Zona } from '../../datos/zonas'
+import { traductor } from '../../i18n/traductor'
+import { claveEstadoHumedad, decimal, fechaLarga } from './formato'
 
 /** Texto corto para el portapapeles: zona, humedad, fecha y fuentes. */
-export function textoResumen(zona: Zona, fuentes: Record<string, string>): string {
+export function textoResumen(zona: Zona, fuentes: Record<string, string>, idioma?: string | null): string {
+  const t = traductor(idioma)
+  const fuente = (clave: string) => fuentes[clave] ?? t('comun.sinFuente')
   const lineas = [`AgroResilience - ${zona.nombre}`]
   const pct = humedadPorcentaje(zona)
   if (zona.humedad && pct !== null) {
     lineas.push(
-      `Humedad del suelo (0 a 5 cm): ${decimal(pct)} %, ${estadoHumedad(zona).toLowerCase()}. Lectura del ${fechaLarga(zona.humedad.fecha)}. Fuente: ${fuentes.humedad ?? 'sin fuente'}.`,
+      t('zona.resumen.humedad', {
+        pct: decimal(pct),
+        estado: t(`zona.estado.${claveEstadoHumedad(zona)}`).toLowerCase(),
+        fecha: fechaLarga(zona.humedad.fecha, idioma),
+        fuente: fuente('humedad'),
+      }),
     )
   } else {
-    lineas.push('Humedad del suelo: sin lectura.')
+    lineas.push(t('zona.resumen.sinHumedad'))
   }
   if (zona.lluvia30d) {
-    lineas.push(
-      `Lluvia de 30 días: ${decimal(zona.lluvia30d.valor_mm)} mm hasta el ${fechaLarga(zona.lluvia30d.hasta)}. Fuente: ${fuentes.lluvia ?? 'sin fuente'}.`,
-    )
+    lineas.push(t('zona.resumen.lluvia', { mm: decimal(zona.lluvia30d.valor_mm), fecha: fechaLarga(zona.lluvia30d.hasta, idioma), fuente: fuente('lluvia') }))
   }
   if (zona.temperatura) {
-    lineas.push(
-      `Temperatura media de 7 días: ${decimal(zona.temperatura.valor_c)} °C hasta el ${fechaLarga(zona.temperatura.hasta)}. Fuente: ${fuentes.temperatura ?? 'sin fuente'}.`,
-    )
+    lineas.push(t('zona.resumen.temperatura', { c: decimal(zona.temperatura.valor_c), fecha: fechaLarga(zona.temperatura.hasta, idioma), fuente: fuente('temperatura') }))
   }
   return lineas.join('\n')
 }

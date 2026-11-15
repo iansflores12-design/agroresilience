@@ -1,6 +1,7 @@
 // Contratos de Gemini Decision. Este modulo no usa el DOM: lo comparten el navegador y las
 // funciones de `api/`.
 
+import type { Idioma } from '../../i18n/idiomas.js'
 import type { PreciosRegion } from './precios.js'
 
 export type Terreno = 'plano' | 'elevado' | 'bajo' | 'ondulado'
@@ -16,6 +17,8 @@ export interface EntradaDecision {
   objetivos: Objetivo[]
   /** Ubicacion de la parcela (GPS). Con ella se usa el punto de Kharis mas cercano y el ajuste por altura. */
   parcela?: { lat: number; lon: number }
+  /** Idioma de los textos de la decision y de Gemini. Por defecto, español. */
+  idioma?: Idioma
 }
 
 /** Ajuste a escala de parcela (kharis.escala_fina.v1). */
@@ -72,6 +75,8 @@ export interface PasoPlan {
   /** Null = la tierra queda sin cultivo esa temporada. */
   cultivoId: string | null
   nombre: string
+  /** El cultivo sigue del paso anterior (el frijol terciopelo ocupa dos temporadas). */
+  continua?: boolean
   temporada: Temporada
   meses: string
   /** Datos del motor para el paso; null si es descanso. */

@@ -9,7 +9,8 @@
 
 import { validarEntrada } from '../src/lib/decision/motor.js'
 import { LUGARES } from '../src/lib/decision/parametros.js'
-import { INSTRUCCIONES_GEMINI, TOP3, buscarRotacion, datosParaGemini, pedidoPara } from '../src/lib/decision/textos.js'
+import { TOP3, buscarRotacion, datosParaGemini, instruccionesGemini, pedidoPara } from '../src/lib/decision/textos.js'
+import { traductor } from '../src/i18n/traductor.js'
 import { ErrorGemini, geminiEnVivo, hayClave } from './_gemini.js'
 import { decisionPara, json, leerCuerpo } from './_comun.js'
 
@@ -19,6 +20,7 @@ export async function POST(request: Request): Promise<Response> {
   const rotacionId = typeof cuerpo?.rotacionId === 'string' ? cuerpo.rotacionId : null
   if (!entrada || !rotacionId) return json({ error: 'entrada_invalida' }, 400)
 
+  const t = traductor(entrada.idioma)
   const codificador = new TextEncoder()
   const flujo = new ReadableStream<Uint8Array>({
     async start(control) {
@@ -30,7 +32,7 @@ export async function POST(request: Request): Promise<Response> {
         }
       }
       try {
-        enviar({ tipo: 'paso', id: 'datos', texto: `Leyendo el pronóstico de ${LUGARES[entrada.zonaId].nombre}` })
+        enviar({ tipo: 'paso', id: 'datos', texto: t('gemini.pasoDatos', { lugar: LUGARES[entrada.zonaId].nombre }) })
         let decision
         try {
           decision = await decisionPara(entrada, request.url)
@@ -38,24 +40,20 @@ export async function POST(request: Request): Promise<Response> {
           enviar({ tipo: 'error', causa: 'kharis', mensaje: String(e) })
           return
         }
-        enviar({ tipo: 'paso', id: 'decision', texto: 'Se compararon las rotaciones' })
+        enviar({ tipo: 'paso', id: 'decision', texto: t('gemini.pasoDecision') })
         enviar({ tipo: 'decision', decision })
         if (rotacionId !== TOP3 && !buscarRotacion(decision, rotacionId)) {
-          enviar({ tipo: 'error', causa: 'servidor', mensaje: 'Rotación desconocida' })
+          enviar({ tipo: 'error', causa: 'servidor', mensaje: t('gemini.rotacionDesconocida') })
           return
         }
         if (!hayClave()) {
           enviar({ tipo: 'error', causa: 'sin_clave' })
           return
         }
-        enviar({
-          tipo: 'paso',
-          id: 'gemini',
-          texto: rotacionId === TOP3 ? 'La IA explica las tres mejores con el clima de su zona' : 'La IA escribe el análisis a fondo',
-        })
+        enviar({ tipo: 'paso', id: 'gemini', texto: t(rotacionId === TOP3 ? 'geminiTop3.paso' : 'gemini.pasoGemini') })
         const pedido = {
-          sistema: INSTRUCCIONES_GEMINI,
-          mensajes: [{ rol: 'user' as const, texto: `${datosParaGemini(decision, rotacionId)}\n\n${pedidoPara(rotacionId)}` }],
+          sistema: instruccionesGemini(entrada.idioma),
+          mensajes: [{ rol: 'user' as const, texto: `${datosParaGemini(decision, rotacionId)}\n\n${pedidoPara(rotacionId, entrada.idioma)}` }],
           signal: request.signal,
         }
         for await (const delta of geminiEnVivo(pedido)) enviar({ tipo: 'texto', delta })

@@ -1,4 +1,5 @@
 import type { Ref } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Escenario } from '../../datos/aptitud'
 import type { DatosZonas, Zona } from '../../datos/zonas'
 import type { CapaBase, CapaDatos } from './capas'
@@ -32,8 +33,9 @@ export interface PropsMapa {
  * 100 % del contenedor: el alto lo decide quien lo usa.
  */
 export function ContenedorMapa(props: PropsMapa) {
+  const { t } = useTranslation()
   return (
-    <section aria-label="Mapa" className={estilos.contenedor}>
+    <section aria-label={t('mapa.region')} className={estilos.contenedor}>
       <MapaHonduras {...props} />
     </section>
   )

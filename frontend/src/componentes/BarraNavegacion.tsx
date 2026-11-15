@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 import { destinoActual, destinos } from '../destinos'
 import { clases } from './clases'
@@ -13,13 +14,14 @@ export interface PropsBarraNavegacion {
 export function BarraNavegacion({ contraido = false, alContraer }: PropsBarraNavegacion) {
   const { pathname } = useLocation()
   const activo = destinoActual(pathname)
+  const { t } = useTranslation()
   return (
-    <nav className={clases(estilos.nav, 'plano-superior')} aria-label="Principal">
+    <nav className={clases(estilos.nav, 'plano-superior')} aria-label={t('nav.principal')}>
       <div className={estilos.marca} aria-hidden="true">
         <span className={estilos.logo}>
           <Icono nombre="grass" relleno tamano={24} />
         </span>
-        <span className={estilos.nombre}>AgroResilience</span>
+        <span className={estilos.nombre}>{t('app.nombre')}</span>
       </div>
       <ul className={estilos.lista}>
         {destinos.map((d) => {
@@ -30,12 +32,12 @@ export function BarraNavegacion({ contraido = false, alContraer }: PropsBarraNav
                 to={d.ruta}
                 className={clases(estilos.enlace, esActivo && estilos.activo)}
                 aria-current={esActivo ? 'page' : undefined}
-                title={contraido ? d.etiqueta : undefined}
+                title={contraido ? t(d.etiqueta) : undefined}
               >
                 <span className={clases(estilos.indicador, 'capa-estado')}>
                   <Icono nombre={d.icono} relleno={esActivo} />
                 </span>
-                <span className={estilos.etiqueta}>{d.etiqueta}</span>
+                <span className={estilos.etiqueta}>{t(d.etiqueta)}</span>
               </Link>
             </li>
           )
@@ -49,7 +51,7 @@ export function BarraNavegacion({ contraido = false, alContraer }: PropsBarraNav
           onClick={alContraer}
         >
           <Icono nombre={contraido ? 'chevron_right' : 'arrow_back'} />
-          <span className={estilos.etiquetaContraer}>{contraido ? 'Expandir' : 'Contraer'}</span>
+          <span className={estilos.etiquetaContraer}>{contraido ? t('nav.expandir') : t('nav.contraer')}</span>
         </button>
       </div>
     </nav>

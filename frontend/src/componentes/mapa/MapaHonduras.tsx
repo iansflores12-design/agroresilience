@@ -2,8 +2,10 @@ import type { FeatureCollection, MultiPolygon } from 'geojson'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useImperativeHandle, useRef } from 'react'
-import { buscarDepartamento, palabraNivel, ranking } from '../../datos/aptitud'
+import { useTranslation } from 'react-i18next'
+import { buscarDepartamento, ranking } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
+import { nombreCultivo } from '../../i18n/dominio'
 import limitesJson from '../../datos/departamentos.geo.json'
 import { BASES, DATOS } from './capas'
 import type { PropsMapa } from './ContenedorMapa'
@@ -71,6 +73,7 @@ export function MapaHonduras({
   datos = null,
   ref,
 }: PropsMapa) {
+  const { t } = useTranslation()
   const raiz = useRef<HTMLDivElement>(null)
   const interno = useRef<Interno | null>(null)
   const acciones = useRef({ alSeleccionarZona, alSeleccionarDepartamento })
@@ -214,8 +217,13 @@ export function MapaHonduras({
       trazo.setAttribute(
         'aria-label',
         puesto && cultivo
-          ? `Departamento de ${nombre}: ${palabraNivel[puesto.nivel].toLowerCase()} para ${cultivo.nombre.toLowerCase()}, ${puesto.total} de 100`
-          : `Departamento de ${nombre}`,
+          ? t('mapa.departamentoAria', {
+              nombre,
+              nivel: t(`aptitud.niveles.${puesto.nivel}`).toLowerCase(),
+              cultivo: nombreCultivo(t, cultivo.id).toLowerCase(),
+              total: puesto.total,
+            })
+          : t('mapa.departamento', { nombre }),
       )
       if (seEligenDepartamentos) trazo.setAttribute('aria-pressed', String(id === departamentoId))
       trazo.toggleAttribute('data-elegido', id === departamentoId)
@@ -237,7 +245,7 @@ export function MapaHonduras({
         })
       }
     })
-  }, [cultivoId, escenario, departamentoId, zonaSeleccionadaId, zonas, caja, seEligenDepartamentos])
+  }, [cultivoId, escenario, departamentoId, zonaSeleccionadaId, zonas, caja, seEligenDepartamentos, t])
 
   useImperativeHandle(
     ref,

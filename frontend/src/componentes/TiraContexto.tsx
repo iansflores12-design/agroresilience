@@ -1,40 +1,50 @@
+import { useTranslation } from 'react-i18next'
 import { buscarCultivo } from '../datos/cultivos'
 import { buscarZona } from '../datos/zonas'
 import { useEstadoApp } from '../estado/EstadoApp'
-import { TEMPORADAS } from '../lib/decision/parametros'
+import { nombreCultivo } from '../i18n/dominio'
 import { Chip } from './Chip'
 import estilos from './TiraContexto.module.css'
 
 /** Dice en palabras completas el cultivo y el lugar elegidos. Cada chip lleva a donde se elige. */
 export function TiraContexto() {
+  const { t } = useTranslation()
   const { cultivoId, zonaId, temporada, parcela } = useEstadoApp()
   const cultivo = buscarCultivo(cultivoId)
   const zona = buscarZona(zonaId)
+  const textoCultivo = cultivo
+    ? temporada
+      ? t('contexto.cultivoDeTemporada', {
+          cultivo: nombreCultivo(t, cultivo.id),
+          temporada: t(`temporadas.${temporada}.nombre`).toLowerCase(),
+        })
+      : nombreCultivo(t, cultivo.id)
+    : t('contexto.elegirCultivo')
+  const ariaCultivo = cultivo ? t('contexto.cultivoAria', { cultivo: textoCultivo }) : t('contexto.sinCultivoAria')
+
   if (zona && parcela) {
     return (
-      <div className={estilos.tira} role="group" aria-label="Contexto elegido">
-        <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${cultivo.nombre}` : 'Sin cultivo. Elegir cultivo'}>
-          {cultivo ? (temporada ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}` : cultivo.nombre) : 'Elegir cultivo'}
+      <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
+        <Chip to="/" icono="grass" aria-label={cultivo ? t('contexto.cultivoAria', { cultivo: nombreCultivo(t, cultivo.id) }) : ariaCultivo}>
+          {textoCultivo}
         </Chip>
-        <Chip to="/" icono="my_location" aria-label={`Su parcela, cerca de ${zona.nombre}`}>
-          Su parcela
+        <Chip to="/" icono="my_location" aria-label={t('contexto.suParcelaAria', { lugar: zona.nombre })}>
+          {t('contexto.suParcela')}
         </Chip>
       </div>
     )
   }
-  const textoCultivo = cultivo
-    ? temporada
-      ? `${cultivo.nombre} de ${TEMPORADAS[temporada].nombre.toLowerCase()}`
-      : cultivo.nombre
-    : 'Elegir cultivo'
-  const textoZona = zona ? zona.nombre : 'Elegir lugar'
   return (
-    <div className={estilos.tira} role="group" aria-label="Contexto elegido">
-      <Chip to="/" icono="grass" aria-label={cultivo ? `Cultivo: ${textoCultivo}` : 'Sin cultivo. Elegir cultivo'}>
+    <div className={estilos.tira} role="group" aria-label={t('contexto.grupo')}>
+      <Chip to="/" icono="grass" aria-label={ariaCultivo}>
         {textoCultivo}
       </Chip>
-      <Chip to="/mapa" icono="location_on" aria-label={zona ? `Lugar: ${zona.nombre}` : 'Sin lugar. Elegir lugar'}>
-        {textoZona}
+      <Chip
+        to="/mapa"
+        icono="location_on"
+        aria-label={zona ? t('contexto.lugarAria', { lugar: zona.nombre }) : t('contexto.sinLugarAria')}
+      >
+        {zona ? zona.nombre : t('contexto.elegirLugar')}
       </Chip>
     </div>
   )

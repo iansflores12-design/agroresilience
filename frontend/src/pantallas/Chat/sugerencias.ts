@@ -1,41 +1,21 @@
+import { traductor } from '../../i18n/traductor'
 import type { ContextoChat } from '../../lib/chat/tipos'
-
-function minusculas(texto: string): string {
-  return texto.toLocaleLowerCase('es')
-}
 
 /** Sugerencias armadas con lo que el asistente ve; generales si falta cultivo o zona. */
 export function armarSugerencias(c: ContextoChat): string[] {
-  const cultivo = c.cultivo ? minusculas(c.cultivo.nombre) : null
+  const t = traductor(c.idioma)
+  const s = (clave: string, datos: Record<string, unknown> = {}) => t(`chat.sugerencias.${clave}`, datos)
+  const cultivo = c.cultivo ? c.cultivo.nombre.toLocaleLowerCase(c.idioma ?? 'es') : null
   const zona = c.zona?.nombre ?? null
+  const semana = c.edadSemanas ?? 0
   if (cultivo && zona) {
-    return [
-      `¿Cómo está la humedad en ${zona} para ${cultivo}?`,
-      `¿Está ${zona} más seca de lo normal?`,
-      `¿Qué cuidados necesita el cultivo de ${cultivo} en la semana ${c.edadSemanas ?? 0}?`,
-      `¿Qué rotación me conviene después de ${cultivo}?`,
-    ]
+    return [s('humedadPara', { zona, cultivo }), s('masSeca', { zona }), s('cuidados', { cultivo, semana }), s('rotacion', { cultivo })]
   }
   if (cultivo) {
-    return [
-      `¿Qué cuidados necesita el cultivo de ${cultivo} en la semana ${c.edadSemanas ?? 0}?`,
-      `¿Qué rotación me conviene después de ${cultivo}?`,
-      `¿Cómo afecta la falta de agua al cultivo de ${cultivo}?`,
-      '¿Qué zona me conviene revisar primero?',
-    ]
+    return [s('cuidados', { cultivo, semana }), s('rotacion', { cultivo }), s('faltaAgua', { cultivo }), s('zonaPrimero')]
   }
   if (zona) {
-    return [
-      `¿Cómo está la humedad en ${zona}?`,
-      `¿Está ${zona} más seca de lo normal?`,
-      `¿Qué cultivos conviene considerar en ${zona}?`,
-      '¿De dónde vienen los datos de humedad?',
-    ]
+    return [s('humedadEn', { zona }), s('masSeca', { zona }), s('cultivosEn', { zona }), s('datos')]
   }
-  return [
-    '¿Qué es la humedad del suelo y por qué importa?',
-    '¿Qué es una rotación de cultivos?',
-    '¿Cómo leo el mapa de zonas?',
-    '¿De dónde vienen los datos de humedad?',
-  ]
+  return [s('queEsHumedad'), s('queEsRotacion'), s('leerMapa'), s('datos')]
 }

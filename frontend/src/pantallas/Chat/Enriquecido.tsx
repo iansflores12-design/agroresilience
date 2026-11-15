@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useMemo, useState } from 'react'
 import { Boton } from '../../componentes/Boton'
 import { ContenedorMapa } from '../../componentes/mapa/ContenedorMapa'
@@ -62,6 +63,7 @@ const sinAccion = () => {}
 
 /** El mapa dentro del chat: el país pintado para un cultivo, con el enfoque en el departamento del productor. */
 function MapaChat({ cultivoId, zonaId }: { cultivoId: string; zonaId: string | null }) {
+  const { t } = useTranslation()
   const cultivo = buscarCultivo(cultivoId)
   const [tocado, fijarTocado] = useState<string | null>(null)
   if (!cultivo) return null
@@ -86,11 +88,12 @@ function MapaChat({ cultivoId, zonaId }: { cultivoId: string; zonaId: string | n
           <>
             <NivelAptitud nivel={resultado.nivel} />
             <span>
-              {cultivo.nombre} en {resultado.departamento.nombre}: {resultado.total} de 100 (puntaje de ejemplo)
+              {t('dondeSeDa.resultado', { cultivo: t(`cultivos.${cultivo.id}.nombre`), departamento: resultado.departamento.nombre, total: resultado.total })}
+              {t('dondeSeDa.ejemplo')}
             </span>
           </>
         ) : (
-          <span>Qué tan bien se da el {cultivo.nombre.toLowerCase()} en cada departamento. Toque uno para ver su puntaje.</span>
+          <span>{t('dondeSeDa.enCada', { el: t(`cultivos.${cultivo.id}.el`) })}</span>
         )}
       </figcaption>
     </figure>
@@ -102,6 +105,7 @@ function MapaChat({ cultivoId, zonaId }: { cultivoId: string; zonaId: string | n
  * "Repetir" la vuelve a correr. Con movimiento reducido todo aparece de una vez.
  */
 function Animacion({ titulo, pasos }: { titulo: string; pasos: PasoAnimacion[] }) {
+  const { t } = useTranslation()
   const [vuelta, fijarVuelta] = useState(0)
   return (
     <figure className={estilos.figura}>
@@ -119,7 +123,7 @@ function Animacion({ titulo, pasos }: { titulo: string; pasos: PasoAnimacion[] }
                   <span className={estilos.barra} aria-hidden="true">
                     <span style={{ '--valor': p.valor / 100 } as React.CSSProperties} />
                   </span>
-                  <span className={estilos.cifra}>{p.valor} de 100</span>
+                  <span className={estilos.cifra}>{t('comun.deCien', { valor: p.valor })}</span>
                 </span>
               )}
             </span>
@@ -127,7 +131,7 @@ function Animacion({ titulo, pasos }: { titulo: string; pasos: PasoAnimacion[] }
         ))}
       </ol>
       <Boton variante="texto" icono="replay" onClick={() => fijarVuelta((v) => v + 1)}>
-        Repetir
+        {t('dondeSeDa.repetir')}
       </Boton>
     </figure>
   )
