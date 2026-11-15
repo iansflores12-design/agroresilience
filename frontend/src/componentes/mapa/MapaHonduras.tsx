@@ -7,7 +7,7 @@ import { buscarDepartamento, ranking } from '../../datos/aptitud'
 import { buscarCultivo } from '../../datos/cultivos'
 import { nombreCultivo } from '../../i18n/dominio'
 import limitesJson from '../../datos/departamentos.geo.json'
-import { BASES, DATOS } from './capas'
+import { BASES, DATOS, desenfoque } from './capas'
 import type { PropsMapa } from './ContenedorMapa'
 import { nombreCorto } from './formato'
 import estilos from './MapaHonduras.module.css'
@@ -188,12 +188,26 @@ export function MapaHonduras({
     const capas: L.TileLayer[] = []
     const fondo = BASES[base].url
     if (fondo) capas.push(L.tileLayer(fondo, { maxZoom: 10, zIndex: 1 }))
+    let ajustar: (() => void) | null = null
     if (datos) {
       const def = DATOS[datos]
-      capas.push(L.tileLayer(def.url, { maxNativeZoom: def.zoomNativo, maxZoom: 10, zIndex: 2, opacity: 0.75 }))
+      // Panel propio para la capa de satelite: el desenfoque va sobre el panel entero y no sobre cada
+      // tesela, asi no aparecen costuras entre teselas. Queda entre el fondo y los departamentos.
+      const panel = mapa.getPane('datos') ?? mapa.createPane('datos')
+      panel.style.zIndex = '250'
+      panel.style.pointerEvents = 'none'
+      ajustar = () => {
+        panel.style.filter = `blur(${desenfoque(def, mapa.getZoom()).toFixed(1)}px)`
+      }
+      ajustar()
+      mapa.on('zoomend', ajustar)
+      capas.push(L.tileLayer(def.url, { pane: 'datos', maxNativeZoom: def.zoomNativo, maxZoom: 10, opacity: 0.75 }))
     }
     capas.forEach((c) => c.addTo(mapa))
-    return () => capas.forEach((c) => c.remove())
+    return () => {
+      capas.forEach((c) => c.remove())
+      if (ajustar) mapa.off('zoomend', ajustar)
+    }
   }, [base, datos, zonas, caja, seEligenDepartamentos])
 
   // Pinta la seleccion: color y puntaje de cada departamento, y el lugar elegido.

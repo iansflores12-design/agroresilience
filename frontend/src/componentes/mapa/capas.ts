@@ -30,6 +30,11 @@ export interface DefDatos {
   icono: NombreIcono
   url: string
   zoomNativo: number
+  /**
+   * Lado de una celda del satelite, en pixeles de la tesela a su zoom nativo. Sirve para desenfocar lo justo
+   * y que no se vea el escalonado: IMERG 0,1 grados, SMAP 9 km, MODIS 1 km.
+   */
+  celdaPx: number
   /** Colores de la capa, de menos a mas (tomados de las teselas reales). */
   colores: string[]
 }
@@ -39,27 +44,37 @@ export const DATOS: Record<CapaDatos, DefDatos> = {
     icono: 'rainy',
     url: gibs('IMERG_Precipitation_Rate', 6),
     zoomNativo: 6,
+    celdaPx: 4.5,
     colores: ['#3cb043', '#ffe600', '#ff8c00', '#e60000'],
   },
   humedad: {
     icono: 'water_drop',
     url: gibs('SMAP_L4_Analyzed_Surface_Soil_Moisture', 6),
     zoomNativo: 6,
+    celdaPx: 3.5,
     colores: ['#c8c800', '#3fa53f', '#35d0d0', '#1030e0'],
   },
   vegetacion: {
     icono: 'grass',
     url: gibs('MODIS_Terra_NDVI_8Day', 9),
     zoomNativo: 9,
+    celdaPx: 3,
     colores: ['#d9c9b8', '#9bc468', '#0b6b1d'],
   },
   calor: {
     icono: 'thermostat',
     url: gibs('MODIS_Terra_L3_Land_Surface_Temp_8Day_Day', 7),
     zoomNativo: 7,
+    celdaPx: 1,
     colores: ['#9be000', '#ffff00', '#ff9900', '#e60000'],
   },
 }
 
 export const ORDEN_BASES: CapaBase[] = ['simple', 'relieve', 'satelite']
 export const ORDEN_DATOS: CapaDatos[] = ['lluvia', 'humedad', 'vegetacion', 'calor']
+
+/** Desenfoque en pixeles para un zoom: crece con lo que se estira la celda, entre 1,5 y 18 px. */
+export function desenfoque(def: DefDatos, zoom: number): number {
+  const lado = def.celdaPx * 2 ** (zoom - def.zoomNativo)
+  return Math.min(18, Math.max(1.5, lado * 0.6))
+}
