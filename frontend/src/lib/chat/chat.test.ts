@@ -1,7 +1,7 @@
 import { armarContexto } from './contexto'
-import { crearClienteDemo, PREFIJO_DEMO } from './clienteDemo'
+import { crearClienteResistente, respuestaLocal } from './clienteResistente'
 import { crearClienteHttp } from './clienteHttp'
-import { crearClienteChat, esModoDemo } from './index'
+import { crearClienteChat, urlApi } from './index'
 import { ErrorChat, type ContextoChat } from './tipos'
 
 const contextoVacio: ContextoChat = { vista: 'chat', cultivo: null, edadSemanas: null, etapa: null, zona: null, humedad: null }
@@ -38,7 +38,7 @@ describe('clienteHttp', () => {
   const peticion = { mensajes: [], contexto: contextoVacio }
 
   it('hace POST a {urlBase}/chat con JSON y devuelve el texto', async () => {
-    const fetchSim = vi.fn(async () => new Response(JSON.stringify({ texto: 'hola' }), { status: 200 }))
+    const fetchSim = vi.fn(async (_url: string) => new Response(JSON.stringify({ texto: 'hola' }), { status: 200 }))
     vi.stubGlobal('fetch', fetchSim)
     const r = await crearClienteHttp('http://api.test/').enviar(peticion)
     expect(r).toEqual({ texto: 'hola' })
@@ -85,25 +85,42 @@ describe('clienteHttp', () => {
   })
 })
 
-describe('clienteDemo', () => {
-  it('responde con el prefijo y resume el contexto', async () => {
-    const contexto = armarContexto({ vista: 'chat', cultivoId: 'maiz', edadSemanas: 3, zonaId: 'choluteca' })
-    const r = await crearClienteDemo(1).enviar({ mensajes: [], contexto })
-    expect(r.texto.startsWith(PREFIJO_DEMO)).toBe(true)
-    expect(PREFIJO_DEMO).toBe('Respuesta de demostración.')
-    expect(r.texto).toContain('semana 3')
-    expect(r.texto).toContain('Choluteca')
-    expect(r.texto).toContain(contexto.humedad!.fecha)
-    expect(r.texto).toContain('backend')
+describe('clienteResistente', () => {
+  const contexto = armarContexto({ vista: 'chat', cultivoId: 'maiz', edadSemanas: 3, zonaId: 'choluteca' })
+
+  it('reintenta y devuelve la respuesta cuando la API se recupera', async () => {
+    const enviar = vi.fn().mockRejectedValueOnce(new ErrorChat('servidor')).mockResolvedValueOnce({ texto: 'real' })
+    const r = await crearClienteResistente({ enviar }, { esperasMs: [1, 1] }).enviar({ mensajes: [], contexto })
+    expect(r).toEqual({ texto: 'real' })
+    expect(enviar).toHaveBeenCalledTimes(2)
   })
 
-  it('es cancelable con signal', async () => {
+  it('si la API nunca responde, contesta con los datos del contexto en vez de fallar', async () => {
+    const enviar = vi.fn().mockRejectedValue(new ErrorChat('red'))
+    const r = await crearClienteResistente({ enviar }, { esperasMs: [1, 1] }).enviar({ mensajes: [], contexto })
+    expect(enviar).toHaveBeenCalledTimes(3)
+    expect(r.respaldo).toBe(true)
+    expect(r.texto).toBe(respuestaLocal(contexto))
+    expect(r.texto).toContain('semana 3')
+    expect(r.texto).toContain('Choluteca')
+    expect(r.texto).not.toMatch(/demostraci|prueba/i)
+  })
+
+  it('corta un intento colgado y pasa al siguiente', async () => {
+    const enviar = vi
+      .fn()
+      .mockImplementationOnce(({ signal }: { signal: AbortSignal }) => new Promise((_, no) => signal.addEventListener('abort', () => no(new ErrorChat('cancelado')))))
+      .mockResolvedValueOnce({ texto: 'segundo' })
+    const r = await crearClienteResistente({ enviar }, { esperasMs: [1], limiteMs: 20 }).enviar({ mensajes: [], contexto })
+    expect(r.texto).toBe('segundo')
+  })
+
+  it('la cancelacion del usuario se respeta', async () => {
     const control = new AbortController()
-    const promesa = crearClienteDemo(10_000).enviar({ mensajes: [], contexto: contextoVacio, signal: control.signal })
     control.abort()
-    await expect(promesa).rejects.toMatchObject({ causa: 'cancelado' })
+    const enviar = vi.fn().mockRejectedValue(new ErrorChat('cancelado'))
     await expect(
-      crearClienteDemo(1).enviar({ mensajes: [], contexto: contextoVacio, signal: control.signal }),
+      crearClienteResistente({ enviar }, { esperasMs: [1] }).enviar({ mensajes: [], contexto, signal: control.signal }),
     ).rejects.toMatchObject({ causa: 'cancelado' })
   })
 })
@@ -114,16 +131,19 @@ describe('crearClienteChat', () => {
     vi.unstubAllGlobals()
   })
 
-  it('sin VITE_API_URL es modo demostracion', async () => {
+  it('sin VITE_API_URL usa /api del mismo sitio, nunca un modo de prueba', async () => {
     vi.stubEnv('VITE_API_URL', '')
-    expect(esModoDemo()).toBe(true)
+    expect(urlApi()).toBe('/api')
+    const fetchSim = vi.fn(async (_url: string) => new Response(JSON.stringify({ texto: 'real' }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchSim)
     const r = await crearClienteChat().enviar({ mensajes: [], contexto: contextoVacio })
-    expect(r.texto.startsWith(PREFIJO_DEMO)).toBe(true)
+    expect(r.texto).toBe('real')
+    expect(fetchSim.mock.calls[0][0]).toBe('/api/chat')
   })
 
   it('con VITE_API_URL usa el cliente HTTP', async () => {
     vi.stubEnv('VITE_API_URL', 'http://api.test')
-    expect(esModoDemo()).toBe(false)
+    expect(urlApi()).toBe('http://api.test')
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ texto: 'real' }), { status: 200 })))
     const r = await crearClienteChat().enviar({ mensajes: [], contexto: contextoVacio })
     expect(r.texto).toBe('real')

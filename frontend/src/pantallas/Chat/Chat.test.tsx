@@ -24,7 +24,7 @@ function montar(cliente: ClienteChat, ruta = '/chat') {
   const arbol = (visible: boolean) => (
     <ProveedorEstadoApp>
       <ProveedorConversacion>
-        <MemoryRouter initialEntries={[ruta]}>{visible && <Chat cliente={cliente} modoDemo />}</MemoryRouter>
+        <MemoryRouter initialEntries={[ruta]}>{visible && <Chat cliente={cliente} />}</MemoryRouter>
       </ProveedorConversacion>
     </ProveedorEstadoApp>
   )
@@ -39,18 +39,18 @@ describe('pantalla Chat', () => {
     vi.clearAllMocks()
   })
 
-  it('muestra redactor, registro accesible, insignia y boton deshabilitado', () => {
+  it('muestra redactor, registro accesible y boton deshabilitado, sin modo de prueba', () => {
     montar(clienteDe())
     expect(screen.getByRole('textbox', { name: 'Mensaje' })).toBeInTheDocument()
     expect(screen.getByRole('log', { name: /Conversación/ })).toHaveAttribute('aria-live', 'polite')
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeDisabled()
-    expect(screen.getByText('Modo de prueba: todavía sin conexión al asistente real')).toBeInTheDocument()
+    expect(screen.queryByText(/Modo de prueba/)).not.toBeInTheDocument()
     expect(screen.getByText('Sin cultivo')).toBeInTheDocument()
     expect(screen.getByText('Sin zona')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Borrar conversación' })).not.toBeInTheDocument()
   })
 
-  it('Enter envia, agrega el mensaje y luego la respuesta, y avisa la demostracion una vez', async () => {
+  it('Enter envia, agrega el mensaje y luego la respuesta, sin avisos de demostracion', async () => {
     const cliente = clienteDe('hola de vuelta')
     const u = userEvent.setup()
     montar(cliente)
@@ -64,7 +64,7 @@ describe('pantalla Chat', () => {
     expect(cliente.enviar.mock.calls[0][0].mensajes.map((m: { texto: string }) => m.texto)).toEqual(['Pregunta uno'])
     await u.type(campo, 'Dos{Enter}')
     await waitFor(() => expect(cliente.enviar).toHaveBeenCalledTimes(2))
-    expect(mocks.avisar.info).toHaveBeenCalledTimes(1)
+    expect(mocks.avisar.info).not.toHaveBeenCalled()
   })
 
   it('Mayus+Enter salta de linea y no envia', async () => {

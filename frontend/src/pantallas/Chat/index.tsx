@@ -11,32 +11,16 @@ import { claveEstadoHumedad } from '../Zona/formato'
 import { TITULO_NUEVO, useConversacion, type MensajeChat } from '../../estado/Conversacion'
 import { useEstadoApp } from '../../estado/EstadoApp'
 import { avisar } from '../../lib/avisos'
-import { armarContexto, crearClienteChat, ErrorChat, esModoDemo, type ClienteChat, type ContextoChat } from '../../lib/chat'
+import { armarContexto, crearClienteChat, ErrorChat, type ClienteChat, type ContextoChat } from '../../lib/chat'
 import estilos from './Chat.module.css'
 import { ContenidoMensaje, MensajeEscribiendose } from './Enriquecido'
 import { armarSugerencias } from './sugerencias'
 
-const CLAVE_AVISO_DEMO = 'agroresilience.chat.demo.avisado'
 const VISTAS: ContextoChat['vista'][] = ['cultivos', 'mapa', 'zona']
 
 export interface PropsChat {
-  /** Cliente del backend; por defecto el que corresponde a `VITE_API_URL`. */
+  /** Cliente del backend; por defecto el de `VITE_API_URL` (o /api), con reintentos y respaldo local. */
   cliente?: ClienteChat
-  /** Fuerza el modo demostracion (por defecto segun `VITE_API_URL`). */
-  modoDemo?: boolean
-}
-
-function avisarDemoUnaVez(t: TFunction) {
-  try {
-    if (window.sessionStorage.getItem(CLAVE_AVISO_DEMO)) return
-    window.sessionStorage.setItem(CLAVE_AVISO_DEMO, '1')
-  } catch {
-    // Sin sessionStorage se avisa en cada carga de la pagina.
-  }
-  avisar.info({
-    titulo: t('chat.demoTitulo'),
-    descripcion: t('chat.demoDescripcion'),
-  })
 }
 
 function descripcionError(t: TFunction, e: unknown): string {
@@ -48,7 +32,7 @@ function descripcionError(t: TFunction, e: unknown): string {
   return t('chat.errorOtro')
 }
 
-export default function Chat({ cliente, modoDemo }: PropsChat) {
+export default function Chat({ cliente }: PropsChat) {
   const [params] = useSearchParams()
   const { t } = useTranslation()
   const idioma = useIdioma()
@@ -79,18 +63,15 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   const abortar = useRef<AbortController | null>(null)
   const vivo = useRef(true)
 
-  const demo = modoDemo ?? esModoDemo()
   const clienteActual = useRef<ClienteChat | null>(cliente ?? null)
   const contextoActual = useRef(contexto)
   const mensajesActuales = useRef(mensajes)
-  const demoActual = useRef(demo)
   useEffect(() => {
     clienteActual.current = cliente ?? clienteActual.current ?? crearClienteChat()
     contextoActual.current = contexto
     mensajesActuales.current = mensajes
-    demoActual.current = demo
     tActual.current = t
-  }, [cliente, contexto, mensajes, demo, t])
+  }, [cliente, contexto, mensajes, t])
 
   // Al salir de la pantalla se aborta la peticion en curso.
   useEffect(() => {
@@ -156,7 +137,6 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
   function enviar(contenido: string) {
     const limpio = contenido.trim()
     if (!limpio || abortar.current) return
-    if (demoActual.current) avisarDemoUnaVez(t)
     const nuevo = agregar({ rol: 'usuario', texto: limpio })
     setTexto('')
     campo.current?.focus()
@@ -301,7 +281,6 @@ export default function Chat({ cliente, modoDemo }: PropsChat) {
 
       <div className={`plano-superior ${estilos.redactor}`}>
         <div className={estilos.redactorInterior}>
-          {demo && <span className={estilos.insignia}>{t('chat.modoPrueba')}</span>}
           <div className={estilos.campoFila}>
             <textarea
               ref={campo}

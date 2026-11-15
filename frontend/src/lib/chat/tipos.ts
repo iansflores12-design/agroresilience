@@ -21,8 +21,14 @@ export interface PeticionChat {
   signal?: AbortSignal
 }
 
+export interface RespuestaChat {
+  texto: string
+  /** La API no respondio y el texto se armo en el navegador con los datos del contexto. */
+  respaldo?: boolean
+}
+
 export interface ClienteChat {
-  enviar(p: PeticionChat): Promise<{ texto: string }>
+  enviar(p: PeticionChat): Promise<RespuestaChat>
 }
 
 export type CausaErrorChat = 'red' | 'servidor' | 'cancelado' | 'respuesta'

@@ -277,7 +277,8 @@ Regras:
 - Não invente outros preços, nem doses, variedades ou datas exatas de chuva.
 - Explique termos técnicos com palavras do dia a dia (por exemplo, evapotranspiração = a água que a planta e o solo perdem para o ar).
 - Lembre que é uma ajuda: a decisão é do produtor e do seu técnico local.
-- Responda só sobre culturas, plantio, solo, água, clima e manejo da parcela. Se perguntarem outra coisa, diga em uma frase que só ajuda com culturas.
+- Seu tema é o campo: culturas, plantio, colheita, solo, água, irrigação, clima, pragas, animais da propriedade, preços e manejo da parcela. Responda sempre essas perguntas, mesmo que faltem dados da consulta: use o que souber em geral e diga que dado ajudaria.
+- Só se a pergunta não tiver nada a ver com o campo (por exemplo esportes, política ou lição de casa), responda em uma frase que só ajuda com temas do campo. Nunca acrescente essa frase a uma resposta sobre o campo.
 - Seja breve e útil: vá direto ao que o produtor pode fazer.
 - Sem emojis. Sem tabelas. Texto simples com títulos curtos em linhas próprias, sem símbolos de Markdown.`,
     pedidoAnalisis: `Faça a análise aprofundada da rotação consultada nesta ordem, com um título curto por parte:
@@ -613,8 +614,6 @@ No máximo 250 palavras.`,
     reservado: 'Espaço reservado: aqui ficará a explicação gráfica de um fenômeno',
   },
   chat: {
-    demoTitulo: 'Modo de demonstração',
-    demoDescripcion: 'As respostas são locais: o assistente real será conectado ao backend.',
     errorRed: 'Verifique sua conexão e tente de novo.',
     errorServidor: 'O servidor não conseguiu responder neste momento.',
     errorRespuesta: 'O servidor enviou uma resposta que não se entende.',
@@ -634,7 +633,6 @@ No máximo 250 palavras.`,
     conversacion: 'Conversa com o assistente',
     asistente: 'Assistente',
     escribiendo: 'O assistente está escrevendo',
-    modoPrueba: 'Modo de teste: ainda sem conexão com o assistente real',
     mensaje: 'Mensagem',
     sugerencias: {
       humedadPara: 'Como está a umidade em {{zona}} para {{cultivo}}?',
@@ -650,10 +648,11 @@ No máximo 250 palavras.`,
       queEsRotacion: 'O que é uma rotação de culturas?',
       leerMapa: 'Como leio o mapa de zonas?',
     },
-    demo: {
-      prefijo: 'Resposta de demonstração.',
-      ve: 'Isto é o que o assistente vê agora:',
-      real: 'O assistente real será conectado ao backend.',
+    respaldo: {
+      intro: 'O assistente não conseguiu responder agora. Enquanto isso, isto é o que dizem os seus dados:',
+      cierre: 'Pergunte de novo em instantes para uma resposta completa.',
+    },
+    datos: {
       cultivo: 'Cultura: {{cultivo}}{{semana}}{{etapa}}.',
       semana: ', semana {{n}}',
       sinCultivo: 'Cultura: nenhuma escolhida.',

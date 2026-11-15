@@ -79,6 +79,9 @@ function cuerpo(p: PedidoGemini): string {
   })
 }
 
+/** Tope para que un modelo empiece a responder antes de pasar al siguiente. */
+const limiteModeloMs = () => Number(process.env.GEMINI_LIMITE_MS) || 20_000
+
 const esperar = (ms: number) => new Promise((listo) => setTimeout(listo, ms))
 
 /** Respuestas con las que vale la pena probar otro modelo: saturado, sin cuota, caído o inexistente. */
@@ -95,16 +98,31 @@ async function llamar(metodo: string, p: PedidoGemini): Promise<Response> {
   const lista = libres.length ? libres : todos.slice(0, 1)
   let r: Response
   for (let i = 0; ; i++) {
+    // Cada modelo tiene un tope para empezar a responder: si se cuelga, se prueba el siguiente.
+    // El tope se quita en cuanto llegan los encabezados, asi no corta una respuesta en vivo larga.
+    const control = new AbortController()
+    const alCancelar = () => control.abort()
+    p.signal?.addEventListener('abort', alCancelar, { once: true })
+    const tope = setTimeout(() => control.abort(), limiteModeloMs())
     try {
       r = await fetch(`${URL_BASE}${lista[i]}:${metodo}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
         body: cuerpo(p),
-        signal: p.signal,
+        signal: control.signal,
       })
     } catch (e) {
       if (p.signal?.aborted) throw new ErrorGemini('cancelado')
+      // Sin red o colgado: este modelo descansa un rato y se prueba el siguiente.
+      enPausa.set(marca(lista[i]), Date.now() + 30_000)
+      if (i < lista.length - 1) {
+        console.error(`[gemini] ${lista[i]} no respondio (${String(e).slice(0, 80)}); se prueba ${lista[i + 1]}`)
+        continue
+      }
       throw new ErrorGemini('red', String(e))
+    } finally {
+      clearTimeout(tope)
+      p.signal?.removeEventListener('abort', alCancelar)
     }
     if (PROBAR_OTRO.has(r.status)) {
       enPausa.set(marca(lista[i]), Date.now() + pausaMs(r.status, Boolean(p.busqueda)))

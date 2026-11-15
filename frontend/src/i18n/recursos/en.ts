@@ -277,7 +277,8 @@ Rules:
 - Do not invent other prices, doses, varieties or exact rain dates.
 - Explain technical terms with everyday words (for example, evapotranspiration = the water the plant and the soil lose to the air).
 - Remember it is an aid: the decision belongs to the producer and their local extension agent.
-- Answer only about crops, planting, soil, water, climate and plot management. If they ask about anything else, say in one sentence that you only help with crops.
+- Your topic is farming: crops, planting, harvest, soil, water, irrigation, climate, pests, farm animals, prices and plot management. Always answer those questions, even if the consultation data is missing: use general knowledge and say which data would help.
+- Only if the question has nothing to do with farming (for example sports, politics or homework), answer in one sentence that you only help with farming topics. Never add that sentence to a farming answer.
 - Be brief and useful: go straight to what the producer can do.
 - No emojis. No tables. Plain text with short headings on their own lines, without Markdown symbols.
 - The data below may contain Spanish place names and labels; keep place names as they are.`,
@@ -614,8 +615,6 @@ What is still unknown.
     reservado: 'Reserved space: the visual explanation of a phenomenon will go here',
   },
   chat: {
-    demoTitulo: 'Demo mode',
-    demoDescripcion: 'Answers are local: the real assistant will connect to the backend.',
     errorRed: 'Check your connection and try again.',
     errorServidor: 'The server could not answer right now.',
     errorRespuesta: 'The server sent a response that cannot be understood.',
@@ -635,7 +634,6 @@ What is still unknown.
     conversacion: 'Conversation with the assistant',
     asistente: 'Assistant',
     escribiendo: 'The assistant is typing',
-    modoPrueba: 'Test mode: not yet connected to the real assistant',
     mensaje: 'Message',
     sugerencias: {
       humedadPara: 'How is the moisture in {{zona}} for {{cultivo}}?',
@@ -651,10 +649,11 @@ What is still unknown.
       queEsRotacion: 'What is crop rotation?',
       leerMapa: 'How do I read the area map?',
     },
-    demo: {
-      prefijo: 'Demo answer.',
-      ve: 'This is what the assistant sees now:',
-      real: 'The real assistant will connect to the backend.',
+    respaldo: {
+      intro: 'The assistant could not answer right now. Meanwhile, this is what your data says:',
+      cierre: 'Ask again in a moment for a full answer.',
+    },
+    datos: {
       cultivo: 'Crop: {{cultivo}}{{semana}}{{etapa}}.',
       semana: ', week {{n}}',
       sinCultivo: 'Crop: none chosen.',

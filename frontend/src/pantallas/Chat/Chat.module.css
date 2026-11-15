@@ -184,15 +184,6 @@
   margin-inline: auto;
 }
 
-.insignia {
-  align-self: flex-start;
-  padding: var(--esp-1) var(--esp-3);
-  border-radius: var(--forma-completa);
-  background-color: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
-  font: var(--tipo-nota);
-}
-
 .campoFila {
   display: flex;
   align-items: flex-end;
